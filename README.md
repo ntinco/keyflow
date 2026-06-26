@@ -68,12 +68,25 @@ This repository is meant to be reusable across trusted environments, but it is n
 
 The repo already exposes a stable config contract through example files and environment variables.
 
-Naming conventions used by the codebase:
+### Naming convention
 
-- `English-first` for files, classes, services, helpers, groups, and runtime targets.
-- `keyflow` is the product-facing project name; new internal APIs should not introduce `norman*`.
-- Real external labels such as SAP window titles or executable names stay unchanged when they must match the host system.
-- Legacy `NORMAN_*` environment variables remain supported as compatibility inputs until a separate migration removes them.
+Rules (ordered by priority):
+
+1. **English-first** — all files, classes, services, helpers, groups, and runtime targets use English identifiers.
+2. **`keyflow*` prefix** — new runtime APIs and service names use `keyflow` as the product namespace. Do not introduce new `norman*` symbols.
+3. **Intent over history** — names express what a thing _does_, not when it was created or what it replaced.
+4. **External labels stay as-is** — SAP window titles, executable names, KeePass entry paths, and business domain names (e.g. `pluz dev`, `saplogon.exe`) are never translated or renamed.
+5. **`NORMAN_*` env vars are legacy-compatible** — they remain supported as external environment inputs. The pattern is: env-var override first, file fallback second. They are not renamed by default; see the full list under [Environment variables currently supported](#environment-variables-currently-supported).
+
+Preferred vocabulary by layer:
+
+| Layer | Preferred terms |
+|---|---|
+| Data loading | `session`, `entry`, `provider`, `catalog` |
+| Window matching | `window`, `workspace`, `target` |
+| Activation scope | `profile`, `group`, `context` |
+| Execution | `command`, `run`, `action` |
+| Config | `path`, `secret`, `constant` |
 
 ### Example files
 

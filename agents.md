@@ -2,12 +2,32 @@
 
 This repository is a private reusable Windows automation workspace built around AutoHotkey v2. Treat it as an operational codebase with local-only configuration, not as a generic public package.
 
-Naming conventions:
+## Naming convention
 
-- Use `English-first` for files, classes, services, helpers, groups, and runtime targets.
-- Use `keyflow` as the project name in new internal APIs; do not introduce new `norman*` symbols.
-- Keep real external labels such as SAP window titles, executable names, and business entry names unchanged when the host system depends on them.
-- Legacy `NORMAN_*` environment variables are still supported as compatibility inputs. Preserve env-var override first, file fallback second unless the user asks for a migration.
+### Rules (ordered by priority)
+
+1. **English-first** — all files, classes, services, helpers, groups, and runtime targets use English identifiers.
+2. **`keyflow*` prefix** — new runtime APIs and service names use `keyflow` as the product namespace (e.g. `keyflowInitServices`, `keyflowServiceRegistry`). Do not introduce new `norman*` symbols.
+3. **Intent over history** — names express what a thing _does_, not when it was created or what it replaced.
+4. **External labels stay as-is** — SAP window titles, executable names, KeePass entry paths, and business domain names (e.g. `pluz dev`, `saplogon.exe`) are never translated or renamed.
+5. **`NORMAN_*` env vars are legacy-compatible** — they remain supported as external environment inputs. Preserve the pattern: env-var override first, file fallback second. Do not rename them in code unless the user explicitly requests a migration.
+
+### Vocabulary by layer
+
+| Layer | Preferred terms |
+|---|---|
+| Data loading | `session`, `entry`, `provider`, `catalog` |
+| Window matching | `window`, `workspace`, `target` |
+| Activation scope | `profile`, `group`, `context` |
+| Execution | `command`, `run`, `action` |
+| Config | `path`, `secret`, `constant` |
+
+### What to avoid
+
+- Do not mix `logon` / `login` / `session` for the same concept.
+- Do not mix `gui` / `window` / `desktop` if they represent the same layer.
+- Do not mix `run` / `open` / `execute` / `start` without a clear criterion.
+- Do not introduce abbreviations that are not already used in the codebase.
 
 ## What this repo is
 
