@@ -1,4 +1,5 @@
-# Canonical AI artifacts are stored in /ai; only ignore non-canonical custom overlay artifacts.
+# AI health-check snapshots are versioned canonical artifacts.
+ahk_out.txt
 *data/hotkey-usage.json
 *data/hotkey-usage.example.json
 *data/local-secrets.ini

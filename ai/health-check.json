@@ -1,0 +1,942 @@
+{
+  "summary": {
+    "ok": true,
+    "issue_count": 0,
+    "services": [
+      "dynamic",
+      "everything",
+      "hotkeyTracker",
+      "hotstring",
+      "launcher",
+      "memory",
+      "run",
+      "sap",
+      "snipaste",
+      "video",
+      "whatsapp",
+      "windowGroup",
+      "windows"
+    ],
+    "profiles": {
+      "autocorrect": 434,
+      "quick-snippets": 3,
+      "sap-transaction-shortcuts": 19,
+      "ymt-commands": 6
+    },
+    "dead_class_candidates": [],
+    "dead_constant_candidates": [
+      "sapQasSnippetsJsonFile"
+    ],
+    "legacy_audit_count": 0,
+    "legacy_audit_note": "NORMAN_* and norman_src are legacy-compatible; not treated as issues."
+  },
+  "issues": {
+    "include_missing": [],
+    "registry": [],
+    "service_calls": [],
+    "profiles": []
+  },
+  "dead_candidates": {
+    "dead_class_candidates": [],
+    "dead_constant_candidates": [
+      {
+        "constant": "sapQasSnippetsJsonFile",
+        "reason": "Constant is declared but not referenced by any service or hotkey."
+      }
+    ]
+  },
+  "audits": {
+    "unused_assignments": [],
+    "unused_groups_or_targets": [],
+    "legacy_refs": []
+  },
+  "contracts": {
+    "include_graph": [
+      {
+        "file": "platforms/windows/hotkeys/domains.ahk",
+        "includes": [
+          {
+            "include": "domains/comms.ahk",
+            "target": "platforms/windows/hotkeys/domains/comms.ahk",
+            "exists": true
+          },
+          {
+            "include": "domains/media-web.ahk",
+            "target": "platforms/windows/hotkeys/domains/media-web.ahk",
+            "exists": true
+          },
+          {
+            "include": "domains/productivity.ahk",
+            "target": "platforms/windows/hotkeys/domains/productivity.ahk",
+            "exists": true
+          }
+        ]
+      },
+      {
+        "file": "platforms/windows/hotkeys/domains/comms.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/hotkeys/domains/media-web.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/hotkeys/domains/productivity.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/hotkeys/editors-ide.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/hotkeys/editors-office.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/hotkeys/editors-text.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/hotkeys/editors.ahk",
+        "includes": [
+          {
+            "include": "editors-ide.ahk",
+            "target": "platforms/windows/hotkeys/editors-ide.ahk",
+            "exists": true
+          },
+          {
+            "include": "editors-office.ahk",
+            "target": "platforms/windows/hotkeys/editors-office.ahk",
+            "exists": true
+          },
+          {
+            "include": "editors-text.ahk",
+            "target": "platforms/windows/hotkeys/editors-text.ahk",
+            "exists": true
+          }
+        ]
+      },
+      {
+        "file": "platforms/windows/hotkeys/global.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/hotkeys/sap-eclipse.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/hotkeys/sap-gui.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/hotkeys/sap.ahk",
+        "includes": [
+          {
+            "include": "sap-gui.ahk",
+            "target": "platforms/windows/hotkeys/sap-gui.ahk",
+            "exists": true
+          },
+          {
+            "include": "sap-eclipse.ahk",
+            "target": "platforms/windows/hotkeys/sap-eclipse.ahk",
+            "exists": true
+          }
+        ]
+      },
+      {
+        "file": "platforms/windows/keyflow.ahk",
+        "includes": [
+          {
+            "include": "library/bootstrap.ahk",
+            "target": "platforms/windows/library/bootstrap.ahk",
+            "exists": true
+          },
+          {
+            "include": "hotkeys/global.ahk",
+            "target": "platforms/windows/hotkeys/global.ahk",
+            "exists": true
+          },
+          {
+            "include": "hotkeys/sap.ahk",
+            "target": "platforms/windows/hotkeys/sap.ahk",
+            "exists": true
+          },
+          {
+            "include": "hotkeys/editors.ahk",
+            "target": "platforms/windows/hotkeys/editors.ahk",
+            "exists": true
+          },
+          {
+            "include": "hotkeys/domains.ahk",
+            "target": "platforms/windows/hotkeys/domains.ahk",
+            "exists": true
+          }
+        ]
+      },
+      {
+        "file": "platforms/windows/library/automation/dynamic.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/library/automation/everything.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/library/automation/hotkey-tracker.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/library/automation/hotstring.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/library/automation/launcher.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/library/automation/memory.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/library/automation/run.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/library/automation/sap-session.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/library/automation/sap.ahk",
+        "includes": [
+          {
+            "include": "sap-session.ahk",
+            "target": "platforms/windows/library/automation/sap-session.ahk",
+            "exists": true
+          }
+        ]
+      },
+      {
+        "file": "platforms/windows/library/automation/snipaste.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/library/automation/video.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/library/automation/whatsapp.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/library/automation/window-group.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/library/automation/windows.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/library/bootstrap.ahk",
+        "includes": [
+          {
+            "include": "config/constants-core-base.ahk",
+            "target": "platforms/windows/library/config/constants-core-base.ahk",
+            "exists": true
+          },
+          {
+            "include": "config/constants-core-paths.ahk",
+            "target": "platforms/windows/library/config/constants-core-paths.ahk",
+            "exists": true
+          },
+          {
+            "include": "config/constants-core-apps.ahk",
+            "target": "platforms/windows/library/config/constants-core-apps.ahk",
+            "exists": true
+          },
+          {
+            "include": "config/constants-core-rules.ahk",
+            "target": "platforms/windows/library/config/constants-core-rules.ahk",
+            "exists": true
+          },
+          {
+            "include": "config/constants-core.ahk",
+            "target": "platforms/windows/library/config/constants-core.ahk",
+            "exists": true
+          },
+          {
+            "include": "config/constants-secrets.ahk",
+            "target": "platforms/windows/library/config/constants-secrets.ahk",
+            "exists": true
+          },
+          {
+            "include": "json-service.ahk",
+            "target": "platforms/windows/library/json-service.ahk",
+            "exists": true
+          },
+          {
+            "include": "util.ahk",
+            "target": "platforms/windows/library/util.ahk",
+            "exists": true
+          },
+          {
+            "include": "automation/memory.ahk",
+            "target": "platforms/windows/library/automation/memory.ahk",
+            "exists": true
+          },
+          {
+            "include": "automation/hotkey-tracker.ahk",
+            "target": "platforms/windows/library/automation/hotkey-tracker.ahk",
+            "exists": true
+          },
+          {
+            "include": "automation/run.ahk",
+            "target": "platforms/windows/library/automation/run.ahk",
+            "exists": true
+          },
+          {
+            "include": "automation/everything.ahk",
+            "target": "platforms/windows/library/automation/everything.ahk",
+            "exists": true
+          },
+          {
+            "include": "automation/launcher.ahk",
+            "target": "platforms/windows/library/automation/launcher.ahk",
+            "exists": true
+          },
+          {
+            "include": "automation/hotstring.ahk",
+            "target": "platforms/windows/library/automation/hotstring.ahk",
+            "exists": true
+          },
+          {
+            "include": "automation/dynamic.ahk",
+            "target": "platforms/windows/library/automation/dynamic.ahk",
+            "exists": true
+          },
+          {
+            "include": "automation/windows.ahk",
+            "target": "platforms/windows/library/automation/windows.ahk",
+            "exists": true
+          },
+          {
+            "include": "automation/window-group.ahk",
+            "target": "platforms/windows/library/automation/window-group.ahk",
+            "exists": true
+          },
+          {
+            "include": "ui/dark-theme.ahk",
+            "target": "platforms/windows/library/ui/dark-theme.ahk",
+            "exists": true
+          },
+          {
+            "include": "automation/sap.ahk",
+            "target": "platforms/windows/library/automation/sap.ahk",
+            "exists": true
+          },
+          {
+            "include": "automation/video.ahk",
+            "target": "platforms/windows/library/automation/video.ahk",
+            "exists": true
+          },
+          {
+            "include": "automation/snipaste.ahk",
+            "target": "platforms/windows/library/automation/snipaste.ahk",
+            "exists": true
+          },
+          {
+            "include": "automation/whatsapp.ahk",
+            "target": "platforms/windows/library/automation/whatsapp.ahk",
+            "exists": true
+          }
+        ]
+      },
+      {
+        "file": "platforms/windows/library/config/constants-core-apps.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/library/config/constants-core-base.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/library/config/constants-core-paths.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/library/config/constants-core-rules.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/library/config/constants-core.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/library/config/constants-secrets.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/library/json-service.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/library/ui/dark-theme.ahk",
+        "includes": []
+      },
+      {
+        "file": "platforms/windows/library/util.ahk",
+        "includes": []
+      }
+    ],
+    "service_registry": [
+      {
+        "service": "dynamic",
+        "class": "DynamicService",
+        "class_file": "platforms/windows/library/automation/dynamic.ahk",
+        "referenced_methods": [
+          "clearChatAndSend",
+          "copyAndRefreshAppTime",
+          "execute",
+          "fillNttOfficeCredentials",
+          "openEdgeReadAloud",
+          "openEditorCommandPaletteWithPercent",
+          "openSublimeCommandPaletteByTag",
+          "openTeamsSearchAndGoToField",
+          "refreshAndCloseXyplorerTab"
+        ],
+        "declared_methods": [
+          "openEditorCommandPaletteWithPercent",
+          "openSublimeCommandPaletteByTag",
+          "openTeamsSearchAndGoToField",
+          "refreshAndCloseXyplorerTab",
+          "copyAndRefreshAppTime",
+          "openEdgeReadAloud",
+          "clearChatAndSend",
+          "fillNttOfficeCredentials",
+          "execute",
+          "_executeAction",
+          "_parseActionParts",
+          "_handleWWA",
+          "_handleSL",
+          "_handleClick",
+          "if",
+          "_handleSend",
+          "_resolveMemoryVars",
+          "_logDebug",
+          "_logError"
+        ]
+      },
+      {
+        "service": "everything",
+        "class": "EverythingService",
+        "class_file": "platforms/windows/library/automation/everything.ahk",
+        "referenced_methods": [
+          "incrementRunCount"
+        ],
+        "declared_methods": [
+          "incrementRunCount"
+        ]
+      },
+      {
+        "service": "hotkeyTracker",
+        "class": "HotkeyTrackerService",
+        "class_file": "platforms/windows/library/automation/hotkey-tracker.ahk",
+        "referenced_methods": [
+          "track"
+        ],
+        "declared_methods": [
+          "track",
+          "_loadUsageData",
+          "_saveUsageData",
+          "_normalizeUsageData",
+          "_defaultUsageData",
+          "_normalizeKey"
+        ]
+      },
+      {
+        "service": "hotstring",
+        "class": "HotstringService",
+        "class_file": "platforms/windows/library/automation/hotstring.ahk",
+        "referenced_methods": [
+          "set"
+        ],
+        "declared_methods": [
+          "set",
+          "registerEntries",
+          "_resolveHotstringOptions",
+          "_isImmediatePersonName",
+          "_isSapInputMode",
+          "_resetHotstringContext",
+          "_loadEntries",
+          "_loadEntriesFromJson",
+          "_readJsonPayload",
+          "_validateHotstringJsonPayload",
+          "_buildEntryFromJsonItem",
+          "_resolveEntryValue",
+          "_showRuntimeError"
+        ]
+      },
+      {
+        "service": "launcher",
+        "class": "LauncherService",
+        "class_file": "platforms/windows/library/automation/launcher.ahk",
+        "referenced_methods": [
+          "closeAndWait",
+          "paste",
+          "playSelectedMedia",
+          "save"
+        ],
+        "declared_methods": [
+          "isMediaPath",
+          "closeAndWait",
+          "playSelectedMedia",
+          "paste",
+          "save",
+          "_readSelectedFiles",
+          "_readSelectedFile",
+          "_isPasteableTextFile",
+          "_waitAfterPaste"
+        ]
+      },
+      {
+        "service": "memory",
+        "class": "MemoryService",
+        "class_file": "platforms/windows/library/automation/memory.ahk",
+        "referenced_methods": [
+          "getValue",
+          "resolveProviderValue",
+          "resolveSecretValue",
+          "resolveTargetTitle"
+        ],
+        "declared_methods": [
+          "paste",
+          "getValue",
+          "resolveProviderValue",
+          "resolveSecretValue",
+          "resolveTargetTitle",
+          "_normalizeTargetAndTitle",
+          "_isKeepassReference",
+          "_resolveKeepassReference",
+          "_getKeepassProviderCommand",
+          "_runCommandForStdout",
+          "_quoteForCommandLine",
+          "_buildContextSuffix",
+          "_showRuntimeError"
+        ]
+      },
+      {
+        "service": "run",
+        "class": "RunService",
+        "class_file": "platforms/windows/library/automation/run.ahk",
+        "referenced_methods": [
+          "openApp",
+          "runCommand"
+        ],
+        "declared_methods": [
+          "open",
+          "runCommand",
+          "runPythonScript",
+          "openApp",
+          "createFromTemplate",
+          "_run",
+          "_prepareHotkeyLaunch",
+          "_firstAppItem",
+          "_normalizeAppTarget",
+          "_activateIfExists",
+          "_activateOrRunTarget"
+        ]
+      },
+      {
+        "service": "sap",
+        "class": "SapService",
+        "class_file": "platforms/windows/library/automation/sap.ahk",
+        "referenced_methods": [
+          "exitSession",
+          "focusEclipseWindows",
+          "focusGuiWindows",
+          "insertCommentBlock",
+          "insertCommentLine",
+          "isTextInputActive",
+          "openDevSession",
+          "openPrdSession",
+          "openQasSession",
+          "openSe09",
+          "openSe16n",
+          "openSe37",
+          "openSe38",
+          "openSe80",
+          "openSession",
+          "openWorkbenchOptions",
+          "promptAndOpenAbapObject",
+          "promptAndSearchAbapObject",
+          "reloginFromProjectWindow",
+          "runTcode",
+          "runTcodeFromFocusedInput",
+          "startQuickDebug",
+          "toggleDebugMode"
+        ],
+        "declared_methods": [
+          "_afterSapLaunch",
+          "insertCommentLine",
+          "insertCommentBlock",
+          "_insertCommentLine",
+          "_insertCommentBlock",
+          "_buildCodeSignature",
+          "_buildCodeCommentLine",
+          "_buildCommentMarkup",
+          "reloginFromProjectWindow",
+          "isTextInputActive",
+          "runTcodeFromFocusedInput",
+          "runTcode",
+          "toggleDebugMode",
+          "_runDebugToggleCommand",
+          "exitSession",
+          "_runExitCommand",
+          "openWorkbenchOptions",
+          "openSe16n",
+          "openSe37",
+          "openSe38",
+          "openSe09",
+          "openSe80",
+          "saveCurrentCodeArtifact",
+          "focusGuiWindows",
+          "focusEclipseWindows",
+          "openAbapObject",
+          "promptAndOpenAbapObject",
+          "searchAbapObject",
+          "promptAndSearchAbapObject",
+          "runQuickDebug",
+          "startQuickDebug",
+          "_runTcodePostAction",
+          "_normalizeTcodeForSap",
+          "_submitTcodeButton",
+          "_resolveOperationDelayMs",
+          "_syncYmtProgramFromLocal",
+          "_readActiveInputValue",
+          "_promptValue",
+          "openDevSession",
+          "openQasSession",
+          "openPrdSession",
+          "openSession",
+          "openConfiguredSession",
+          "_resolveSessionConfig",
+          "_normalizeSessionLookup",
+          "_validateSessionConfig",
+          "reloginFromWindowContext",
+          "_buildLaunchCommand",
+          "_runLaunchCommand",
+          "_tryHandleCredentialWindows",
+          "_handleMultipleSessionPopup",
+          "_fillCredentials",
+          "_resolveSessionEntryRef",
+          "_normalizeSessionEntryRef",
+          "_loadSessionRecordFromKeepass",
+          "_resolveSessionField",
+          "_resolveSessionFieldOrFallback",
+          "_parseSessionEntryUrl",
+          "_mapGet",
+          "_showRuntimeError"
+        ]
+      },
+      {
+        "service": "snipaste",
+        "class": "SnipasteService",
+        "class_file": "platforms/windows/library/automation/snipaste.ahk",
+        "referenced_methods": [
+          "copyPaste",
+          "ctrlC",
+          "pasteResizeOffice",
+          "resizeOffice"
+        ],
+        "declared_methods": [
+          "__new",
+          "ctrlC",
+          "copyPaste",
+          "pasteResizeOffice",
+          "resizeOffice",
+          "_lastEditorActive",
+          "_hasImageInClipboard"
+        ]
+      },
+      {
+        "service": "video",
+        "class": "VideoService",
+        "class_file": "platforms/windows/library/automation/video.ahk",
+        "referenced_methods": [
+          "control"
+        ],
+        "declared_methods": [
+          "control",
+          "_activate"
+        ]
+      },
+      {
+        "service": "whatsapp",
+        "class": "WhatsappService",
+        "class_file": "platforms/windows/library/automation/whatsapp.ahk",
+        "referenced_methods": [
+          "archive",
+          "clearArchive",
+          "delete"
+        ],
+        "declared_methods": [
+          "archive",
+          "delete",
+          "clearArchive",
+          "performContextAction"
+        ]
+      },
+      {
+        "service": "windowGroup",
+        "class": "WindowGroupService",
+        "class_file": "platforms/windows/library/automation/window-group.ahk",
+        "referenced_methods": [
+          "activateGroup"
+        ],
+        "declared_methods": [
+          "__new",
+          "activateGroup",
+          "_activate",
+          "jobGroupKey",
+          "_collectWindows",
+          "_groupActive",
+          "_isGroupMatch",
+          "_windowInfo",
+          "_ruleGroup",
+          "_rulePattern",
+          "_resetGroupState"
+        ]
+      },
+      {
+        "service": "windows",
+        "class": "WindowsService",
+        "class_file": "platforms/windows/library/automation/windows.ahk",
+        "referenced_methods": [
+          "microphoneToggle",
+          "resizeHeight",
+          "snapWindowLeft",
+          "snapWindowRight",
+          "soundToggle"
+        ],
+        "declared_methods": [
+          "closeWindow",
+          "handleSapCloseCase",
+          "resizeHeight",
+          "snapWindowRight",
+          "snapWindowLeft",
+          "_winSizes",
+          "_taskbarHeight",
+          "soundToggle",
+          "microphoneToggle",
+          "_isWindowActiveForGroup"
+        ]
+      }
+    ],
+    "hotstring_profiles": [
+      {
+        "label": "autocorrect",
+        "group": "",
+        "mode": "autocorrect",
+        "file": "platforms/windows/data/autocorrect.json",
+        "exists": true,
+        "json_valid": true,
+        "has_items_array": true,
+        "item_count": 434
+      },
+      {
+        "label": "quick-snippets",
+        "group": "",
+        "mode": "autocorrect",
+        "file": "platforms/windows/data/quick-snippets.json",
+        "exists": true,
+        "json_valid": true,
+        "has_items_array": true,
+        "item_count": 3
+      },
+      {
+        "label": "sap-transaction-shortcuts",
+        "group": "group_sap_runtime_windows",
+        "mode": "sapTransaction",
+        "file": "platforms/windows/data/sap-transaction-shortcuts.json",
+        "exists": true,
+        "json_valid": true,
+        "has_items_array": true,
+        "item_count": 19
+      },
+      {
+        "label": "ymt-commands",
+        "group": "group_sap_runtime_windows",
+        "mode": "ymtCommand",
+        "file": "platforms/windows/data/ymt-commands.json",
+        "exists": true,
+        "json_valid": true,
+        "has_items_array": true,
+        "item_count": 6
+      }
+    ],
+    "public_service_calls": [
+      {
+        "file": "platforms/windows/hotkeys/domains/comms.ahk",
+        "calls": [
+          "dynamic.openTeamsSearchAndGoToField",
+          "whatsapp.archive",
+          "whatsapp.clearArchive",
+          "whatsapp.delete"
+        ]
+      },
+      {
+        "file": "platforms/windows/hotkeys/domains/media-web.ahk",
+        "calls": [
+          "dynamic.clearChatAndSend",
+          "dynamic.fillNttOfficeCredentials",
+          "dynamic.openEdgeReadAloud"
+        ]
+      },
+      {
+        "file": "platforms/windows/hotkeys/domains/productivity.ahk",
+        "calls": [
+          "dynamic.copyAndRefreshAppTime",
+          "dynamic.refreshAndCloseXyplorerTab",
+          "launcher.paste",
+          "launcher.playSelectedMedia",
+          "launcher.save",
+          "snipaste.copyPaste"
+        ]
+      },
+      {
+        "file": "platforms/windows/hotkeys/editors-ide.ahk",
+        "calls": [
+          "dynamic.openEditorCommandPaletteWithPercent"
+        ]
+      },
+      {
+        "file": "platforms/windows/hotkeys/editors-office.ahk",
+        "calls": [
+          "snipaste.pasteResizeOffice",
+          "snipaste.resizeOffice"
+        ]
+      },
+      {
+        "file": "platforms/windows/hotkeys/editors-text.ahk",
+        "calls": [
+          "dynamic.openSublimeCommandPaletteByTag"
+        ]
+      },
+      {
+        "file": "platforms/windows/hotkeys/global.ahk",
+        "calls": [
+          "hotkeyTracker.track",
+          "run.openApp",
+          "sap.insertCommentBlock",
+          "sap.insertCommentLine",
+          "sap.openDevSession",
+          "sap.openPrdSession",
+          "sap.openQasSession",
+          "snipaste.copyPaste",
+          "snipaste.ctrlC",
+          "video.control",
+          "windowGroup.activateGroup",
+          "windows.microphoneToggle",
+          "windows.resizeHeight",
+          "windows.snapWindowLeft",
+          "windows.snapWindowRight",
+          "windows.soundToggle"
+        ]
+      },
+      {
+        "file": "platforms/windows/hotkeys/sap-eclipse.ahk",
+        "calls": [
+          "sap.focusEclipseWindows",
+          "sap.promptAndOpenAbapObject",
+          "sap.promptAndSearchAbapObject",
+          "sap.startQuickDebug"
+        ]
+      },
+      {
+        "file": "platforms/windows/hotkeys/sap-gui.ahk",
+        "calls": [
+          "sap.exitSession",
+          "sap.focusGuiWindows",
+          "sap.isTextInputActive",
+          "sap.openSe09",
+          "sap.openSe16n",
+          "sap.openSe37",
+          "sap.openSe38",
+          "sap.openSe80",
+          "sap.openWorkbenchOptions",
+          "sap.reloginFromProjectWindow",
+          "sap.runTcodeFromFocusedInput",
+          "sap.toggleDebugMode"
+        ]
+      },
+      {
+        "file": "platforms/windows/library/automation/dynamic.ahk",
+        "calls": [
+          "dynamic.execute",
+          "memory.getValue"
+        ]
+      },
+      {
+        "file": "platforms/windows/library/automation/everything.ahk",
+        "calls": [
+          "run.runCommand"
+        ]
+      },
+      {
+        "file": "platforms/windows/library/automation/hotstring.ahk",
+        "calls": [
+          "sap.isTextInputActive",
+          "sap.openSession",
+          "sap.runTcode"
+        ]
+      },
+      {
+        "file": "platforms/windows/library/automation/launcher.ahk",
+        "calls": [
+          "everything.incrementRunCount",
+          "run.runCommand"
+        ]
+      },
+      {
+        "file": "platforms/windows/library/automation/run.ahk",
+        "calls": [
+          "launcher.closeAndWait",
+          "memory.getValue",
+          "memory.resolveTargetTitle"
+        ]
+      },
+      {
+        "file": "platforms/windows/library/automation/sap-session.ahk",
+        "calls": [
+          "launcher.closeAndWait",
+          "memory.getValue",
+          "memory.resolveProviderValue",
+          "memory.resolveSecretValue"
+        ]
+      },
+      {
+        "file": "platforms/windows/library/automation/sap.ahk",
+        "calls": [
+          "memory.getValue",
+          "windowGroup.activateGroup"
+        ]
+      },
+      {
+        "file": "platforms/windows/library/automation/snipaste.ahk",
+        "calls": [
+          "run.runCommand"
+        ]
+      },
+      {
+        "file": "platforms/windows/library/bootstrap.ahk",
+        "calls": [
+          "hotstring.set"
+        ]
+      }
+    ]
+  },
+  "repo": {
+    "entrypoint": "platforms/windows/keyflow.ahk",
+    "bootstrap": "platforms/windows/library/bootstrap.ahk",
+    "tool": "ai/health_check.py"
+  }
+}

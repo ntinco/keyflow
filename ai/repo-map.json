@@ -1,0 +1,91 @@
+{
+  "version": 2,
+  "purpose": "AI-first navigation map for rapid maintenance of keyflow.",
+  "read-order": [
+    "AGENTS.md",
+    "ai/health-check.summary.json",
+    "ai/repo-map.json",
+    "platforms/windows/keyflow.ahk",
+    "platforms/windows/library/bootstrap.ahk",
+    "platforms/windows/library/automation/sap-session.ahk",
+    "platforms/windows/library/automation/sap.ahk",
+    "platforms/windows/hotkeys/global.ahk"
+  ],
+  "entrypoints": [
+    {
+      "id": "runtime",
+      "path": "platforms/windows/keyflow.ahk",
+      "role": "Main AutoHotkey entrypoint."
+    },
+    {
+      "id": "bootstrap",
+      "path": "platforms/windows/library/bootstrap.ahk",
+      "role": "Loads constants, services, and hotstring profiles."
+    },
+    {
+      "id": "health-check",
+      "path": "ai/health_check.py",
+      "role": "Generates machine-readable validation snapshot. Run before and after structural changes."
+    }
+  ],
+  "domains": [
+    {
+      "id": "sap-session",
+      "path": "platforms/windows/library/automation/sap-session.ahk",
+      "owns": ["KeePass-backed SAP session lookup", "credential field resolution", "SAP launch command assembly"]
+    },
+    {
+      "id": "sap-automation",
+      "path": "platforms/windows/library/automation/sap.ahk",
+      "owns": ["SAP GUI automation", "Eclipse ABAP helpers", "tcode execution"]
+    },
+    {
+      "id": "runtime-services",
+      "path": "platforms/windows/library/automation/",
+      "owns": ["13 registered services exposed as services.*", "dynamic, run, memory, launcher, windows, everything, snipaste, video, whatsapp, windowGroup, hotstring, hotkeyTracker"]
+    },
+    {
+      "id": "hotkeys",
+      "path": "platforms/windows/hotkeys/",
+      "owns": ["global shortcuts", "SAP shortcuts", "editor shortcuts", "domain shortcuts"]
+    },
+    {
+      "id": "catalogs",
+      "path": "platforms/windows/data/",
+      "owns": ["hotstring catalogs (autocorrect, quick-snippets, sap-transaction-shortcuts, ymt-commands)", "example config files", "local-only runtime contracts"]
+    },
+    {
+      "id": "ai-tooling",
+      "path": "ai/",
+      "owns": ["health_check.py: validation script", "health-check.summary.json: current summary (20 lines, read first)", "health-check.json: full contract detail (on demand)", "repo-map.json: this file"]
+    },
+    {
+      "id": "docs",
+      "path": "docs/",
+      "owns": ["smoke-test.md: manual startup checklist", "health-check.md: prose contract companion"]
+    }
+  ],
+  "agent-workflow": [
+    "1. Read AGENTS.md for rules.",
+    "2. Read ai/health-check.summary.json for current state.",
+    "3. Run python ai/health_check.py --pretty --summary to refresh if repo changed.",
+    "4. Edit the smallest responsible file set.",
+    "5. Run python ai/health_check.py --pretty --output ai/health-check.json --output-summary ai/health-check.summary.json.",
+    "6. If ok is false: read issues[] in health-check.json and fix before proceeding.",
+    "7. If runtime wiring changed: smoke-test with AutoHotkey (see docs/smoke-test.md)."
+  ],
+  "runtime-api": [
+    "dynamic", "everything", "hotkeyTracker", "hotstring",
+    "launcher", "memory", "run", "sap", "snipaste",
+    "video", "whatsapp", "windowGroup", "windows"
+  ],
+  "local-only-files": [
+    "platforms/windows/data/local-secrets.ini",
+    "platforms/windows/data/local-paths.ini",
+    "platforms/windows/data/local-startup.ini",
+    "platforms/windows/data/memory-vars.ini",
+    "platforms/windows/data/rom.ini",
+    "storage.db",
+    "platforms/windows/storage.db"
+  ]
+}

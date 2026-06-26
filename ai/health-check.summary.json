@@ -1,0 +1,31 @@
+{
+  "ok": true,
+  "issue_count": 0,
+  "services": [
+    "dynamic",
+    "everything",
+    "hotkeyTracker",
+    "hotstring",
+    "launcher",
+    "memory",
+    "run",
+    "sap",
+    "snipaste",
+    "video",
+    "whatsapp",
+    "windowGroup",
+    "windows"
+  ],
+  "profiles": {
+    "autocorrect": 434,
+    "quick-snippets": 3,
+    "sap-transaction-shortcuts": 19,
+    "ymt-commands": 6
+  },
+  "dead_class_candidates": [],
+  "dead_constant_candidates": [
+    "sapQasSnippetsJsonFile"
+  ],
+  "legacy_audit_count": 0,
+  "legacy_audit_note": "NORMAN_* and norman_src are legacy-compatible; not treated as issues."
+}
