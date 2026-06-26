@@ -1,0 +1,51 @@
+#hotif winactive(exeMsTeams)
+f1::{
+trackDomainsHotkeyUsage("f1", "teams")
+services.dynamic.openTeamsSearchAndGoToField()
+}
+!2::{
+trackDomainsHotkeyUsage("!2", "teams")
+Send("^2")
+}
+!3::{
+trackDomainsHotkeyUsage("!3", "teams")
+Send("^3")
+}
+
+#hotif winactive(titleWhatsapp)
+f1::{
+trackDomainsHotkeyUsage("f1", "whatsapp")
+services.whatsapp.archive()
+}
+f2::{
+trackDomainsHotkeyUsage("f2", "whatsapp")
+services.whatsapp.delete()
+}
++f1::{
+trackDomainsHotkeyUsage("+f1", "whatsapp")
+services.whatsapp.clearArchive()
+}
+
+#hotif winactive(exeTodoist)
+#hotif winactive(exeOutlook)
+!1::{
+trackDomainsHotkeyUsage("!1", "outlook")
+Send("^{f2}")
+}
+!2::{
+trackDomainsHotkeyUsage("!2", "outlook")
+Send("^{f3}")
+}
+!3::{
+trackDomainsHotkeyUsage("!3", "outlook")
+Send("^{f4}")
+}
+!4::{
+trackDomainsHotkeyUsage("!4", "outlook")
+Send("^{f5}")
+}
+!5::{
+trackDomainsHotkeyUsage("!5", "outlook")
+Send("^{f6}")
+}
+

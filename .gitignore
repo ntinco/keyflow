@@ -1,0 +1,9 @@
+# Canonical AI artifacts are stored in /ai; only ignore non-canonical custom overlay artifacts.
+*data/hotkey-usage.json
+*data/local-secrets.ini
+*data/local-paths.ini
+*data/local-startup.ini
+*data/memory-vars.ini
+*data/rom.ini
+storage.db
+*/storage.db

@@ -1,0 +1,288 @@
+﻿{
+  "hotkeys": {
+    "!+down": {
+      "count": 9,
+      "firstSeenUtc": "20260525152658",
+      "lastSeenUtc": "20260625210930",
+      "sourceFile": "hotkeys\/sap.ahk",
+      "sourceGroup": "sap-eclipse"
+    },
+    "!0": {
+      "count": 7,
+      "firstSeenUtc": "20260601151422",
+      "lastSeenUtc": "20260625151033",
+      "sourceFile": "hotkeys\/sap.ahk",
+      "sourceGroup": "sap-gui-session"
+    },
+    "!5": {
+      "count": 49,
+      "firstSeenUtc": "20260524185834",
+      "lastSeenUtc": "20260619023455",
+      "sourceFile": "hotkeys\/sap.ahk",
+      "sourceGroup": "sap-gui-session"
+    },
+    "!6": {
+      "count": 207,
+      "firstSeenUtc": "20260525155615",
+      "lastSeenUtc": "20260623020301",
+      "sourceFile": "hotkeys\/sap.ahk",
+      "sourceGroup": "sap-gui-session"
+    },
+    "!7": {
+      "count": 17,
+      "firstSeenUtc": "20260526004546",
+      "lastSeenUtc": "20260619005421",
+      "sourceFile": "hotkeys\/sap.ahk",
+      "sourceGroup": "sap-gui-session"
+    },
+    "!8": {
+      "count": 155,
+      "firstSeenUtc": "20260524191201",
+      "lastSeenUtc": "20260625231732",
+      "sourceFile": "hotkeys\/sap.ahk",
+      "sourceGroup": "sap-gui-session"
+    },
+    "!9": {
+      "count": 1,
+      "firstSeenUtc": "20260622224040",
+      "lastSeenUtc": "20260622224040",
+      "sourceFile": "hotkeys\/sap.ahk",
+      "sourceGroup": "sap-gui-session"
+    },
+    "!down": {
+      "count": 22,
+      "firstSeenUtc": "20260524191422",
+      "lastSeenUtc": "20260617000113",
+      "sourceFile": "hotkeys\/sap.ahk",
+      "sourceGroup": "sap-gui-session"
+    },
+    "!e": {
+      "count": 4,
+      "firstSeenUtc": "20260529213317",
+      "lastSeenUtc": "20260622203112",
+      "sourceFile": "hotkeys\/global.ahk",
+      "sourceGroup": "global"
+    },
+    "!left": {
+      "count": 1,
+      "firstSeenUtc": "20260529221212",
+      "lastSeenUtc": "20260529221212",
+      "sourceFile": "hotkeys\/sap.ahk",
+      "sourceGroup": "sap-gui-session"
+    },
+    "!p": {
+      "count": 14,
+      "firstSeenUtc": "20260602205637",
+      "lastSeenUtc": "20260625125306",
+      "sourceFile": "hotkeys\/domains.ahk",
+      "sourceGroup": "launcher"
+    },
+    "!right": {
+      "count": 1,
+      "firstSeenUtc": "20260604214840",
+      "lastSeenUtc": "20260604214840",
+      "sourceFile": "hotkeys\/editors.ahk",
+      "sourceGroup": "excel"
+    },
+    "!s": {
+      "count": 1,
+      "firstSeenUtc": "20260604190915",
+      "lastSeenUtc": "20260604190915",
+      "sourceFile": "hotkeys\/global.ahk",
+      "sourceGroup": "global"
+    },
+    "!up": {
+      "count": 2,
+      "firstSeenUtc": "20260605185237",
+      "lastSeenUtc": "20260610142541",
+      "sourceFile": "hotkeys\/editors.ahk",
+      "sourceGroup": "notepad"
+    },
+    "#!right": {
+      "count": 10,
+      "firstSeenUtc": "20260617170705",
+      "lastSeenUtc": "20260626010453",
+      "sourceFile": "hotkeys\/global.ahk",
+      "sourceGroup": "global"
+    },
+    "#^f1": {
+      "count": 20,
+      "firstSeenUtc": "20260525215423",
+      "lastSeenUtc": "20260625153952",
+      "sourceFile": "hotkeys\/global.ahk",
+      "sourceGroup": "global"
+    },
+    "#e": {
+      "count": 2,
+      "firstSeenUtc": "20260529005306",
+      "lastSeenUtc": "20260625171813",
+      "sourceFile": "hotkeys\/global.ahk",
+      "sourceGroup": "global"
+    },
+    "#esc": {
+      "count": 56,
+      "firstSeenUtc": "20260524192245",
+      "lastSeenUtc": "20260626014752",
+      "sourceFile": "hotkeys\/global.ahk",
+      "sourceGroup": "global"
+    },
+    "#f1": {
+      "count": 179,
+      "firstSeenUtc": "20260524173134",
+      "lastSeenUtc": "20260625222323",
+      "sourceFile": "hotkeys\/global.ahk",
+      "sourceGroup": "global"
+    },
+    "#f2": {
+      "count": 150,
+      "firstSeenUtc": "20260524185513",
+      "lastSeenUtc": "20260625231659",
+      "sourceFile": "hotkeys\/global.ahk",
+      "sourceGroup": "global"
+    },
+    "#f3": {
+      "count": 192,
+      "firstSeenUtc": "20260524185504",
+      "lastSeenUtc": "20260625232728",
+      "sourceFile": "hotkeys\/global.ahk",
+      "sourceGroup": "global"
+    },
+    "$^!+a": {
+      "count": 5,
+      "firstSeenUtc": "20260603233610",
+      "lastSeenUtc": "20260625192505",
+      "sourceFile": "hotkeys\/global.ahk",
+      "sourceGroup": "global"
+    },
+    "$enter": {
+      "count": 1460,
+      "firstSeenUtc": "20260524173157",
+      "lastSeenUtc": "20260626003906",
+      "sourceFile": "hotkeys\/sap.ahk",
+      "sourceGroup": "sap-gui-ymt-input"
+    },
+    "^+k": {
+      "count": 2202,
+      "firstSeenUtc": "20260524162054",
+      "lastSeenUtc": "20260625222237",
+      "sourceFile": "hotkeys\/sap.ahk",
+      "sourceGroup": "sap-gui-session"
+    },
+    "^+w": {
+      "count": 66,
+      "firstSeenUtc": "20260524204113",
+      "lastSeenUtc": "20260619033959",
+      "sourceFile": "hotkeys\/sap.ahk",
+      "sourceGroup": "sap-gui-session"
+    },
+    "^5": {
+      "count": 6,
+      "firstSeenUtc": "20260603215110",
+      "lastSeenUtc": "20260619000138",
+      "sourceFile": "hotkeys\/sap.ahk",
+      "sourceGroup": "sap-eclipse"
+    },
+    "^\\": {
+      "count": 15,
+      "firstSeenUtc": "20260525163745",
+      "lastSeenUtc": "20260619045741",
+      "sourceFile": "hotkeys\/global.ahk",
+      "sourceGroup": "global"
+    },
+    "^b": {
+      "count": 3,
+      "firstSeenUtc": "20260609175907",
+      "lastSeenUtc": "20260623011114",
+      "sourceFile": "hotkeys\/sap.ahk",
+      "sourceGroup": "sap-gui-session"
+    },
+    "^d": {
+      "count": 151,
+      "firstSeenUtc": "20260524191219",
+      "lastSeenUtc": "20260625231949",
+      "sourceFile": "hotkeys\/sap.ahk",
+      "sourceGroup": "sap-gui-session"
+    },
+    "^g": {
+      "count": 1,
+      "firstSeenUtc": "20260609144831",
+      "lastSeenUtc": "20260609144831",
+      "sourceFile": "hotkeys\/sap.ahk",
+      "sourceGroup": "sap-gui-session"
+    },
+    "^n": {
+      "count": 2,
+      "firstSeenUtc": "20260526191543",
+      "lastSeenUtc": "20260606171420",
+      "sourceFile": "hotkeys\/sap.ahk",
+      "sourceGroup": "sap-eclipse"
+    },
+    "backtick": {
+      "count": 748,
+      "firstSeenUtc": "20260524190135",
+      "lastSeenUtc": "20260625231841",
+      "sourceFile": "hotkeys\/sap.ahk",
+      "sourceGroup": "sap-eclipse"
+    },
+    "d": {
+      "count": 3,
+      "firstSeenUtc": "20260525001148",
+      "lastSeenUtc": "20260525001149",
+      "sourceFile": "hotkeys\/domains.ahk",
+      "sourceGroup": "vlc"
+    },
+    "f1": {
+      "count": 120,
+      "firstSeenUtc": "20260525133422",
+      "lastSeenUtc": "20260625225155",
+      "sourceFile": "hotkeys\/sap.ahk",
+      "sourceGroup": "sap-eclipse"
+    },
+    "f2": {
+      "count": 325,
+      "firstSeenUtc": "20260524163201",
+      "lastSeenUtc": "20260625224147",
+      "sourceFile": "hotkeys\/sap.ahk",
+      "sourceGroup": "sap-eclipse"
+    },
+    "f5": {
+      "count": 222,
+      "firstSeenUtc": "20260524215458",
+      "lastSeenUtc": "20260626022858",
+      "sourceFile": "hotkeys\/domains.ahk",
+      "sourceGroup": "xyplorer"
+    },
+    "xbutton2": {
+      "count": 388,
+      "firstSeenUtc": "20260524192054",
+      "lastSeenUtc": "20260625235622",
+      "sourceFile": "hotkeys\/global.ahk",
+      "sourceGroup": "global"
+    },
+    "~\\": {
+      "count": 3492,
+      "firstSeenUtc": "20260525165143",
+      "lastSeenUtc": "20260626030328",
+      "sourceFile": "hotkeys\/global.ahk",
+      "sourceGroup": "global"
+    },
+    "~^c": {
+      "count": 3917,
+      "firstSeenUtc": "20260524162408",
+      "lastSeenUtc": "20260626032945",
+      "sourceFile": "hotkeys\/global.ahk",
+      "sourceGroup": "global"
+    },
+    "~^v": {
+      "count": 35,
+      "firstSeenUtc": "20260602214130",
+      "lastSeenUtc": "20260622165233",
+      "sourceFile": "hotkeys\/editors.ahk",
+      "sourceGroup": "winword"
+    }
+  },
+  "meta": {
+    "updatedAtUtc": "20260626032945",
+    "version": 1
+  }
+}

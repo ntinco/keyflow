@@ -1,0 +1,18 @@
+{
+  "format": "hotstring-items-v1",
+  "source": "data/qas-snippets.json",
+  "items": [
+    {
+      "trigger": "ls_memo-category",
+      "value": "ls_memo-category"
+    },
+    {
+      "trigger": "ls_memo-cli_dep",
+      "value": "ls_memo-cli_dep"
+    },
+    {
+      "trigger": "ls_memo-check_result",
+      "value": "ls_memo-check_result"
+    }
+  ]
+}

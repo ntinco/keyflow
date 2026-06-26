@@ -1,0 +1,18 @@
+{
+  "format": "hotstring-items-v1",
+  "source": "data/quick-snippets.json",
+  "items": [
+    {
+      "trigger": "bd,",
+      "value": "Buen día,"
+    },
+    {
+      "trigger": "bt,",
+      "value": "Buenas tardes,"
+    },
+    {
+      "trigger": "bn,",
+      "value": "Buenas noches,"
+    }
+  ]
+}

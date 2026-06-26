@@ -1,0 +1,1743 @@
+{
+  "format": "hotstring-items-v1",
+  "source": "data/autocorrect.json",
+  "items": [
+    {
+      "trigger": "hi",
+      "value": "Hi",
+      "immediate": false
+    },
+    {
+      "trigger": "hola",
+      "value": "Hola"
+    },
+    {
+      "trigger": "holi",
+      "value": "Holi"
+    },
+    {
+      "trigger": "hello",
+      "value": "Hello"
+    },
+    {
+      "trigger": "soli",
+      "value": "soli"
+    },
+    {
+      "trigger": "agustin",
+      "value": "Agustin"
+    },
+    {
+      "trigger": "alan",
+      "value": "Alan"
+    },
+    {
+      "trigger": "alejandro",
+      "value": "Alejandro"
+    },
+    {
+      "trigger": "alex",
+      "value": "Alex"
+    },
+    {
+      "trigger": "alvar",
+      "value": "Alvar"
+    },
+    {
+      "trigger": "alici",
+      "value": "Alici"
+    },
+    {
+      "trigger": "almerco",
+      "value": "Almerco"
+    },
+    {
+      "trigger": "andrea",
+      "value": "Andrea"
+    },
+    {
+      "trigger": "angel",
+      "value": "Angel"
+    },
+    {
+      "trigger": "anibal",
+      "value": "Anibal"
+    },
+    {
+      "trigger": "annel",
+      "value": "Annel"
+    },
+    {
+      "trigger": "anthony",
+      "value": "Anthony"
+    },
+    {
+      "trigger": "antonella",
+      "value": "Antonella"
+    },
+    {
+      "trigger": "arelis",
+      "value": "Arelis"
+    },
+    {
+      "trigger": "arles",
+      "value": "Arles"
+    },
+    {
+      "trigger": "axel",
+      "value": "Axel"
+    },
+    {
+      "trigger": "betty",
+      "value": "Betty"
+    },
+    {
+      "trigger": "billy",
+      "value": "Billy"
+    },
+    {
+      "trigger": "brad",
+      "value": "Brad"
+    },
+    {
+      "trigger": "brenda",
+      "value": "Brenda"
+    },
+    {
+      "trigger": "braya",
+      "value": "Braya"
+    },
+    {
+      "trigger": "carl",
+      "value": "Carl"
+    },
+    {
+      "trigger": "carmen",
+      "value": "Carmen"
+    },
+    {
+      "trigger": "cesar",
+      "value": "Cesar"
+    },
+    {
+      "trigger": "chri",
+      "value": "Chri"
+    },
+    {
+      "trigger": "charito",
+      "value": "Charito"
+    },
+    {
+      "trigger": "cinth",
+      "value": "Cinth"
+    },
+    {
+      "trigger": "claudia",
+      "value": "Claudia"
+    },
+    {
+      "trigger": "cleber",
+      "value": "Cléber"
+    },
+    {
+      "trigger": "crys",
+      "value": "Crys"
+    },
+    {
+      "trigger": "cronel",
+      "value": "Cronel"
+    },
+    {
+      "trigger": "damaris",
+      "value": "Damaris"
+    },
+    {
+      "trigger": "daniel",
+      "value": "Daniel"
+    },
+    {
+      "trigger": "david",
+      "value": "David"
+    },
+    {
+      "trigger": "denis",
+      "value": "Denis"
+    },
+    {
+      "trigger": "delia",
+      "value": "Delia"
+    },
+    {
+      "trigger": "debora",
+      "value": "Debora"
+    },
+    {
+      "trigger": "dian",
+      "value": "Dian"
+    },
+    {
+      "trigger": "dios",
+      "value": "Dios"
+    },
+    {
+      "trigger": "dora",
+      "value": "Dora"
+    },
+    {
+      "trigger": "eder",
+      "value": "Eder"
+    },
+    {
+      "trigger": "edith",
+      "value": "Edith"
+    },
+    {
+      "trigger": "edgar",
+      "value": "Edgar"
+    },
+    {
+      "trigger": "eduardo",
+      "value": "Eduardo"
+    },
+    {
+      "trigger": "edwar",
+      "value": "Edwar"
+    },
+    {
+      "trigger": "efrain",
+      "value": "Efrain"
+    },
+    {
+      "trigger": "eiko",
+      "value": "Eiko"
+    },
+    {
+      "trigger": "emily",
+      "value": "Emily"
+    },
+    {
+      "trigger": "enrique",
+      "value": "Enrique"
+    },
+    {
+      "trigger": "elias",
+      "value": "Elias"
+    },
+    {
+      "trigger": "eric",
+      "value": "Eric"
+    },
+    {
+      "trigger": "erika",
+      "value": "Erika"
+    },
+    {
+      "trigger": "fabricio",
+      "value": "Fabricio"
+    },
+    {
+      "trigger": "fernando",
+      "value": "Fernando"
+    },
+    {
+      "trigger": "fili",
+      "value": "Fili"
+    },
+    {
+      "trigger": "fran",
+      "value": "Fran"
+    },
+    {
+      "trigger": "fred",
+      "value": "Fred"
+    },
+    {
+      "trigger": "gabriel",
+      "value": "Gabriel"
+    },
+    {
+      "trigger": "gaspar",
+      "value": "Gaspar"
+    },
+    {
+      "trigger": "giancarlo",
+      "value": "Giancarlo"
+    },
+    {
+      "trigger": "gianett",
+      "value": "Gianett"
+    },
+    {
+      "trigger": "gino",
+      "value": "Gino"
+    },
+    {
+      "trigger": "giov",
+      "value": "Giov"
+    },
+    {
+      "trigger": "gonzalo",
+      "value": "Gonzalo"
+    },
+    {
+      "trigger": "gustavo",
+      "value": "Gustavo"
+    },
+    {
+      "trigger": "hector",
+      "value": "Hector"
+    },
+    {
+      "trigger": "henry",
+      "value": "Henry"
+    },
+    {
+      "trigger": "hosdy",
+      "value": "Hosdy"
+    },
+    {
+      "trigger": "Hugo",
+      "value": "Hugo"
+    },
+    {
+      "trigger": "isa",
+      "value": "Isa"
+    },
+    {
+      "trigger": "jacqueline",
+      "value": "Jacqueline"
+    },
+    {
+      "trigger": "jarol",
+      "value": "Jarol"
+    },
+    {
+      "trigger": "jasson",
+      "value": "Jasson"
+    },
+    {
+      "trigger": "javier",
+      "value": "Javier"
+    },
+    {
+      "trigger": "jefe",
+      "value": "Jefe"
+    },
+    {
+      "trigger": "jhon",
+      "value": "Jhon"
+    },
+    {
+      "trigger": "jhoon",
+      "value": "Jhoon"
+    },
+    {
+      "trigger": "johnny",
+      "value": "Johnny"
+    },
+    {
+      "trigger": "jonathan",
+      "value": "Jonathan"
+    },
+    {
+      "trigger": "jorge",
+      "value": "Jorge"
+    },
+    {
+      "trigger": "jose",
+      "value": "Jose"
+    },
+    {
+      "trigger": "joss",
+      "value": "Joss"
+    },
+    {
+      "trigger": "juan",
+      "value": "Juan"
+    },
+    {
+      "trigger": "juli",
+      "value": "Juli"
+    },
+    {
+      "trigger": "karen",
+      "value": "Karen"
+    },
+    {
+      "trigger": "karina",
+      "value": "Karina"
+    },
+    {
+      "trigger": "kat",
+      "value": "Kat"
+    },
+    {
+      "trigger": "kerly",
+      "value": "Kerly"
+    },
+    {
+      "trigger": "keny",
+      "value": "Keny"
+    },
+    {
+      "trigger": "kevin",
+      "value": "Kevin"
+    },
+    {
+      "trigger": "liz",
+      "value": "Liz"
+    },
+    {
+      "trigger": "lou",
+      "value": "Lou"
+    },
+    {
+      "trigger": "lucy",
+      "value": "Lucy"
+    },
+    {
+      "trigger": "luis",
+      "value": "Luis"
+    },
+    {
+      "trigger": "luiggi",
+      "value": "Luiggi"
+    },
+    {
+      "trigger": "lilian",
+      "value": "Lilian"
+    },
+    {
+      "trigger": "manuel",
+      "value": "Manuel"
+    },
+    {
+      "trigger": "marco",
+      "value": "Marco"
+    },
+    {
+      "trigger": "mari",
+      "value": "Mari"
+    },
+    {
+      "trigger": "marlon",
+      "value": "Marlon"
+    },
+    {
+      "trigger": "mauro",
+      "value": "Mauro"
+    },
+    {
+      "trigger": "melissa",
+      "value": "Melissa"
+    },
+    {
+      "trigger": "merly",
+      "value": "Merly"
+    },
+    {
+      "trigger": "michel",
+      "value": "Michel"
+    },
+    {
+      "trigger": "miguel",
+      "value": "Miguel"
+    },
+    {
+      "trigger": "milagros",
+      "value": "Milagros"
+    },
+    {
+      "trigger": "miriam",
+      "value": "Miriam"
+    },
+    {
+      "trigger": "nadia",
+      "value": "Nadia"
+    },
+    {
+      "trigger": "norka",
+      "value": "Norka"
+    },
+    {
+      "trigger": "nini",
+      "value": "ñiñi"
+    },
+    {
+      "trigger": "norman",
+      "value": "Norman"
+    },
+    {
+      "trigger": "oliver",
+      "value": "Oliver"
+    },
+    {
+      "trigger": "omar",
+      "value": "Omar"
+    },
+    {
+      "trigger": "orfe",
+      "value": "Orfe"
+    },
+    {
+      "trigger": "oscar",
+      "value": "Oscar"
+    },
+    {
+      "trigger": "paty",
+      "value": "Paty"
+    },
+    {
+      "trigger": "patrici",
+      "value": "Patrici"
+    },
+    {
+      "trigger": "palomino",
+      "value": "Palomino"
+    },
+    {
+      "trigger": "panchito",
+      "value": "Panchito"
+    },
+    {
+      "trigger": "paul",
+      "value": "Paul"
+    },
+    {
+      "trigger": "pavel",
+      "value": "Pavel"
+    },
+    {
+      "trigger": "pedri",
+      "value": "Pedri"
+    },
+    {
+      "trigger": "pedro",
+      "value": "Pedro"
+    },
+    {
+      "trigger": "percy",
+      "value": "Percy"
+    },
+    {
+      "trigger": "piero",
+      "value": "Piero"
+    },
+    {
+      "trigger": "pineda",
+      "value": "Pineda"
+    },
+    {
+      "trigger": "pujay",
+      "value": "Pujay"
+    },
+    {
+      "trigger": "rajiv",
+      "value": "Rajiv"
+    },
+    {
+      "trigger": "rafael",
+      "value": "Rafael"
+    },
+    {
+      "trigger": "raul",
+      "value": "Raul"
+    },
+    {
+      "trigger": "renzo",
+      "value": "Renzo"
+    },
+    {
+      "trigger": "ricardo",
+      "value": "Ricardo"
+    },
+    {
+      "trigger": "rich",
+      "value": "Rich"
+    },
+    {
+      "trigger": "robert",
+      "value": "Robert"
+    },
+    {
+      "trigger": "rodolfo",
+      "value": "Rodolfo"
+    },
+    {
+      "trigger": "rodrigo",
+      "value": "Rodrigo"
+    },
+    {
+      "trigger": "romulo",
+      "value": "Romulo"
+    },
+    {
+      "trigger": "rocio",
+      "value": "Rocio"
+    },
+    {
+      "trigger": "roussel",
+      "value": "Roussel"
+    },
+    {
+      "trigger": "rosa",
+      "value": "Rosa"
+    },
+    {
+      "trigger": "rose",
+      "value": "Rose"
+    },
+    {
+      "trigger": "rosmery",
+      "value": "Rosmery"
+    },
+    {
+      "trigger": "rudy",
+      "value": "Rudy"
+    },
+    {
+      "trigger": "salgado",
+      "value": "Salgado"
+    },
+    {
+      "trigger": "sergio",
+      "value": "Sergio"
+    },
+    {
+      "trigger": "sofi",
+      "value": "Sofi"
+    },
+    {
+      "trigger": "sole",
+      "value": "Sole"
+    },
+    {
+      "trigger": "solim",
+      "value": "Solim"
+    },
+    {
+      "trigger": "tinco",
+      "value": "Tinco"
+    },
+    {
+      "trigger": "trini",
+      "value": "Trini"
+    },
+    {
+      "trigger": "veronica",
+      "value": "Veronica"
+    },
+    {
+      "trigger": "victor",
+      "value": "Victor"
+    },
+    {
+      "trigger": "vilm",
+      "value": "Vilm"
+    },
+    {
+      "trigger": "viviana",
+      "value": "Viviana"
+    },
+    {
+      "trigger": "walter",
+      "value": "Walter"
+    },
+    {
+      "trigger": "will",
+      "value": "Will"
+    },
+    {
+      "trigger": "xela",
+      "value": "Xela"
+    },
+    {
+      "trigger": "yandi",
+      "value": "Yandi"
+    },
+    {
+      "trigger": "yesi",
+      "value": "Yesi"
+    },
+    {
+      "trigger": "yisus",
+      "value": "Yisus"
+    },
+    {
+      "trigger": "yordy",
+      "value": "Yordy"
+    },
+    {
+      "trigger": "yda",
+      "value": "Yda"
+    },
+    {
+      "trigger": "chambi",
+      "value": "Chambi"
+    },
+    {
+      "trigger": "portugal",
+      "value": "Portugal"
+    },
+    {
+      "trigger": "cunado",
+      "value": "cuando"
+    },
+    {
+      "trigger": "gte",
+      "value": "Gte"
+    },
+    {
+      "trigger": "qeu",
+      "value": "que"
+    },
+    {
+      "trigger": "papa",
+      "value": "papá"
+    },
+    {
+      "trigger": "bd",
+      "value": "Buen día"
+    },
+    {
+      "trigger": "bt",
+      "value": "Buenas tardes"
+    },
+    {
+      "trigger": "bn",
+      "value": "Buenas noches"
+    },
+    {
+      "trigger": "accion",
+      "value": "acción"
+    },
+    {
+      "trigger": "aplicacion",
+      "value": "aplicación"
+    },
+    {
+      "trigger": "comunicacion",
+      "value": "comunicación"
+    },
+    {
+      "trigger": "administracion",
+      "value": "administración"
+    },
+    {
+      "trigger": "organizacion",
+      "value": "organización"
+    },
+    {
+      "trigger": "situacion",
+      "value": "situación"
+    },
+    {
+      "trigger": "condicion",
+      "value": "condición"
+    },
+    {
+      "trigger": "seccion",
+      "value": "sección"
+    },
+    {
+      "trigger": "relacion",
+      "value": "relación"
+    },
+    {
+      "trigger": "region",
+      "value": "región"
+    },
+    {
+      "trigger": "division",
+      "value": "división"
+    },
+    {
+      "trigger": "decision",
+      "value": "decisión"
+    },
+    {
+      "trigger": "precision",
+      "value": "precisión"
+    },
+    {
+      "trigger": "extension",
+      "value": "extensión"
+    },
+    {
+      "trigger": "intencion",
+      "value": "intención"
+    },
+    {
+      "trigger": "mencion",
+      "value": "mención"
+    },
+    {
+      "trigger": "dimension",
+      "value": "dimensión"
+    },
+    {
+      "trigger": "redaccion",
+      "value": "redacción"
+    },
+    {
+      "trigger": "clasificacion",
+      "value": "clasificación"
+    },
+    {
+      "trigger": "codificacion",
+      "value": "codificación"
+    },
+    {
+      "trigger": "construccion",
+      "value": "construcción"
+    },
+    {
+      "trigger": "institucion",
+      "value": "institución"
+    },
+    {
+      "trigger": "sustitucion",
+      "value": "sustitución"
+    },
+    {
+      "trigger": "definicion",
+      "value": "definición"
+    },
+    {
+      "trigger": "notificacion",
+      "value": "notificación"
+    },
+    {
+      "trigger": "modificacion",
+      "value": "modificación"
+    },
+    {
+      "trigger": "rectificacion",
+      "value": "rectificación"
+    },
+    {
+      "trigger": "certificacion",
+      "value": "certificación"
+    },
+    {
+      "trigger": "calificacion",
+      "value": "calificación"
+    },
+    {
+      "trigger": "planificacion",
+      "value": "planificación"
+    },
+    {
+      "trigger": "verificacion",
+      "value": "verificación"
+    },
+    {
+      "trigger": "especificacion",
+      "value": "especificación"
+    },
+    {
+      "trigger": "identificacion",
+      "value": "identificación"
+    },
+    {
+      "trigger": "unificacion",
+      "value": "unificación"
+    },
+    {
+      "trigger": "justificacion",
+      "value": "justificación"
+    },
+    {
+      "trigger": "ratificacion",
+      "value": "ratificación"
+    },
+    {
+      "trigger": "peticion",
+      "value": "petición"
+    },
+    {
+      "trigger": "opcion",
+      "value": "opción"
+    },
+    {
+      "trigger": "produccion",
+      "value": "producción"
+    },
+    {
+      "trigger": "introduccion",
+      "value": "introducción"
+    },
+    {
+      "trigger": "reduccion",
+      "value": "reducción"
+    },
+    {
+      "trigger": "instruccion",
+      "value": "instrucción"
+    },
+    {
+      "trigger": "destruccion",
+      "value": "destrucción"
+    },
+    {
+      "trigger": "suscripcion",
+      "value": "suscripción"
+    },
+    {
+      "trigger": "descripcion",
+      "value": "descripción"
+    },
+    {
+      "trigger": "prescripcion",
+      "value": "prescripción"
+    },
+    {
+      "trigger": "transcripcion",
+      "value": "transcripción"
+    },
+    {
+      "trigger": "distribucion",
+      "value": "distribución"
+    },
+    {
+      "trigger": "contribucion",
+      "value": "contribución"
+    },
+    {
+      "trigger": "instalacion",
+      "value": "instalación"
+    },
+    {
+      "trigger": "desinstalacion",
+      "value": "desinstalación"
+    },
+    {
+      "trigger": "configuracion",
+      "value": "configuración"
+    },
+    {
+      "trigger": "implementacion",
+      "value": "implementación"
+    },
+    {
+      "trigger": "documentacion",
+      "value": "documentación"
+    },
+    {
+      "trigger": "argumentacion",
+      "value": "argumentación"
+    },
+    {
+      "trigger": "presentacion",
+      "value": "presentación"
+    },
+    {
+      "trigger": "representacion",
+      "value": "representación"
+    },
+    {
+      "trigger": "autenticacion",
+      "value": "autenticación"
+    },
+    {
+      "trigger": "autorizacion",
+      "value": "autorización"
+    },
+    {
+      "trigger": "formalizacion",
+      "value": "formalización"
+    },
+    {
+      "trigger": "normalizacion",
+      "value": "normalización"
+    },
+    {
+      "trigger": "optimizacion",
+      "value": "optimización"
+    },
+    {
+      "trigger": "visualizacion",
+      "value": "visualización"
+    },
+    {
+      "trigger": "ejecucion",
+      "value": "ejecución"
+    },
+    {
+      "trigger": "evaluacion",
+      "value": "evaluación"
+    },
+    {
+      "trigger": "validacion",
+      "value": "validación"
+    },
+    {
+      "trigger": "consolidacion",
+      "value": "consolidación"
+    },
+    {
+      "trigger": "liquidacion",
+      "value": "liquidación"
+    },
+    {
+      "trigger": "ubicacion",
+      "value": "ubicación"
+    },
+    {
+      "trigger": "publicacion",
+      "value": "publicación"
+    },
+    {
+      "trigger": "replicacion",
+      "value": "replicación"
+    },
+    {
+      "trigger": "duplicacion",
+      "value": "duplicación"
+    },
+    {
+      "trigger": "complicacion",
+      "value": "complicación"
+    },
+    {
+      "trigger": "implicacion",
+      "value": "implicación"
+    },
+    {
+      "trigger": "explicacion",
+      "value": "explicación"
+    },
+    {
+      "trigger": "educacion",
+      "value": "educación"
+    },
+    {
+      "trigger": "asignacion",
+      "value": "asignación"
+    },
+    {
+      "trigger": "designacion",
+      "value": "designación"
+    },
+    {
+      "trigger": "combinacion",
+      "value": "combinación"
+    },
+    {
+      "trigger": "ordenacion",
+      "value": "ordenación"
+    },
+    {
+      "trigger": "preparacion",
+      "value": "preparación"
+    },
+    {
+      "trigger": "informacion",
+      "value": "información"
+    },
+    {
+      "trigger": "transformacion",
+      "value": "transformación"
+    },
+    {
+      "trigger": "conversacion",
+      "value": "conversación"
+    },
+    {
+      "trigger": "observacion",
+      "value": "observación"
+    },
+    {
+      "trigger": "conservacion",
+      "value": "conservación"
+    },
+    {
+      "trigger": "reservacion",
+      "value": "reservación"
+    },
+    {
+      "trigger": "preservacion",
+      "value": "preservación"
+    },
+    {
+      "trigger": "innovacion",
+      "value": "innovación"
+    },
+    {
+      "trigger": "renovacion",
+      "value": "renovación"
+    },
+    {
+      "trigger": "motivacion",
+      "value": "motivación"
+    },
+    {
+      "trigger": "activacion",
+      "value": "activación"
+    },
+    {
+      "trigger": "desactivacion",
+      "value": "desactivación"
+    },
+    {
+      "trigger": "habilitacion",
+      "value": "habilitación"
+    },
+    {
+      "trigger": "deshabilitacion",
+      "value": "deshabilitación"
+    },
+    {
+      "trigger": "habitacion",
+      "value": "habitación"
+    },
+    {
+      "trigger": "alimentacion",
+      "value": "alimentación"
+    },
+    {
+      "trigger": "almacenacion",
+      "value": "almacenación"
+    },
+    {
+      "trigger": "segmentacion",
+      "value": "segmentación"
+    },
+    {
+      "trigger": "fragmentacion",
+      "value": "fragmentación"
+    },
+    {
+      "trigger": "integracion",
+      "value": "integración"
+    },
+    {
+      "trigger": "desintegracion",
+      "value": "desintegración"
+    },
+    {
+      "trigger": "migracion",
+      "value": "migración"
+    },
+    {
+      "trigger": "emigracion",
+      "value": "emigración"
+    },
+    {
+      "trigger": "inmigracion",
+      "value": "inmigración"
+    },
+    {
+      "trigger": "generacion",
+      "value": "generación"
+    },
+    {
+      "trigger": "regeneracion",
+      "value": "regeneración"
+    },
+    {
+      "trigger": "degeneracion",
+      "value": "degeneración"
+    },
+    {
+      "trigger": "coordinacion",
+      "value": "coordinación"
+    },
+    {
+      "trigger": "subordinacion",
+      "value": "subordinación"
+    },
+    {
+      "trigger": "prestacion",
+      "value": "prestación"
+    },
+    {
+      "trigger": "restauracion",
+      "value": "restauración"
+    },
+    {
+      "trigger": "restitucion",
+      "value": "restitución"
+    },
+    {
+      "trigger": "constitucion",
+      "value": "constitución"
+    },
+    {
+      "trigger": "reproduccion",
+      "value": "reproducción"
+    },
+    {
+      "trigger": "deduccion",
+      "value": "deducción"
+    },
+    {
+      "trigger": "induccion",
+      "value": "inducción"
+    },
+    {
+      "trigger": "conduccion",
+      "value": "conducción"
+    },
+    {
+      "trigger": "traduccion",
+      "value": "traducción"
+    },
+    {
+      "trigger": "reaccion",
+      "value": "reacción"
+    },
+    {
+      "trigger": "transaccion",
+      "value": "transacción"
+    },
+    {
+      "trigger": "satisfaccion",
+      "value": "satisfacción"
+    },
+    {
+      "trigger": "insatisfaccion",
+      "value": "insatisfacción"
+    },
+    {
+      "trigger": "tambien",
+      "value": "también"
+    },
+    {
+      "trigger": "asi",
+      "value": "así"
+    },
+    {
+      "trigger": "aun",
+      "value": "aún"
+    },
+    {
+      "trigger": "despues",
+      "value": "después"
+    },
+    {
+      "trigger": "ademas",
+      "value": "además"
+    },
+    {
+      "trigger": "quiza",
+      "value": "quizá"
+    },
+    {
+      "trigger": "quizas",
+      "value": "quizás"
+    },
+    {
+      "trigger": "unicamente",
+      "value": "únicamente"
+    },
+    {
+      "trigger": "ultimo",
+      "value": "último"
+    },
+    {
+      "trigger": "numero",
+      "value": "número"
+    },
+    {
+      "trigger": "articulo",
+      "value": "artículo"
+    },
+    {
+      "trigger": "capitulo",
+      "value": "capítulo"
+    },
+    {
+      "trigger": "medico",
+      "value": "médico"
+    },
+    {
+      "trigger": "economico",
+      "value": "económico"
+    },
+    {
+      "trigger": "tecnico",
+      "value": "técnico"
+    },
+    {
+      "trigger": "politico",
+      "value": "político"
+    },
+    {
+      "trigger": "critico",
+      "value": "crítico"
+    },
+    {
+      "trigger": "musica",
+      "value": "música"
+    },
+    {
+      "trigger": "logica",
+      "value": "lógica"
+    },
+    {
+      "trigger": "fisica",
+      "value": "física"
+    },
+    {
+      "trigger": "quimica",
+      "value": "química"
+    },
+    {
+      "trigger": "historico",
+      "value": "histórico"
+    },
+    {
+      "trigger": "automatico",
+      "value": "automático"
+    },
+    {
+      "trigger": "metrico",
+      "value": "métrico"
+    },
+    {
+      "trigger": "periodico",
+      "value": "periódico"
+    },
+    {
+      "trigger": "caracteristico",
+      "value": "característico"
+    },
+    {
+      "trigger": "didactico",
+      "value": "didáctico"
+    },
+    {
+      "trigger": "practico",
+      "value": "práctico"
+    },
+    {
+      "trigger": "teorico",
+      "value": "teórico"
+    },
+    {
+      "trigger": "basico",
+      "value": "básico"
+    },
+    {
+      "trigger": "clasico",
+      "value": "clásico"
+    },
+    {
+      "trigger": "pais",
+      "value": "país"
+    },
+    {
+      "trigger": "dias",
+      "value": "días"
+    },
+    {
+      "trigger": "dia",
+      "value": "día"
+    },
+    {
+      "trigger": "razon",
+      "value": "razón"
+    },
+    {
+      "trigger": "corazon",
+      "value": "corazón"
+    },
+    {
+      "trigger": "solucion",
+      "value": "solución"
+    },
+    {
+      "trigger": "evolucion",
+      "value": "evolución"
+    },
+    {
+      "trigger": "revolucion",
+      "value": "revolución"
+    },
+    {
+      "trigger": "teh",
+      "value": "the"
+    },
+    {
+      "trigger": "recieve",
+      "value": "receive"
+    },
+    {
+      "trigger": "seperate",
+      "value": "separate"
+    },
+    {
+      "trigger": "occured",
+      "value": "occurred"
+    },
+    {
+      "trigger": "definately",
+      "value": "definitely"
+    },
+    {
+      "trigger": "acheive",
+      "value": "achieve"
+    },
+    {
+      "trigger": "wierd",
+      "value": "weird"
+    },
+    {
+      "trigger": "beleive",
+      "value": "believe"
+    },
+    {
+      "trigger": "calender",
+      "value": "calendar"
+    },
+    {
+      "trigger": "occassion",
+      "value": "occasion"
+    },
+    {
+      "trigger": "neccessary",
+      "value": "necessary"
+    },
+    {
+      "trigger": "priviledge",
+      "value": "privilege"
+    },
+    {
+      "trigger": "maintanance",
+      "value": "maintenance"
+    },
+    {
+      "trigger": "independant",
+      "value": "independent"
+    },
+    {
+      "trigger": "occurence",
+      "value": "occurrence"
+    },
+    {
+      "trigger": "accomodate",
+      "value": "accommodate"
+    },
+    {
+      "trigger": "arguement",
+      "value": "argument"
+    },
+    {
+      "trigger": "begining",
+      "value": "beginning"
+    },
+    {
+      "trigger": "buisness",
+      "value": "business"
+    },
+    {
+      "trigger": "commitee",
+      "value": "committee"
+    },
+    {
+      "trigger": "completly",
+      "value": "completely"
+    },
+    {
+      "trigger": "concensus",
+      "value": "consensus"
+    },
+    {
+      "trigger": "enviroment",
+      "value": "environment"
+    },
+    {
+      "trigger": "existance",
+      "value": "existence"
+    },
+    {
+      "trigger": "familar",
+      "value": "familiar"
+    },
+    {
+      "trigger": "foriegn",
+      "value": "foreign"
+    },
+    {
+      "trigger": "goverment",
+      "value": "government"
+    },
+    {
+      "trigger": "happend",
+      "value": "happened"
+    },
+    {
+      "trigger": "knowlege",
+      "value": "knowledge"
+    },
+    {
+      "trigger": "liason",
+      "value": "liaison"
+    },
+    {
+      "trigger": "peice",
+      "value": "piece"
+    },
+    {
+      "trigger": "persistant",
+      "value": "persistent"
+    },
+    {
+      "trigger": "posession",
+      "value": "possession"
+    },
+    {
+      "trigger": "prefered",
+      "value": "preferred"
+    },
+    {
+      "trigger": "reccomend",
+      "value": "recommend"
+    },
+    {
+      "trigger": "refered",
+      "value": "referred"
+    },
+    {
+      "trigger": "relevent",
+      "value": "relevant"
+    },
+    {
+      "trigger": "responsability",
+      "value": "responsibility"
+    },
+    {
+      "trigger": "restaraunt",
+      "value": "restaurant"
+    },
+    {
+      "trigger": "seperately",
+      "value": "separately"
+    },
+    {
+      "trigger": "succesful",
+      "value": "successful"
+    },
+    {
+      "trigger": "sucess",
+      "value": "success"
+    },
+    {
+      "trigger": "tommorow",
+      "value": "tomorrow"
+    },
+    {
+      "trigger": "tommorrow",
+      "value": "tomorrow"
+    },
+    {
+      "trigger": "untill",
+      "value": "until"
+    },
+    {
+      "trigger": "usefull",
+      "value": "useful"
+    },
+    {
+      "trigger": "writting",
+      "value": "writing"
+    },
+    {
+      "trigger": "becuase",
+      "value": "because"
+    },
+    {
+      "trigger": "comming",
+      "value": "coming"
+    },
+    {
+      "trigger": "dissapear",
+      "value": "disappear"
+    },
+    {
+      "trigger": "excellant",
+      "value": "excellent"
+    },
+    {
+      "trigger": "experiance",
+      "value": "experience"
+    },
+    {
+      "trigger": "facinating",
+      "value": "fascinating"
+    },
+    {
+      "trigger": "freind",
+      "value": "friend"
+    },
+    {
+      "trigger": "grammer",
+      "value": "grammar"
+    },
+    {
+      "trigger": "harrass",
+      "value": "harass"
+    },
+    {
+      "trigger": "ignorence",
+      "value": "ignorance"
+    },
+    {
+      "trigger": "immediatly",
+      "value": "immediately"
+    },
+    {
+      "trigger": "lenght",
+      "value": "length"
+    },
+    {
+      "trigger": "libary",
+      "value": "library"
+    },
+    {
+      "trigger": "liesure",
+      "value": "leisure"
+    },
+    {
+      "trigger": "mispell",
+      "value": "misspell"
+    },
+    {
+      "trigger": "paralell",
+      "value": "parallel"
+    },
+    {
+      "trigger": "passtime",
+      "value": "pastime"
+    },
+    {
+      "trigger": "potrait",
+      "value": "portrait"
+    },
+    {
+      "trigger": "practicle",
+      "value": "practical"
+    },
+    {
+      "trigger": "preceed",
+      "value": "precede"
+    },
+    {
+      "trigger": "presance",
+      "value": "presence"
+    },
+    {
+      "trigger": "probaly",
+      "value": "probably"
+    },
+    {
+      "trigger": "profesor",
+      "value": "professor"
+    },
+    {
+      "trigger": "promiss",
+      "value": "promise"
+    },
+    {
+      "trigger": "publically",
+      "value": "publicly"
+    },
+    {
+      "trigger": "realy",
+      "value": "really"
+    },
+    {
+      "trigger": "reciept",
+      "value": "receipt"
+    },
+    {
+      "trigger": "refering",
+      "value": "referring"
+    },
+    {
+      "trigger": "religous",
+      "value": "religious"
+    },
+    {
+      "trigger": "rember",
+      "value": "remember"
+    },
+    {
+      "trigger": "resistence",
+      "value": "resistance"
+    },
+    {
+      "trigger": "sacrafice",
+      "value": "sacrifice"
+    },
+    {
+      "trigger": "sargent",
+      "value": "sergeant"
+    },
+    {
+      "trigger": "schedual",
+      "value": "schedule"
+    },
+    {
+      "trigger": "sentance",
+      "value": "sentence"
+    },
+    {
+      "trigger": "similiar",
+      "value": "similar"
+    },
+    {
+      "trigger": "speach",
+      "value": "speech"
+    },
+    {
+      "trigger": "stratagy",
+      "value": "strategy"
+    },
+    {
+      "trigger": "suprise",
+      "value": "surprise"
+    },
+    {
+      "trigger": "therefor",
+      "value": "therefore"
+    },
+    {
+      "trigger": "threshhold",
+      "value": "threshold"
+    },
+    {
+      "trigger": "truely",
+      "value": "truly"
+    },
+    {
+      "trigger": "unecessary",
+      "value": "unnecessary"
+    },
+    {
+      "trigger": "unfortunatly",
+      "value": "unfortunately"
+    },
+    {
+      "trigger": "unneccessary",
+      "value": "unnecessary"
+    },
+    {
+      "trigger": "vegitable",
+      "value": "vegetable"
+    },
+    {
+      "trigger": "visable",
+      "value": "visible"
+    },
+    {
+      "trigger": "whereever",
+      "value": "wherever"
+    },
+    {
+      "trigger": "operacion",
+      "value": "operación"
+    }
+  ]
+}

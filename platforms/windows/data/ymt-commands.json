@@ -1,0 +1,30 @@
+{
+  "format": "hotstring-items-v1",
+  "source": "data/ymt-commands.json",
+  "items": [
+    {
+      "trigger": "da",
+      "value": "da"
+    },
+    {
+      "trigger": "ta",
+      "value": "ta"
+    },
+    {
+      "trigger": "d3",
+      "value": "d3"
+    },
+    {
+      "trigger": "d4",
+      "value": "d4"
+    },
+    {
+      "trigger": "dz",
+      "value": "dz"
+    },
+    {
+      "trigger": "sc",
+      "value": "sc"
+    }
+  ]
+}

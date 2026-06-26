@@ -1,0 +1,82 @@
+{
+  "format": "hotstring-items-v1",
+  "source": "data/sap-transaction-shortcuts.json",
+  "items": [
+    {
+      "trigger": "z0",
+      "value": "zpm000"
+    },
+    {
+      "trigger": "z2",
+      "value": "zpm002"
+    },
+    {
+      "trigger": "z30",
+      "value": "zpm030"
+    },
+    {
+      "trigger": "z4",
+      "value": "zpm004"
+    },
+    {
+      "trigger": "z5",
+      "value": "zpm005"
+    },
+    {
+      "trigger": "z6",
+      "value": "zpm006"
+    },
+    {
+      "trigger": "z7",
+      "value": "zpm007"
+    },
+    {
+      "trigger": "z8",
+      "value": "zpm008"
+    },
+    {
+      "trigger": "z9",
+      "value": "zpm009"
+    },
+    {
+      "trigger": "z10",
+      "value": "zpm010"
+    },
+    {
+      "trigger": "z11",
+      "value": "zpm011"
+    },
+    {
+      "trigger": "z12",
+      "value": "zpm012"
+    },
+    {
+      "trigger": "z13",
+      "value": "zpm013"
+    },
+    {
+      "trigger": "z14",
+      "value": "zpm014"
+    },
+    {
+      "trigger": "z15",
+      "value": "zpm015"
+    },
+    {
+      "trigger": "z16",
+      "value": "zpm016"
+    },
+    {
+      "trigger": "z17",
+      "value": "zpm017"
+    },
+    {
+      "trigger": "z18",
+      "value": "zpm018"
+    },
+    {
+      "trigger": "z19",
+      "value": "zpm019"
+    }
+  ]
+}

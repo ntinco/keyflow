@@ -1,0 +1,78 @@
+#hotif winactive(exeSublimeText)
+!left::{
+trackEditorsHotkeyUsage("!left", "sublime")
+Send("!-")
+}
+!right::{
+trackEditorsHotkeyUsage("!right", "sublime")
+Send("!+-")
+}
+!up::{
+trackEditorsHotkeyUsage("!up", "sublime")
+Send("^+{up}")
+}
+!down::{
+trackEditorsHotkeyUsage("!down", "sublime")
+Send("^+{down}")
+}
+f1::{
+trackEditorsHotkeyUsage("f1", "sublime")
+Send("^r")
+}
+^f1::{
+trackEditorsHotkeyUsage("^f1", "sublime")
+Send("^+p")
+}
+!f1::{
+trackEditorsHotkeyUsage("!f1", "sublime")
+services.dynamic.openSublimeCommandPaletteByTag()
+}
+
+#hotif winactive(exeNotepad)
+!left::{
+trackEditorsHotkeyUsage("!left", "notepad")
+Send("^pgdn")
+}
+!right::{
+trackEditorsHotkeyUsage("!right", "notepad")
+Send("^pgup")
+}
+!up::{
+trackEditorsHotkeyUsage("!up", "notepad")
+Send("^+{up}")
+}
+!down::{
+trackEditorsHotkeyUsage("!down", "notepad")
+Send("^+{down}")
+}
+!+down::{
+trackEditorsHotkeyUsage("!+down", "notepad")
+Send("^d")
+}
+^+k::{
+trackEditorsHotkeyUsage("^+k", "notepad")
+Send("^+l")
+}
++f1::{
+trackEditorsHotkeyUsage("+f1", "notepad")
+Send("^+!b")
+}
+
+#hotif winactive(exeObsidian)
+f1::{
+trackEditorsHotkeyUsage("f1", "obsidian")
+Send("^o")
+}
+f5::{
+trackEditorsHotkeyUsage("f5", "obsidian")
+Send("^e")
+}
+!left::{
+trackEditorsHotkeyUsage("!left", "obsidian")
+Send("^!{left}")
+}
+^f1::{
+trackEditorsHotkeyUsage("^f1", "obsidian")
+Send("^p")
+}
+
