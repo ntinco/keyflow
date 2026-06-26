@@ -26,6 +26,7 @@ global utils := AppUtils()
 #Include automation\windows-group.ahk
 #Include ui\dark-theme.ahk
 #Include automation\saplogon.ahk
+#Include automation\sap-session-config.ahk
 #Include automation\video.ahk
 #Include automation\snipaste.ahk
 #Include automation\whatsapp.ahk
@@ -33,7 +34,8 @@ global utils := AppUtils()
 normanServiceRegistry() {
   return {
     dynamic: DynamicService(),
-    saplogon: SapLogonService(),
+    sapSessions: SapSessionConfigService(),
+    saplogon: SapLogonSessionConfigService(),
     windows: WindowsService(),
     windowsGroup: WindowsGroupService(),
     video: VideoService(),

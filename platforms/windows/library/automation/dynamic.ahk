@@ -24,9 +24,9 @@ class DynamicService {
     return this.execute("^e; ^g", 200)
   }
 
-  ; unlockKeepassAndClosePrompt() {
-  ;   return this.execute("%keepassXc%; {enter}; WinWaitActive,Password", 100)
-  ; }
+  unlockKeepassAndClosePrompt() {
+    return this.execute("%keepassXc%; {enter}; WinWaitActive,Password", 100)
+  }
 
   refreshAndCloseXyplorerTab() {
     return this.execute("{f5}; ^+{f4}")
@@ -232,5 +232,4 @@ class DynamicService {
       ToolTip("DYN ERROR: " errorMsg)
   }
 }
-
 
