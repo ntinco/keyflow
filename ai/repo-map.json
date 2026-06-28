@@ -1,21 +1,31 @@
 {
-  "version": 2,
+  "version": 4,
   "purpose": "AI-first navigation map for rapid maintenance of keyflow.",
   "read-order": [
-    "AGENTS.md",
     "ai/health-check.summary.json",
     "ai/repo-map.json",
+    "AGENTS.md",
+    "README.md",
     "platforms/windows/keyflow.ahk",
     "platforms/windows/library/bootstrap.ahk",
     "platforms/windows/library/automation/sap-session.ahk",
-    "platforms/windows/library/automation/sap.ahk",
-    "platforms/windows/hotkeys/global.ahk"
+    "platforms/windows/library/automation/sap.ahk"
   ],
+  "ai-operating-guide": {
+    "files": [
+      "AGENTS.md",
+      "README.md",
+      "ai/repo-map.json",
+      "ai/health-check.summary.json"
+    ],
+    "rule": "When routing, behavior, validation, or current evolution status changes, update this guide layer in the same cycle.",
+    "current-focus": "Business-name-first SAP sessions, startup cleanup, and continued removal of dormant runtime surface."
+  },
   "entrypoints": [
     {
       "id": "runtime",
       "path": "platforms/windows/keyflow.ahk",
-      "role": "Main AutoHotkey entrypoint."
+      "role": "Main AutoHotkey entrypoint. Loads bootstrap and all hotkey aggregators."
     },
     {
       "id": "bootstrap",
@@ -23,61 +33,129 @@
       "role": "Loads constants, services, and hotstring profiles."
     },
     {
+      "id": "startup-host",
+      "path": "platforms/windows/tools/startup/host-startup.ahk",
+      "role": "Optional host launcher. Prepares local drives and portable links, then launches keyflow."
+    },
+    {
+      "id": "startup-vmware",
+      "path": "platforms/windows/tools/startup/vmware-startup.ahk",
+      "role": "Optional VMware launcher. Mounts shared downloads and then launches keyflow."
+    },
+    {
       "id": "health-check",
       "path": "ai/health_check.py",
-      "role": "Generates machine-readable validation snapshot. Run before and after structural changes."
+      "role": "Validation guard for includes, profiles, service wiring, forbidden legacy references, and guide drift."
     }
   ],
   "domains": [
     {
       "id": "sap-session",
       "path": "platforms/windows/library/automation/sap-session.ahk",
-      "owns": ["KeePass-backed SAP session lookup", "credential field resolution", "SAP launch command assembly"]
+      "owns": [
+        "KeePass-backed SAP session lookup",
+        "entry field resolution",
+        "session launch command assembly",
+        "credential window filling"
+      ]
     },
     {
       "id": "sap-automation",
       "path": "platforms/windows/library/automation/sap.ahk",
-      "owns": ["SAP GUI automation", "Eclipse ABAP helpers", "tcode execution"]
+      "owns": [
+        "SAP GUI automation",
+        "Eclipse ABAP helpers",
+        "tcode execution",
+        "session reopen from project windows",
+        "code-save and quick debug helpers"
+      ]
     },
     {
       "id": "runtime-services",
       "path": "platforms/windows/library/automation/",
-      "owns": ["13 registered services exposed as services.*", "dynamic, run, memory, launcher, windows, everything, snipaste, video, whatsapp, windowGroup, hotstring, hotkeyTracker"]
+      "owns": [
+        "13 registered services exposed as services.*",
+        "dynamic, run, memory, launcher, windows, everything, snipaste, video, whatsapp, windowGroup, hotstring, hotkeyTracker"
+      ]
     },
     {
       "id": "hotkeys",
       "path": "platforms/windows/hotkeys/",
-      "owns": ["global shortcuts", "SAP shortcuts", "editor shortcuts", "domain shortcuts"]
+      "owns": [
+        "global triggers",
+        "SAP GUI triggers",
+        "SAP Eclipse triggers",
+        "editor triggers",
+        "domain triggers",
+        "standalone layout script not loaded by default"
+      ]
     },
     {
       "id": "catalogs",
       "path": "platforms/windows/data/",
-      "owns": ["hotstring catalogs (autocorrect, quick-snippets, sap-transaction-shortcuts, ymt-commands)", "example config files", "local-only runtime contracts"]
+      "owns": [
+        "autocorrect catalog",
+        "quick snippets",
+        "SAP transaction shortcuts",
+        "SAP transaction catalog",
+        "ABAP snippets",
+        "YMT commands",
+        "startup and secret example contracts"
+      ]
+    },
+    {
+      "id": "startup",
+      "path": "platforms/windows/tools/startup/",
+      "owns": [
+        "secondary launchers for host and VMware contexts",
+        "drive mounting and portable app startup flow"
+      ]
     },
     {
       "id": "ai-tooling",
       "path": "ai/",
-      "owns": ["health_check.py: validation script", "health-check.summary.json: current summary (20 lines, read first)", "health-check.json: full contract detail (on demand)", "repo-map.json: this file"]
-    },
-    {
-      "id": "docs",
-      "path": "docs/",
-      "owns": ["smoke-test.md: manual startup checklist", "health-check.md: prose contract companion"]
+      "owns": [
+        "health_check.py",
+        "health-check.summary.json",
+        "health-check.json",
+        "repo-map.json"
+      ]
     }
   ],
-  "agent-workflow": [
-    "1. Read AGENTS.md for rules.",
-    "2. Read ai/health-check.summary.json for current state.",
-    "3. Run python ai/health_check.py --pretty --summary to refresh if repo changed.",
-    "4. Edit the smallest responsible file set.",
-    "5. Run python ai/health_check.py --pretty --output ai/health-check.json --output-summary ai/health-check.summary.json.",
-    "6. If ok is false: read issues[] in health-check.json and fix before proceeding.",
-    "7. If runtime wiring changed: smoke-test with AutoHotkey (see docs/smoke-test.md)."
-  ],
   "runtime-api": [
-    "dynamic", "everything", "hotkeyTracker", "hotstring",
-    "launcher", "memory", "run", "sap", "snipaste",
-    "video", "whatsapp", "windowGroup", "windows"
+    "dynamic",
+    "everything",
+    "hotkeyTracker",
+    "hotstring",
+    "launcher",
+    "memory",
+    "run",
+    "sap",
+    "snipaste",
+    "video",
+    "whatsapp",
+    "windowGroup",
+    "windows"
+  ],
+  "sap-session-entrypoints": [
+    "services.sap.openPluzDevSession()",
+    "services.sap.openPluzQasSession()",
+    "services.sap.openPluzPrdSession()",
+    "services.sap.openNamedSession(sessionName)"
+  ],
+  "hotstring-profile-add": [
+    "1. Create data/<label>.json with format hotstring-items-v1 and items[].",
+    "2. Add the profile to keyflowHotstringProfiles() in bootstrap.ahk.",
+    "3. Run the health check and confirm item_count > 0.",
+    "Modes: autocorrect, autocorrectImmediate, sapTransaction, ymtCommand, sapSession."
+  ],
+  "startup-config-sections": [
+    "runtime-env",
+    "sap-defaults",
+    "sap-delays",
+    "ui",
+    "startup-host",
+    "startup-vmware"
   ],
   "local-only-files": [
     "platforms/windows/data/local-secrets.ini",
@@ -87,5 +165,8 @@
     "platforms/windows/data/rom.ini",
     "storage.db",
     "platforms/windows/storage.db"
+  ],
+  "standalone": [
+    "platforms/windows/hotkeys/layouts/colemak-dh.ahk"
   ]
 }

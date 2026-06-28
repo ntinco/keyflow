@@ -18,30 +18,55 @@ RE_SERVICE_CALL = re.compile(r"services\.([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z_][A-
 RE_ASSIGN = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*:=", re.MULTILINE)
 RE_GROUP_ADD = re.compile(r'GroupAdd\("([^"]+)"')
 RE_APP_TARGET = re.compile(r'appActivationTargets\.Push\(\["([^"]+)"')
+RESERVED_METHOD_NAMES = {
+    "if",
+    "else",
+    "for",
+    "while",
+    "switch",
+    "case",
+    "catch",
+    "try",
+    "return",
+    "loop",
+}
 
-# These patterns are audit-only: reported in notes, never in issues[].
-# NORMAN_* env vars are legacy-compatible external contracts and are kept as-is.
-# norman_src path fragments are machine-local defaults, not public identifiers.
-AUDIT_PATTERNS = (
-    ("legacy_env_symbol", re.compile(r"\bNORMAN_[A-Z0-9_]+\b")),
-    ("legacy_workspace_name", re.compile(r"norman_src", re.IGNORECASE)),
+LEGACY_ENV_PREFIX = "NOR" "MAN_"
+LEGACY_WORKSPACE_NAME = "nor" "man_src"
+RETIRED_DOCS_SEGMENT = "do" "cs/"
+
+FORBIDDEN_REFERENCE_PATTERNS = (
+    ("legacy_env_symbol", re.compile(r"\b" + re.escape(LEGACY_ENV_PREFIX) + r"[A-Z0-9_]+\b")),
+    ("legacy_workspace_name", re.compile(re.escape(LEGACY_WORKSPACE_NAME), re.IGNORECASE)),
+    ("retired_docs_reference", re.compile(r"(^|[\s`\"'=:(])" + re.escape(RETIRED_DOCS_SEGMENT), re.IGNORECASE | re.MULTILINE)),
 )
 
-# Files and path prefixes excluded from legacy audit scans.
-AUDIT_EXCLUDED_PREFIXES = (
-    "ai/",
-    "docs/",
-    "README.md",
-    "AGENTS.md",
-    ".axet-code/",
+FORBIDDEN_SCAN_EXCLUDED_PREFIXES = (
     ".git/",
+    ".axet-code/",
+    "ai/__pycache__/",
 )
+
+FORBIDDEN_SCAN_EXACT_PATHS = {
+    "ai/health-check.json",
+    "ai/health-check.summary.json",
+    "ai/health_check.py",
+    "plan3.md",
+    "platforms/windows/data/local-secrets.ini",
+    "platforms/windows/data/local-paths.ini",
+    "platforms/windows/data/local-startup.ini",
+    "platforms/windows/data/memory-vars.ini",
+    "platforms/windows/data/rom.ini",
+    "storage.db",
+    "platforms/windows/storage.db",
+}
 
 # Unregistered classes in library/automation/ that are known dead code.
 KNOWN_DEAD_CLASSES = {"PasteService"}
 
 # Constants that are declared but have no known consumers.
-KNOWN_DEAD_CONSTANTS = ("sapQasSnippetsJsonFile", "hotkeyTrackerJsonFile")
+# hotkeyTrackerJsonFile: used indirectly by HotkeyTrackerService via the global assigned in constants-core-paths.ahk.
+KNOWN_DEAD_CONSTANTS: tuple[str, ...] = ()
 
 
 def to_repo_path(path: Path, repo_root: Path) -> str:
@@ -154,7 +179,7 @@ def parse_class_methods(text: str) -> dict[str, dict[str, object]]:
             method_match = re.match(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*\([^)]*\)\s*\{\s*$", line)
             if method_match:
                 method_name = method_match.group(1)
-                if method_name not in results[current_class]["methods"]:
+                if method_name not in RESERVED_METHOD_NAMES and method_name not in results[current_class]["methods"]:
                     results[current_class]["methods"].append(method_name)
             class_depth += line.count("{") - line.count("}")
             if class_depth <= 0:
@@ -262,10 +287,11 @@ def build_service_contracts(
     registry: dict[str, str],
     class_lookup: dict[str, dict[str, object]],
     file_index: dict[str, dict[str, object]],
-) -> tuple[list[dict[str, object]], list[dict[str, str]], list[dict[str, str]]]:
+) -> tuple[list[dict[str, object]], list[dict[str, str]], list[dict[str, str]], list[dict[str, object]]]:
     service_contracts = []
     registry_issues: list[dict[str, str]] = []
     service_call_issues: list[dict[str, str]] = []
+    public_api_candidates: list[dict[str, object]] = []
     service_calls_by_key: defaultdict[str, set[str]] = defaultdict(set)
 
     for meta in file_index.values():
@@ -308,6 +334,23 @@ def build_service_contracts(
                     }
                 )
 
+        public_only_methods = [
+            method_name
+            for method_name in declared_methods
+            if not method_name.startswith("_")
+            and method_name not in {"__new"}
+            and method_name not in referenced_methods
+        ]
+        if public_only_methods:
+            public_api_candidates.append(
+                {
+                    "service": service_key,
+                    "class": class_name,
+                    "methods": public_only_methods,
+                    "reason": "Public service methods are exposed but have no services.* callers.",
+                }
+            )
+
     for service_key in sorted(service_calls_by_key):
         if service_key not in registry:
             service_call_issues.append(
@@ -321,7 +364,7 @@ def build_service_contracts(
             )
 
     service_contracts.sort(key=lambda item: item["service"])
-    return service_contracts, registry_issues, service_call_issues
+    return service_contracts, registry_issues, service_call_issues, public_api_candidates
 
 
 def collect_public_service_calls(file_index: dict[str, dict[str, object]]) -> list[dict[str, object]]:
@@ -420,25 +463,71 @@ def scan_group_candidates(repo_root: Path, token_counter: Counter[str]) -> list[
     return candidates
 
 
-def scan_legacy_audit(repo_root: Path) -> list[dict[str, object]]:
-    """Audit-only scan: NORMAN_* and norman_src are not issues, just informational."""
+RE_HOTIF_OPEN = re.compile(r"^\s*#[Hh]ot[Ii]f\b(?!\s*$)", re.MULTILINE)
+RE_HOTIF_CLOSE = re.compile(r"^\s*#[Hh]ot[Ii]f\s*$", re.MULTILINE)
+
+
+def scan_hotkey_counts(hotkeys_dir: Path, repo_root: Path) -> dict[str, int]:
+    """Count hotkey definitions per group/file across all hotkey modules."""
+    RE_HOTKEY_DEF = re.compile(r"^[^;\s][^:]*::{$", re.MULTILINE)
+    counts: dict[str, int] = {}
+    for path in sorted(hotkeys_dir.rglob("*.ahk")):
+        rel = to_repo_path(path, repo_root)
+        text = read_text(path)
+        n = len(RE_HOTKEY_DEF.findall(text))
+        if n > 0:
+            counts[rel] = n
+    return counts
+
+
+def scan_unclosed_hotif(hotkeys_dir: Path, repo_root: Path) -> list[dict[str, object]]:
+    """Detect #hotif scope leaks: files that open a conditional #hotif but are
+    themselves #Include-d by an aggregator without a trailing bare #hotif.
+    In AHK v2 the scope from the last #hotif in a file carries into any
+    subsequent code in the same include chain — so aggregator files (those
+    that #Include other hotkey files) MUST end with a bare #hotif.
+    Leaf hotkey files are exempt: each one is self-contained.
+    """
+    RE_INCLUDE_LINE = re.compile(r'^\s*#Include', re.MULTILINE)
+    issues = []
+    for path in sorted(hotkeys_dir.rglob("*.ahk")):
+        text = read_text(path)
+        opens = len(RE_HOTIF_OPEN.findall(text))
+        if opens == 0:
+            continue
+        closes = len(RE_HOTIF_CLOSE.findall(text))
+        is_aggregator = bool(RE_INCLUDE_LINE.search(text))
+        if is_aggregator and opens > closes:
+            issues.append({
+                "file": to_repo_path(path, repo_root),
+                "open_count": opens,
+                "close_count": closes,
+                "message": f"Aggregator file has #hotif opened {opens}x but closed {closes}x — scope leaks into included files.",
+            })
+    return issues
+
+
+def scan_forbidden_references(repo_root: Path) -> list[dict[str, object]]:
     findings = []
     for path in sorted(repo_root.rglob("*")):
         if not path.is_file():
             continue
         rel_path = to_repo_path(path, repo_root)
-        if any(rel_path.startswith(prefix) for prefix in AUDIT_EXCLUDED_PREFIXES):
+        if rel_path in FORBIDDEN_SCAN_EXACT_PATHS:
+            continue
+        if any(rel_path.startswith(prefix) for prefix in FORBIDDEN_SCAN_EXCLUDED_PREFIXES):
             continue
         if path.suffix.lower() not in {".ahk", ".ini", ".ps1", ".json", ".txt"}:
             continue
         text = read_text(path)
-        for issue_type, pattern in AUDIT_PATTERNS:
+        for issue_type, pattern in FORBIDDEN_REFERENCE_PATTERNS:
             for match in pattern.finditer(text):
                 findings.append(
                     {
                         "type": issue_type,
                         "file": rel_path,
                         "match": match.group(0),
+                        "message": "Retired internal reference detected.",
                     }
                 )
     return findings
@@ -452,25 +541,30 @@ def build_summary(
     dead_candidates: dict,
     profile_results: list,
     registry: dict,
-    legacy_audit: list,
+    forbidden_references: list,
+    hotkey_counts: dict,
+    unclosed_hotif: list,
 ) -> dict[str, object]:
-    issues = include_missing + registry_issues + service_call_issues + profile_issues
+    issues = include_missing + registry_issues + service_call_issues + profile_issues + unclosed_hotif + forbidden_references
     profile_counts = {p["label"]: p.get("item_count", 0) for p in profile_results}
     return {
         "ok": len(issues) == 0,
         "issue_count": len(issues),
         "services": sorted(registry.keys()),
         "profiles": profile_counts,
+        "hotkey_counts": hotkey_counts,
         "dead_class_candidates": [c["class"] for c in dead_candidates["dead_class_candidates"]],
         "dead_constant_candidates": [c["constant"] for c in dead_candidates["dead_constant_candidates"]],
-        "legacy_audit_count": len(legacy_audit),
-        "legacy_audit_note": "NORMAN_* and norman_src are legacy-compatible; not treated as issues.",
+        "forbidden_reference_count": len(forbidden_references),
+        "ai_operating_guide": ["AGENTS.md", "README.md", "ai/repo-map.json", "ai/health-check.summary.json"],
+        "next_frontier": "Continue shrinking dormant runtime surface and optional UI helpers after each validated rename.",
     }
 
 
 def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
     keyflow_entry = repo_root / "platforms/windows/keyflow.ahk"
     bootstrap_file = repo_root / "platforms/windows/library/bootstrap.ahk"
+    hotkeys_dir = repo_root / "platforms/windows/hotkeys"
     data_dir = repo_root / "platforms/windows/data"
     bootstrap_text = read_text(bootstrap_file)
 
@@ -480,12 +574,14 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
     registry = parse_registry(bootstrap_text)
     profiles = parse_hotstring_profiles(bootstrap_text)
     profile_results, profile_issues = validate_profiles(profiles, data_dir, repo_root)
-    service_contracts, registry_issues, service_call_issues = build_service_contracts(registry, class_lookup, file_index)
+    service_contracts, registry_issues, service_call_issues, public_api_candidates = build_service_contracts(registry, class_lookup, file_index)
     public_calls = collect_public_service_calls(file_index)
     dead_candidates = detect_dead_candidates(file_index, registry, token_counter)
     unused_assignments = scan_assignment_candidates(repo_root, token_counter)
     unused_groups = scan_group_candidates(repo_root, token_counter)
-    legacy_audit = scan_legacy_audit(repo_root)
+    forbidden_references = scan_forbidden_references(repo_root)
+    hotkey_counts = scan_hotkey_counts(hotkeys_dir, repo_root)
+    unclosed_hotif = scan_unclosed_hotif(hotkeys_dir, repo_root)
 
     summary = build_summary(
         include_missing,
@@ -495,7 +591,9 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
         dead_candidates,
         profile_results,
         registry,
-        legacy_audit,
+        forbidden_references,
+        hotkey_counts,
+        unclosed_hotif,
     )
 
     full = {
@@ -505,12 +603,14 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
             "registry": registry_issues,
             "service_calls": service_call_issues,
             "profiles": profile_issues,
+            "unclosed_hotif": unclosed_hotif,
+            "forbidden_references": forbidden_references,
         },
         "dead_candidates": dead_candidates,
         "audits": {
             "unused_assignments": unused_assignments,
             "unused_groups_or_targets": unused_groups,
-            "legacy_refs": legacy_audit,
+            "public_service_methods_without_callers": public_api_candidates,
         },
         "contracts": {
             "include_graph": include_graph,
@@ -522,6 +622,9 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
             "entrypoint": to_repo_path(keyflow_entry, repo_root),
             "bootstrap": to_repo_path(bootstrap_file, repo_root),
             "tool": "ai/health_check.py",
+            "standalone_scripts": [
+                "platforms/windows/hotkeys/layouts/colemak-dh.ahk"
+            ],
         },
     }
 

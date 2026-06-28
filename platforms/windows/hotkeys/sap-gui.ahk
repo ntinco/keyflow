@@ -1,8 +1,8 @@
 ; SAP GUI: solo disparadores hacia services.sap.*; la logica vive en library/automation/sap.ahk.
 #hotif winactive("Logon for Project")
 f1::{
-trackSapGuiHotkeyUsage("f1", "sap-gui-logon")
-services.sap.reloginFromProjectWindow()
+trackSapGuiHotkeyUsage("f1", "sap-gui-project-session")
+services.sap.reopenSessionFromProjectWindow()
 }
 #hotif winactive("YMT")
 #hotif services.sap.isTextInputActive("ahk_group group_sap_runtime_windows")

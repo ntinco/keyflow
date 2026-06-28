@@ -23,7 +23,6 @@ global utils := AppUtils()
 #Include automation\dynamic.ahk
 #Include automation\windows.ahk
 #Include automation\window-group.ahk
-#Include ui\dark-theme.ahk
 #Include automation\sap.ahk
 #Include automation\video.ahk
 #Include automation\snipaste.ahk
@@ -52,6 +51,8 @@ keyflowHotstringProfiles() {
     {label: "autocorrect", group: "", mode: "autocorrect"},
     {label: "quick-snippets", group: "", mode: "autocorrect"},
     {label: "sap-transaction-shortcuts", group: "group_sap_runtime_windows", mode: "sapTransaction"},
+    {label: "sap-transaction-catalog", group: "group_sap_runtime_windows", mode: "sapTransaction"},
+    {label: "abap-snippets", group: "group_sap_runtime_windows", mode: "autocorrect"},
     {label: "ymt-commands", group: "group_sap_runtime_windows", mode: "ymtCommand"},
   ]
 }

@@ -36,8 +36,8 @@ class WindowGroupService {
     else
       utils.tooltip("Windows not open: " StrUpper(name))
 
-    SetTimer(jobGroupKey, 10)
-    jobGroupKey() {
+    SetTimer(_jobGroupKey, 10)
+    _jobGroupKey() {
       if !GetKeyState("Alt")
       {
         this._resetGroupState()

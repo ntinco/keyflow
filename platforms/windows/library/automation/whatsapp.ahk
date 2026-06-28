@@ -1,15 +1,15 @@
 ﻿class WhatsappService {
   archive() {
-    this.performContextAction(4)
+    this._performContextAction(4)
   }
   delete() {
-    this.performContextAction(2, "yes")
+    this._performContextAction(2, "yes")
   }
   clearArchive() {
-    this.performContextAction(3, "yes")
+    this._performContextAction(3, "yes")
     this.archive()
   }
-  performContextAction(menuSteps, confirmWithEnter := "") {
+  _performContextAction(menuSteps, confirmWithEnter := "") {
     Send("^w")
     sleep 100
     send("{AppsKey}")

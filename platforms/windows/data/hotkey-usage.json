@@ -36,9 +36,9 @@
       "sourceGroup": "sap-eclipse"
     },
     "f5": {
-      "count": 6,
+      "count": 8,
       "firstSeenUtc": "20260626163737",
-      "lastSeenUtc": "20260626212300",
+      "lastSeenUtc": "20260628030810",
       "sourceFile": "hotkeys\/domains.ahk",
       "sourceGroup": "xyplorer"
     },
@@ -58,7 +58,7 @@
     }
   },
   "meta": {
-    "updatedAtUtc": "20260626212802",
+    "updatedAtUtc": "20260628030810",
     "version": 1
   }
 }

@@ -1,11 +1,4 @@
 class MemoryService {
-  paste(var, noExit := "") {
-    utils.paste(this.getValue(var), noExit)
-
-    If utils.isExit(noExit)
-      Exit()
-  }
-
   getValue(var) {
     value := ""
     try value := IniRead(memoryVarsIniFile, "data", var, "")

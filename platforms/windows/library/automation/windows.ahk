@@ -1,32 +1,4 @@
 ﻿class WindowsService {
-  closeWindow(closeRules := []) {
-    utils.winNow()
-
-    If this._isWindowActiveForGroup(closeRules, "sapWindowClose")
-      SetTimer(handleSapCloseCase, 100)
-
-    if this._isWindowActiveForGroup(closeRules, "ctrlw")
-      Send("^{w}")
-    else if this._isWindowActiveForGroup(closeRules, "ctrlf4")
-      Send("^{F4}")
-    else
-      Send("!{F4}")
-
-    handleSapCloseCase() {
-      If instr(utils.A_Title, "ebugg")
-      {
-        If WinWait("func.debugg.", , 5)
-          Send("{enter}")
-      }
-      else if WinWait("Salir del sistema", , 5)
-      {
-        If !InStr(utils.A_Title, "odif")
-          send "{tab}{enter}"
-      }
-      SetTimer , 0
-    }
-  }
-
   resizeHeight() {
     if WinGetMinMax("A") = -1
       return
@@ -64,7 +36,7 @@
   }
 
   _taskbarHeight() {
-    WinGetPos(, &y1, , &h, classTaskbar)
+    WinGetPos(, &y1, , &h, "ahk_class Shell_TrayWnd")
     return (y1 = A_Screenheight - h) ? h : 0
   }
 
@@ -96,15 +68,4 @@
     send("#!k")
   }
 
-  _isWindowActiveForGroup(groupRules, groupName) {
-    For table in groupRules
-    {
-      If table[1] = groupName and WinActive(table[2])
-        return true
-    }
-    return false
-  }
-
 }
-
-

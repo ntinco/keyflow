@@ -42,15 +42,15 @@ services.video.control()
 }
 #f1::{
 trackHotkeyEvent("#f1", "hotkeys/global.ahk", "global")
-services.sap.openDevSession()
+services.sap.openPluzDevSession()
 }
 #f2::{
 trackHotkeyEvent("#f2", "hotkeys/global.ahk", "global")
-services.sap.openQasSession()
+services.sap.openPluzQasSession()
 }
 #f3::{
 trackHotkeyEvent("#f3", "hotkeys/global.ahk", "global")
-services.sap.openPrdSession()
+services.sap.openPluzPrdSession()
 }
 #esc::{
 trackHotkeyEvent("#esc", "hotkeys/global.ahk", "global")

@@ -1,0 +1,28 @@
+{
+  "format": "hotstring-items-v1",
+  "source": "data/abap-snippets.json",
+  "_ai_hint": "ABAP boilerplate triggered only inside group_sap_runtime_windows. Triggers are short lowercase mnemonics. Values use \\n for line breaks (hotstring.ahk resolves via utils.paste which handles multiline).",
+  "items": [
+    { "trigger": "meth,",  "value": "METHOD .\n  \nENDMETHOD." },
+    { "trigger": "form,",  "value": "FORM .\n  \nENDFORM." },
+    { "trigger": "sel,",   "value": "SELECT *\n  FROM \n  INTO TABLE @DATA(lt_)\n  WHERE  = @lv_.\nIF sy-subrc <> 0.\n  \nENDIF." },
+    { "trigger": "selsi,", "value": "SELECT SINGLE *\n  FROM \n  INTO @DATA(ls_)\n  WHERE  = @lv_.\nIF sy-subrc <> 0.\n  \nENDIF." },
+    { "trigger": "loop,",  "value": "LOOP AT lt_ INTO DATA(ls_).\n  \nENDLOOP." },
+    { "trigger": "loopw,", "value": "LOOP AT lt_ INTO DATA(ls_) WHERE  = .\n  \nENDLOOP." },
+    { "trigger": "ifel,",  "value": "IF .\n  \nELSE.\n  \nENDIF." },
+    { "trigger": "ifrc,",  "value": "IF sy-subrc <> 0.\n  \nENDIF." },
+    { "trigger": "tryc,",  "value": "TRY.\n  \nCATCH cx_root INTO DATA(lx_).\n  MESSAGE lx_->get_text() TYPE 'E'.\nENDTRY." },
+    { "trigger": "msg,",   "value": "MESSAGE 'texto' TYPE 'I'." },
+    { "trigger": "msge,",  "value": "MESSAGE 'texto' TYPE 'E'." },
+    { "trigger": "msgw,",  "value": "MESSAGE 'texto' TYPE 'W'." },
+    { "trigger": "data,",  "value": "DATA: lv_ TYPE ,\n      ls_ TYPE ,\n      lt_ TYPE TABLE OF ." },
+    { "trigger": "clas,",  "value": "CLASS  DEFINITION.\n  PUBLIC SECTION.\n    METHODS: .\n  PRIVATE SECTION.\nENDCLASS.\n\nCLASS  IMPLEMENTATION.\n  METHOD .\n    \n  ENDMETHOD.\nENDCLASS." },
+    { "trigger": "intfc,", "value": "INTERFACE .\n  METHODS: .\nENDINTERFACE." },
+    { "trigger": "rais,",  "value": "RAISE EXCEPTION TYPE cx_\n  EXPORTING\n    textid = cx_=>." },
+    { "trigger": "chk,",   "value": "CHECK  IS NOT INITIAL." },
+    { "trigger": "asrt,",  "value": "ASSERT  IS NOT INITIAL." },
+    { "trigger": "read,",  "value": "READ TABLE lt_ INTO DATA(ls_) WITH KEY  = .\nIF sy-subrc = 0.\n  \nENDIF." },
+    { "trigger": "amod,",  "value": "MODIFY lt_ FROM ls_ TRANSPORTING  WHERE  = ." },
+    { "trigger": "cond,",  "value": "CONDENSE lv_ NO-GAPS." }
+  ]
+}

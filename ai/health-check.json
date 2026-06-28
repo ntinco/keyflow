@@ -19,36 +19,50 @@
     ],
     "profiles": {
       "autocorrect": 434,
-      "quick-snippets": 3,
+      "quick-snippets": 15,
       "sap-transaction-shortcuts": 19,
+      "sap-transaction-catalog": 198,
+      "abap-snippets": 21,
       "ymt-commands": 6
     },
+    "hotkey_counts": {
+      "platforms/windows/hotkeys/domains/comms.ahk": 11,
+      "platforms/windows/hotkeys/domains/media-web.ahk": 6,
+      "platforms/windows/hotkeys/domains/productivity.ahk": 6,
+      "platforms/windows/hotkeys/editors-ide.ahk": 9,
+      "platforms/windows/hotkeys/editors-office.ahk": 13,
+      "platforms/windows/hotkeys/editors-text.ahk": 18,
+      "platforms/windows/hotkeys/global.ahk": 20,
+      "platforms/windows/hotkeys/sap-eclipse.ahk": 23,
+      "platforms/windows/hotkeys/sap-gui.ahk": 19
+    },
     "dead_class_candidates": [],
-    "dead_constant_candidates": [
-      "sapQasSnippetsJsonFile"
+    "dead_constant_candidates": [],
+    "forbidden_reference_count": 0,
+    "ai_operating_guide": [
+      "AGENTS.md",
+      "README.md",
+      "ai/repo-map.json",
+      "ai/health-check.summary.json"
     ],
-    "legacy_audit_count": 0,
-    "legacy_audit_note": "NORMAN_* and norman_src are legacy-compatible; not treated as issues."
+    "next_frontier": "Continue shrinking dormant runtime surface and optional UI helpers after each validated rename."
   },
   "issues": {
     "include_missing": [],
     "registry": [],
     "service_calls": [],
-    "profiles": []
+    "profiles": [],
+    "unclosed_hotif": [],
+    "forbidden_references": []
   },
   "dead_candidates": {
     "dead_class_candidates": [],
-    "dead_constant_candidates": [
-      {
-        "constant": "sapQasSnippetsJsonFile",
-        "reason": "Constant is declared but not referenced by any service or hotkey."
-      }
-    ]
+    "dead_constant_candidates": []
   },
   "audits": {
     "unused_assignments": [],
     "unused_groups_or_targets": [],
-    "legacy_refs": []
+    "public_service_methods_without_callers": []
   },
   "contracts": {
     "include_graph": [
@@ -324,11 +338,6 @@
             "exists": true
           },
           {
-            "include": "ui/dark-theme.ahk",
-            "target": "platforms/windows/library/ui/dark-theme.ahk",
-            "exists": true
-          },
-          {
             "include": "automation/sap.ahk",
             "target": "platforms/windows/library/automation/sap.ahk",
             "exists": true
@@ -379,10 +388,6 @@
         "includes": []
       },
       {
-        "file": "platforms/windows/library/ui/dark-theme.ahk",
-        "includes": []
-      },
-      {
         "file": "platforms/windows/library/util.ahk",
         "includes": []
       }
@@ -418,7 +423,6 @@
           "_handleWWA",
           "_handleSL",
           "_handleClick",
-          "if",
           "_handleSend",
           "_resolveMemoryVars",
           "_logDebug",
@@ -461,7 +465,7 @@
         ],
         "declared_methods": [
           "set",
-          "registerEntries",
+          "_registerEntries",
           "_resolveHotstringOptions",
           "_isImmediatePersonName",
           "_isSapInputMode",
@@ -486,7 +490,7 @@
           "save"
         ],
         "declared_methods": [
-          "isMediaPath",
+          "_isMediaPath",
           "closeAndWait",
           "playSelectedMedia",
           "paste",
@@ -508,7 +512,6 @@
           "resolveTargetTitle"
         ],
         "declared_methods": [
-          "paste",
           "getValue",
           "resolveProviderValue",
           "resolveSecretValue",
@@ -532,11 +535,9 @@
           "runCommand"
         ],
         "declared_methods": [
-          "open",
+          "_open",
           "runCommand",
-          "runPythonScript",
           "openApp",
-          "createFromTemplate",
           "_run",
           "_prepareHotkeyLaunch",
           "_firstAppItem",
@@ -556,21 +557,22 @@
           "insertCommentBlock",
           "insertCommentLine",
           "isTextInputActive",
-          "openDevSession",
-          "openPrdSession",
-          "openQasSession",
+          "openNamedSession",
+          "openPluzDevSession",
+          "openPluzPrdSession",
+          "openPluzQasSession",
           "openSe09",
           "openSe16n",
           "openSe37",
           "openSe38",
           "openSe80",
-          "openSession",
           "openWorkbenchOptions",
           "promptAndOpenAbapObject",
           "promptAndSearchAbapObject",
-          "reloginFromProjectWindow",
+          "reopenSessionFromProjectWindow",
           "runTcode",
           "runTcodeFromFocusedInput",
+          "saveCodeArtifact",
           "startQuickDebug",
           "toggleDebugMode"
         ],
@@ -583,7 +585,7 @@
           "_buildCodeSignature",
           "_buildCodeCommentLine",
           "_buildCommentMarkup",
-          "reloginFromProjectWindow",
+          "reopenSessionFromProjectWindow",
           "isTextInputActive",
           "runTcodeFromFocusedInput",
           "runTcode",
@@ -597,14 +599,14 @@
           "openSe38",
           "openSe09",
           "openSe80",
-          "saveCurrentCodeArtifact",
+          "saveCodeArtifact",
           "focusGuiWindows",
           "focusEclipseWindows",
-          "openAbapObject",
+          "_openAbapObject",
           "promptAndOpenAbapObject",
-          "searchAbapObject",
+          "_searchAbapObject",
           "promptAndSearchAbapObject",
-          "runQuickDebug",
+          "_runQuickDebug",
           "startQuickDebug",
           "_runTcodePostAction",
           "_normalizeTcodeForSap",
@@ -613,15 +615,15 @@
           "_syncYmtProgramFromLocal",
           "_readActiveInputValue",
           "_promptValue",
-          "openDevSession",
-          "openQasSession",
-          "openPrdSession",
-          "openSession",
-          "openConfiguredSession",
+          "openPluzDevSession",
+          "openPluzQasSession",
+          "openPluzPrdSession",
+          "openNamedSession",
+          "_openPinnedSession",
           "_resolveSessionConfig",
           "_normalizeSessionLookup",
           "_validateSessionConfig",
-          "reloginFromWindowContext",
+          "_reopenSessionFromWindowContext",
           "_buildLaunchCommand",
           "_runLaunchCommand",
           "_tryHandleCredentialWindows",
@@ -682,7 +684,7 @@
           "archive",
           "delete",
           "clearArchive",
-          "performContextAction"
+          "_performContextAction"
         ]
       },
       {
@@ -696,7 +698,7 @@
           "__new",
           "activateGroup",
           "_activate",
-          "jobGroupKey",
+          "_jobGroupKey",
           "_collectWindows",
           "_groupActive",
           "_isGroupMatch",
@@ -718,16 +720,13 @@
           "soundToggle"
         ],
         "declared_methods": [
-          "closeWindow",
-          "handleSapCloseCase",
           "resizeHeight",
           "snapWindowRight",
           "snapWindowLeft",
           "_winSizes",
           "_taskbarHeight",
           "soundToggle",
-          "microphoneToggle",
-          "_isWindowActiveForGroup"
+          "microphoneToggle"
         ]
       }
     ],
@@ -750,7 +749,7 @@
         "exists": true,
         "json_valid": true,
         "has_items_array": true,
-        "item_count": 3
+        "item_count": 15
       },
       {
         "label": "sap-transaction-shortcuts",
@@ -761,6 +760,26 @@
         "json_valid": true,
         "has_items_array": true,
         "item_count": 19
+      },
+      {
+        "label": "sap-transaction-catalog",
+        "group": "group_sap_runtime_windows",
+        "mode": "sapTransaction",
+        "file": "platforms/windows/data/sap-transaction-catalog.json",
+        "exists": true,
+        "json_valid": true,
+        "has_items_array": true,
+        "item_count": 198
+      },
+      {
+        "label": "abap-snippets",
+        "group": "group_sap_runtime_windows",
+        "mode": "autocorrect",
+        "file": "platforms/windows/data/abap-snippets.json",
+        "exists": true,
+        "json_valid": true,
+        "has_items_array": true,
+        "item_count": 21
       },
       {
         "label": "ymt-commands",
@@ -828,9 +847,9 @@
           "run.openApp",
           "sap.insertCommentBlock",
           "sap.insertCommentLine",
-          "sap.openDevSession",
-          "sap.openPrdSession",
-          "sap.openQasSession",
+          "sap.openPluzDevSession",
+          "sap.openPluzPrdSession",
+          "sap.openPluzQasSession",
           "snipaste.copyPaste",
           "snipaste.ctrlC",
           "video.control",
@@ -848,6 +867,7 @@
           "sap.focusEclipseWindows",
           "sap.promptAndOpenAbapObject",
           "sap.promptAndSearchAbapObject",
+          "sap.saveCodeArtifact",
           "sap.startQuickDebug"
         ]
       },
@@ -863,7 +883,7 @@
           "sap.openSe38",
           "sap.openSe80",
           "sap.openWorkbenchOptions",
-          "sap.reloginFromProjectWindow",
+          "sap.reopenSessionFromProjectWindow",
           "sap.runTcodeFromFocusedInput",
           "sap.toggleDebugMode"
         ]
@@ -885,7 +905,7 @@
         "file": "platforms/windows/library/automation/hotstring.ahk",
         "calls": [
           "sap.isTextInputActive",
-          "sap.openSession",
+          "sap.openNamedSession",
           "sap.runTcode"
         ]
       },
@@ -900,7 +920,6 @@
         "file": "platforms/windows/library/automation/run.ahk",
         "calls": [
           "launcher.closeAndWait",
-          "memory.getValue",
           "memory.resolveTargetTitle"
         ]
       },
@@ -937,6 +956,9 @@
   "repo": {
     "entrypoint": "platforms/windows/keyflow.ahk",
     "bootstrap": "platforms/windows/library/bootstrap.ahk",
-    "tool": "ai/health_check.py"
+    "tool": "ai/health_check.py",
+    "standalone_scripts": [
+      "platforms/windows/hotkeys/layouts/colemak-dh.ahk"
+    ]
   }
 }

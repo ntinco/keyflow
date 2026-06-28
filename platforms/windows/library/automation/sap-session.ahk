@@ -1,17 +1,17 @@
 class SapSessionService {
-  openDevSession() {
-    this.openConfiguredSession("sap_logon_dev")
+  openPluzDevSession() {
+    this._openPinnedSession("pluz dev")
   }
 
-  openQasSession() {
-    this.openConfiguredSession("sap_logon_qas")
+  openPluzQasSession() {
+    this._openPinnedSession("pluz qas")
   }
 
-  openPrdSession() {
-    this.openConfiguredSession("sap_logon_prd")
+  openPluzPrdSession() {
+    this._openPinnedSession("pluz prd")
   }
 
-  openSession(inputValue) {
+  openNamedSession(inputValue) {
     services.launcher.closeAndWait()
     inputValue := services.memory.getValue(inputValue)
     inputValue := utils.keyClear(inputValue)
@@ -36,17 +36,8 @@ class SapSessionService {
       Exit()
   }
 
-  openConfiguredSession(memoryKey) {
-    sessionName := services.memory.getValue(memoryKey)
-    if !sessionName || sessionName = memoryKey
-    {
-      this._showRuntimeError(
-        "SAP session is not configured for " memoryKey
-        ". Define the value in data/memory-vars.ini [data] with a direct session name like pluz dev."
-      )
-      return
-    }
-    this.openSession(sessionName)
+  _openPinnedSession(sessionName) {
+    this.openNamedSession(sessionName)
   }
 
   _resolveSessionConfig(inputValue) {
@@ -73,7 +64,7 @@ class SapSessionService {
     return ""
   }
 
-  reloginFromWindowContext() {
+  _reopenSessionFromWindowContext() {
     utils.winNow()
 
     Send("1")
@@ -85,7 +76,7 @@ class SapSessionService {
     if !loginParts.Has(6) or !loginParts.Has(7)
       return
     Send("{backspace}")
-    this.openSession(loginParts[6] A_Space loginParts[7])
+    this.openNamedSession(loginParts[6] A_Space loginParts[7])
   }
 
   _buildLaunchCommand(sessionConfig) {

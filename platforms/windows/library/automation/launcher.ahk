@@ -1,7 +1,7 @@
 ﻿class LauncherService {
   supportedPasteExtensionsPattern := "i)(txt|abap|md|ahk)"
 
-  isMediaPath(filename) {
+  _isMediaPath(filename) {
     return InStr(filename, "music") or InStr(filename, "audio") or InStr(filename, "video")
   }
 
@@ -21,7 +21,7 @@
   playSelectedMedia() {
     filename := utils.clipboardRead("^+c", 0.3)
 
-    if this.isMediaPath(filename)
+    if this._isMediaPath(filename)
     {
       this.closeAndWait()
       services.everything.incrementRunCount(filename)
@@ -101,5 +101,4 @@
     Sleep 200
   }
 }
-
 

@@ -12,13 +12,13 @@
     else
       HotIfWinActive()
 
-    registerEntries(this._loadEntries(label), mode)
+    _registerEntries(this._loadEntries(label), mode)
     this._resetHotstringContext()
 
     applySapTcode(hotstringValue, *) => services.sap.runTcode(hotstringValue)
-    applySapLogon(hotstringValue) => services.sap.openSession(hotstringValue)
+    applySapSession(hotstringValue) => services.sap.openNamedSession(hotstringValue)
 
-    registerEntries(entries, mode) {
+    _registerEntries(entries, mode) {
       for entry in entries {
         trigger := entry["trigger"]
         value := entry["value"]
@@ -28,8 +28,8 @@
         hotstringOptions := this._resolveHotstringOptions(mode, trigger, value, entry)
         if this._isSapInputMode(mode)
           hotstring(hotstringOptions . trigger, applySapTcode.Bind(value))
-        else if (mode = "sapLogon")
-          hotstring(hotstringOptions . trigger, applySapLogon)
+        else if (mode = "sapSession")
+          hotstring(hotstringOptions . trigger, applySapSession)
         else
           hotstring(hotstringOptions . trigger, value)
       }
@@ -39,7 +39,7 @@
   _resolveHotstringOptions(mode, trigger := "", value := "", entry := "") {
     if this._isSapInputMode(mode)
       return ":X*b0:"
-    if (mode = "sapLogon")
+    if (mode = "sapSession")
       return ":*:"
     if (mode = "autocorrectImmediate")
       return ":*:"

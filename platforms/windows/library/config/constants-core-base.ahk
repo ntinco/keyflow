@@ -8,6 +8,8 @@
   EnvSet("YSAP", runtimeEnvValue(runtimeEnvFile, "YSAP", "ym.lnk||X|"))
   sapDefaultTcodeFallback := runtimeConfigValue(runtimeEnvFile, "sap-defaults", "defaultTcodeFallback", "smen")
   sapDelayPollMs := runtimeConfigValue(runtimeEnvFile, "sap-delays", "pollMs", "100")
+  uiBorderColor := runtimeConfigValue(runtimeEnvFile, "ui", "borderColor", "4444FF")
+  uiBorderThickness := runtimeConfigValue(runtimeEnvFile, "ui", "borderThickness", "3")
 }
 
 runtimeEnvFilePath() {

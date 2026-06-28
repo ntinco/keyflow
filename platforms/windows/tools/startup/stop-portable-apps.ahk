@@ -1,0 +1,13 @@
+﻿WinKill("ahk_exe AimpPortable.exe")
+WinKill("ahk_exe everything.exe")
+WinKill("ahk_exe flow.Launcher.exe")
+WinKill("ahk_exe keePassXCPortable.exe")
+WinKill("ahk_exe rbtray.exe")
+WinKill("ahk_exe ShareX.exe")
+WinKill("ahk_exe Snipaste.exe")
+WinKill("ahk_exe stretchly.exe")
+WinKill("ahk_exe workrave.exe")
+WinKill("ahk_exe tbaction.exe")
+WinKill("ahk_exe handy.exe")
+WinKill("norman-app.ahk ahk_class AutoHotkey")
+

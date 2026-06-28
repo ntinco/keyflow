@@ -1,0 +1,95 @@
+scriptDir := RegExReplace(A_LineFile, "\\[^\\]+$")
+rootDir := scriptDir "\..\.."
+localStartupFile := rootDir "\data\local-startup.ini"
+
+downloadsPath := readStartupValue(localStartupFile, "startup-host", "downloadsPath", EnvGet("USERPROFILE") "\Downloads")
+baseDrive := readStartupValue(localStartupFile, "startup-host", "baseDrive", "h:")
+workspaceDrive := readStartupValue(localStartupFile, "startup-host", "workspaceDrive", "i:")
+workspacePath := readStartupValue(localStartupFile, "startup-host", "workspacePath", downloadsPath "\.sync\GitHub")
+syncBatchFile := readStartupValue(localStartupFile, "startup-host", "syncBatchFile", "")
+flowLauncherLogsDir := readStartupValue(localStartupFile, "startup-host", "flowLauncherLogsDir", "")
+aimpPortableLink := readStartupValue(localStartupFile, "startup-host", "aimpPortableLink", baseDrive "\.sync\links\AimpPortable.exe.lnk")
+dittoPortableLink := readStartupValue(localStartupFile, "startup-host", "dittoPortableLink", baseDrive "\.sync\links\DittoPortable.exe.lnk")
+portableLinksCsv := readStartupValue(localStartupFile, "startup-host", "portableLinksCsv", "")
+launchDelayMs := readStartupNumber(localStartupFile, "startup-host", "launchDelayMs", 5000)
+
+run(A_ComSpec ' /k subst ' baseDrive ' "' downloadsPath '"', , "hide")
+run(A_ComSpec ' /k subst ' workspaceDrive ' "' workspacePath '"', , "hide")
+Sleep(launchDelayMs)
+
+Run(rootDir "\keyflow.ahk")
+
+if (A_Wday = 6)
+  runWeeklyCleanup(baseDrive, flowLauncherLogsDir, syncBatchFile)
+
+runPortableLink(aimpPortableLink)
+runPortableLink(dittoPortableLink)
+for linkPath in startupConfigCsvArray(portableLinksCsv)
+  runPortableLink(linkPath)
+
+runPortableLink(linkPath) {
+  if !linkPath
+    return
+  if !FileExist(linkPath)
+    return
+
+  Run(linkPath)
+  if WinWait("(PortableApps.com Launcher)", , 5)
+  {
+    WinActivate("(PortableApps.com Launcher)")
+    Sleep(100)
+    Send("{enter}")
+    Sleep(100)
+    Run(linkPath)
+  }
+}
+
+runWeeklyCleanup(baseDrive, flowLauncherLogsDir, syncBatchFile) {
+  folderDelete(baseDrive "\.sync\..apps\PortableApps\LibreOfficePortable\Data\settings\cache")
+  folderDelete(baseDrive "\.sync\..apps\PortableApps\LibreOfficePortable\Data\settings\crash")
+  folderDelete(baseDrive "\.sync\..apps\PortableApps\LibreOfficePortable\Data\settings\temp")
+  folderDelete(baseDrive "\.sync\..apps\PortableApps\LibreOfficePortable\Data\settings\updates")
+  folderDelete(baseDrive "\.sync\..apps\PortableApps\Notepad++Portable\Data\Config\backup")
+  folderDelete(baseDrive "\.sync\..apps\PortableApps_updauto\Snipaste\history")
+  folderDelete(flowLauncherLogsDir)
+  folderDelete(baseDrive "\.sync\..apps\PortableApps_updmanual\ShareX\ShareX\Backup")
+  folderDelete(baseDrive "\.sync\..apps\PortableApps_updmanual\ShareX\ShareX\Logs")
+  folderDelete(baseDrive "\.sync\..apps\PortableApps_updmanual\xyplorer_full_noinstall\Data\AutoBackup")
+  fileDeleteIfExists(baseDrive "\.sync\..apps\PortableApps_updauto\Snipaste\splog.txt")
+
+  if syncBatchFile && FileExist(syncBatchFile)
+    RunWait(syncBatchFile)
+}
+
+folderDelete(folderPath) {
+  if folderPath && DirExist(folderPath)
+    DirDelete(folderPath, true)
+}
+
+fileDeleteIfExists(filePath) {
+  if filePath && FileExist(filePath)
+    FileDelete(filePath)
+}
+
+readStartupValue(configFile, sectionName, keyName, defaultValue := "") {
+  value := IniRead(configFile, sectionName, keyName, defaultValue)
+  if (Trim(value) = "")
+    return defaultValue
+  return value
+}
+
+readStartupNumber(configFile, sectionName, keyName, defaultValue) {
+  value := readStartupValue(configFile, sectionName, keyName, defaultValue)
+  return IsNumber(value) ? value + 0 : defaultValue
+}
+
+startupConfigCsvArray(csvText) {
+  output := []
+  for part in StrSplit(csvText, ";")
+  {
+    value := Trim(part)
+    if value
+      output.Push(value)
+  }
+  return output
+}

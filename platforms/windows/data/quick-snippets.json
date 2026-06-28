@@ -2,17 +2,20 @@
   "format": "hotstring-items-v1",
   "source": "data/quick-snippets.json",
   "items": [
-    {
-      "trigger": "bd,",
-      "value": "Buen día,"
-    },
-    {
-      "trigger": "bt,",
-      "value": "Buenas tardes,"
-    },
-    {
-      "trigger": "bn,",
-      "value": "Buenas noches,"
-    }
+    { "trigger": "bd,",   "value": "Buen día," },
+    { "trigger": "bt,",   "value": "Buenas tardes," },
+    { "trigger": "bn,",   "value": "Buenas noches," },
+    { "trigger": "slds,", "value": "Saludos," },
+    { "trigger": "att,",  "value": "Atentamente," },
+    { "trigger": "sp,",   "value": "summary in prompt" },
+    { "trigger": "ntt,",  "value": "NTT DATA" },
+    { "trigger": "fyi,",  "value": "Para tu información / FYI:" },
+    { "trigger": "pdto,", "value": "Por definir." },
+    { "trigger": "tbd,",  "value": "To be defined." },
+    { "trigger": "wip,",  "value": "Work in progress." },
+    { "trigger": "ok,",   "value": "De acuerdo, queda anotado." },
+    { "trigger": "rev,",  "value": "Pendiente de revisión." },
+    { "trigger": "urg,",  "value": "URGENTE:" },
+    { "trigger": "sig,",  "value": "Con gusto te ayudo, ¿en qué consiste?" }
   ]
 }

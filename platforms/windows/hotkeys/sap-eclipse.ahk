@@ -1,5 +1,5 @@
 ; SAP ADT/Eclipse: solo disparadores hacia services.sap.*; la logica vive en library/automation/sap.ahk.
-#hotif winactive(exeECLIPSE)
+#hotif winactive(exeEclipse)
 !pgdn::{
 trackSapEclipseHotkeyUsage("!pgdn")
 Send("^pgdn")
@@ -79,6 +79,10 @@ Send("{up}")
 !i::{
 trackSapEclipseHotkeyUsage("!i")
 Send("^!i")
+}
+^s::{
+trackSapEclipseHotkeyUsage("^s")
+services.sap.saveCodeArtifact()
 }
 #hotif winactive("- DATABASE TABLE")
 !up::{

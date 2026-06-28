@@ -26,6 +26,7 @@ loadCoreApplicationConstants() {
   exeNotepad := "ahk_exe notepad++.exe"
   exeVscode := "ahk_exe Code.exe"
   exeVscodeInsiders := "ahk_exe Code - Insiders.exe"
+  classExcel := "ahk_class XLMAIN"
   classSapGuiSession := "ahk_class SAP_FRONTEND_SESSION"
   controlOfficeImage := "RichEdit20W16"
   titleTaskTimeTracker := appConfigValue(localPathsFile, "titleTaskTimeTracker", "kur-time")

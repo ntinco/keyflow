@@ -1,5 +1,5 @@
 ﻿class RunService {
-  open(target, noExit := "") {
+  _open(target, noExit := "") {
     this._prepareHotkeyLaunch()
 
     target := services.memory.resolveTargetTitle(target, &title)
@@ -21,13 +21,6 @@
     Run(A_Comspec ' /c ' command, ,"hide")
   }
 
-  runPythonScript(filename) {
-    this._prepareHotkeyLaunch()
-
-    utils.tooltip(filename)
-    this.runCommand( '"python "' filename '""' )
-  }
-
   openApp(appCandidates) {
     app := this._firstAppItem(appCandidates)
 
@@ -36,25 +29,7 @@
       return
     }
 
-    this.open(this._normalizeAppTarget(app))
-  }
-
-  createFromTemplate(app, title, model := "", confirm := "") {
-    if !confirm
-      confirm := MsgBox("Desea crear " app "?", "", 4)
-    if (confirm = "yes")
-    {
-      If model
-      {
-        Try FileCopy(services.memory.getValue(model), app)
-      }
-      Else
-        DirCreate(app)
-
-      this._run(app)
-      If WinWait(title, , 10)
-        WinActivate(title)
-    }
+    this._open(this._normalizeAppTarget(app))
   }
 
   _run(filename) {
@@ -104,4 +79,3 @@
   }
 
 }
-

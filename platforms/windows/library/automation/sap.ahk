@@ -42,8 +42,8 @@ class SapService extends SapSessionService {
       . "*---------------------------------------------------------------------*"
   }
 
-  reloginFromProjectWindow() {
-    this.reloginFromWindowContext()
+  reopenSessionFromProjectWindow() {
+    this._reopenSessionFromWindowContext()
   }
 
   isTextInputActive(winTitle := "A") {
@@ -75,7 +75,7 @@ class SapService extends SapSessionService {
 
     if WinActive(exeEclipse)
     {
-      this.openSession(normalizedTcode)
+      this.openNamedSession(normalizedTcode)
       return
     }
 
@@ -123,7 +123,7 @@ class SapService extends SapSessionService {
     this.runTcode("se80")
   }
 
-  saveCurrentCodeArtifact() {
+  saveCodeArtifact() {
     Send("^s")
   }
 
@@ -139,7 +139,7 @@ class SapService extends SapSessionService {
     services.windowGroup.activateGroup(appActivationTargets, "apps_sap_eclipse")
   }
 
-  openAbapObject(objectName := "") {
+  _openAbapObject(objectName := "") {
     objectName := Trim(objectName)
     if !objectName
       return
@@ -154,10 +154,10 @@ class SapService extends SapSessionService {
     objectName := this._promptValue("ABAP object", "Open ABAP Object")
     if !objectName
       return
-    this.openAbapObject(objectName)
+    this._openAbapObject(objectName)
   }
 
-  searchAbapObject(searchText := "") {
+  _searchAbapObject(searchText := "") {
     searchText := Trim(searchText)
     if !searchText
       return
@@ -172,17 +172,17 @@ class SapService extends SapSessionService {
     searchText := this._promptValue("Wildcard", "Search ABAP Object")
     if !searchText
       return
-    this.searchAbapObject(searchText)
+    this._searchAbapObject(searchText)
   }
 
-  runQuickDebug() {
-    this.saveCurrentCodeArtifact()
+  _runQuickDebug() {
+    this.saveCodeArtifact()
     Sleep(this._resolveOperationDelayMs())
     Send("^+{f2}")
   }
 
   startQuickDebug() {
-    this.runQuickDebug()
+    this._runQuickDebug()
   }
 
   _runTcodePostAction(normalizedTcode) {
