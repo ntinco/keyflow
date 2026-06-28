@@ -30,6 +30,10 @@ Definition of done:
 
 - Another agent can tell which catalogs are pending vs verified without opening the chat.
 
+Status:
+
+- Completed in this cycle with `ai/catalog-review.json`.
+
 ### 2. Teach the health check about review state
 
 - Extend `ai/health_check.py` to validate that the catalog review artifact:
@@ -44,6 +48,10 @@ Definition of done:
 
 - Missing or malformed catalog review state becomes machine-visible.
 
+Status:
+
+- Completed in this cycle through `health_check.py` validation of file existence, active catalog alignment, known status values, and verification-date rules.
+
 ### 3. Clarify human-review workflow in the guide layer
 
 - Update `AGENTS.md`, `README.md`, and `ai/repo-map.json` so they explain:
@@ -56,6 +64,10 @@ Definition of done:
 
 - Human-only tasks are explicit, narrow, and easy to resume.
 
+Status:
+
+- Completed in this cycle by updating `AGENTS.md`, `README.md`, and `ai/repo-map.json` to point to `ai/catalog-review.json`.
+
 ### 4. Separate verified catalogs from future technical hotspots
 
 - Once catalog review state exists, keep technical planning separate from human review.
@@ -65,6 +77,10 @@ Definition of done:
 Definition of done:
 
 - The repo has one clear frontier: catalog governance now, new runtime work only if evidence appears.
+
+Status:
+
+- In effect. The remaining work is human verification, and technical replanning is explicitly conditional on real evidence.
 
 ## Ordered execution
 
@@ -83,4 +99,4 @@ Definition of done:
 
 ## Current active frontier
 
-The next best move is to formalize catalog review state so human freshness verification becomes explicit, resumable, and machine-visible.
+The next best move is human review: update `ai/catalog-review.json` with verification outcomes, starting with `sap-transaction-catalog` and `autocorrect`. Open a new technical plan only if that review reveals a real contract or runtime issue.

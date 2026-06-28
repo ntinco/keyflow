@@ -6,6 +6,7 @@ import json
 import re
 import sys
 from collections import Counter, defaultdict
+from datetime import date
 from pathlib import Path
 
 
@@ -67,6 +68,8 @@ KNOWN_DEAD_CLASSES = {"PasteService"}
 # Constants that are declared but have no known consumers.
 # hotkeyTrackerJsonFile: used indirectly by HotkeyTrackerService via the global assigned in constants-core.ahk.
 KNOWN_DEAD_CONSTANTS: tuple[str, ...] = ()
+CATALOG_REVIEW_FILE = "ai/catalog-review.json"
+CATALOG_REVIEW_STATUS_VALUES = {"pending_human_review", "verified"}
 
 
 def to_repo_path(path: Path, repo_root: Path) -> str:
@@ -285,6 +288,163 @@ def validate_profiles(
             )
         results.append(entry)
     return results, issues
+
+
+def validate_catalog_review(
+    repo_root: Path,
+    profiles: list[dict[str, str]],
+) -> tuple[dict[str, object], list[dict[str, str]]]:
+    review_path = repo_root / CATALOG_REVIEW_FILE
+    expected_catalogs = {
+        profile["label"]: f"platforms/windows/data/{profile['label']}.json"
+        for profile in profiles
+    }
+    result: dict[str, object] = {
+        "file": CATALOG_REVIEW_FILE,
+        "exists": review_path.exists(),
+        "catalogs": [],
+    }
+    issues: list[dict[str, str]] = []
+
+    if not review_path.exists():
+        issues.append(
+            {
+                "type": "catalog_review_missing",
+                "file": CATALOG_REVIEW_FILE,
+                "message": "Catalog review contract is missing.",
+            }
+        )
+        return result, issues
+
+    try:
+        payload = json.loads(review_path.read_text(encoding="utf-8-sig"))
+    except json.JSONDecodeError as exc:
+        issues.append(
+            {
+                "type": "catalog_review_invalid_json",
+                "file": CATALOG_REVIEW_FILE,
+                "message": str(exc),
+            }
+        )
+        return result, issues
+
+    catalogs = payload.get("catalogs")
+    if not isinstance(catalogs, list):
+        issues.append(
+            {
+                "type": "catalog_review_catalogs_missing",
+                "file": CATALOG_REVIEW_FILE,
+                "message": "catalog-review.json must expose catalogs[] as a list.",
+            }
+        )
+        return result, issues
+
+    seen_ids: set[str] = set()
+    pending_count = 0
+    verified_count = 0
+
+    for entry in catalogs:
+        if not isinstance(entry, dict):
+            issues.append(
+                {
+                    "type": "catalog_review_entry_invalid",
+                    "file": CATALOG_REVIEW_FILE,
+                    "message": "Each catalogs[] item must be an object.",
+                }
+            )
+            continue
+
+        catalog_id = entry.get("id", "")
+        catalog_file = entry.get("file", "")
+        status = entry.get("status", "")
+        verified_on = entry.get("last_human_verification", "")
+        result["catalogs"].append(entry)
+
+        if not catalog_id or not isinstance(catalog_id, str):
+            issues.append(
+                {
+                    "type": "catalog_review_id_missing",
+                    "file": CATALOG_REVIEW_FILE,
+                    "message": "Each catalog review entry must define a string id.",
+                }
+            )
+            continue
+
+        if catalog_id in seen_ids:
+            issues.append(
+                {
+                    "type": "catalog_review_duplicate_id",
+                    "file": CATALOG_REVIEW_FILE,
+                    "message": f"Duplicate catalog review id: {catalog_id}",
+                }
+            )
+        seen_ids.add(catalog_id)
+
+        expected_file = expected_catalogs.get(catalog_id)
+        if not expected_file:
+            issues.append(
+                {
+                    "type": "catalog_review_unknown_id",
+                    "file": CATALOG_REVIEW_FILE,
+                    "message": f"Catalog review entry does not match an active versioned catalog: {catalog_id}",
+                }
+            )
+        elif catalog_file != expected_file:
+            issues.append(
+                {
+                    "type": "catalog_review_file_mismatch",
+                    "file": CATALOG_REVIEW_FILE,
+                    "message": f"Catalog review entry for {catalog_id} must point to {expected_file}.",
+                }
+            )
+
+        if status not in CATALOG_REVIEW_STATUS_VALUES:
+            issues.append(
+                {
+                    "type": "catalog_review_status_invalid",
+                    "file": CATALOG_REVIEW_FILE,
+                    "message": f"Catalog review entry for {catalog_id} uses an unknown status: {status}",
+                }
+            )
+        elif status == "pending_human_review":
+            pending_count += 1
+        elif status == "verified":
+            verified_count += 1
+
+        if status == "verified":
+            if not verified_on:
+                issues.append(
+                    {
+                        "type": "catalog_review_verified_date_missing",
+                        "file": CATALOG_REVIEW_FILE,
+                        "message": f"Verified catalog {catalog_id} must include last_human_verification.",
+                    }
+                )
+            else:
+                try:
+                    date.fromisoformat(verified_on)
+                except ValueError:
+                    issues.append(
+                        {
+                            "type": "catalog_review_verified_date_invalid",
+                            "file": CATALOG_REVIEW_FILE,
+                            "message": f"Catalog {catalog_id} has an invalid last_human_verification date: {verified_on}",
+                        }
+                    )
+
+    missing_ids = sorted(set(expected_catalogs) - seen_ids)
+    for missing_id in missing_ids:
+        issues.append(
+            {
+                "type": "catalog_review_entry_missing",
+                "file": CATALOG_REVIEW_FILE,
+                "message": f"Active catalog missing from review contract: {missing_id}",
+            }
+        )
+
+    result["pending_human_review_count"] = pending_count
+    result["verified_count"] = verified_count
+    return result, issues
 
 
 def validate_repo_map_contracts(
@@ -688,15 +848,17 @@ def build_summary(
     service_call_issues: list,
     profile_issues: list,
     guide_contract_issues: list,
+    catalog_review_issues: list,
     dead_candidates: dict,
     profile_results: list,
     registry: dict,
     forbidden_references: list,
     hotkey_counts: dict,
     unclosed_hotif: list,
+    catalog_review_result: dict[str, object],
     next_frontier: str = "",
 ) -> dict[str, object]:
-    issues = include_missing + registry_issues + service_call_issues + profile_issues + guide_contract_issues + unclosed_hotif + forbidden_references
+    issues = include_missing + registry_issues + service_call_issues + profile_issues + guide_contract_issues + catalog_review_issues + unclosed_hotif + forbidden_references
     profile_counts = {p["label"]: p.get("item_count", 0) for p in profile_results}
     ai_readiness = compute_ai_readiness(issues, dead_candidates, forbidden_references)
     return {
@@ -705,6 +867,12 @@ def build_summary(
         "ai_readiness": ai_readiness,
         "services": sorted(registry.keys()),
         "profiles": profile_counts,
+        "catalog_review": {
+            "file": catalog_review_result.get("file", CATALOG_REVIEW_FILE),
+            "exists": catalog_review_result.get("exists", False),
+            "pending_human_review_count": catalog_review_result.get("pending_human_review_count", 0),
+            "verified_count": catalog_review_result.get("verified_count", 0),
+        },
         "hotkey_counts": hotkey_counts,
         "dead_class_candidates": [c["class"] for c in dead_candidates["dead_class_candidates"]],
         "dead_constant_candidates": [c["constant"] for c in dead_candidates["dead_constant_candidates"]],
@@ -739,6 +907,7 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
     registry = parse_registry(bootstrap_text)
     profiles = parse_hotstring_profiles(bootstrap_text)
     profile_results, profile_issues = validate_profiles(profiles, data_dir, repo_root)
+    catalog_review_result, catalog_review_issues = validate_catalog_review(repo_root, profiles)
     service_contracts, registry_issues, service_call_issues, public_api_candidates = build_service_contracts(registry, class_lookup, file_index)
     public_calls = collect_public_service_calls(file_index)
     dead_candidates = detect_dead_candidates(file_index, registry, token_counter)
@@ -756,12 +925,14 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
         service_call_issues,
         profile_issues,
         repo_map_contract_issues + guide_contract_issues,
+        catalog_review_issues,
         dead_candidates,
         profile_results,
         registry,
         forbidden_references,
         hotkey_counts,
         unclosed_hotif,
+        catalog_review_result,
         next_frontier,
     )
 
@@ -773,6 +944,7 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
             "service_calls": service_call_issues,
             "profiles": profile_issues,
             "guide_contracts": repo_map_contract_issues + guide_contract_issues,
+            "catalog_review": catalog_review_issues,
             "unclosed_hotif": unclosed_hotif,
             "forbidden_references": forbidden_references,
         },
@@ -786,6 +958,7 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
             "include_graph": include_graph,
             "service_registry": service_contracts,
             "hotstring_profiles": profile_results,
+            "catalog_review": catalog_review_result,
             "public_service_calls": public_calls,
         },
         "repo": {

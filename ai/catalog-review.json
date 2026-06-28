@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "status_values": [
+    "pending_human_review",
+    "verified"
+  ],
+  "catalogs": [
+    {
+      "id": "abap-snippets",
+      "file": "platforms/windows/data/abap-snippets.json",
+      "status": "pending_human_review",
+      "last_human_verification": "",
+      "notes": "Versioned SAP snippet catalog. Freshness has not been re-verified in the AI-first maintenance model."
+    },
+    {
+      "id": "autocorrect",
+      "file": "platforms/windows/data/autocorrect.json",
+      "status": "pending_human_review",
+      "last_human_verification": "",
+      "notes": "High-volume text replacement catalog. Human freshness verification is still pending."
+    },
+    {
+      "id": "quick-snippets",
+      "file": "platforms/windows/data/quick-snippets.json",
+      "status": "pending_human_review",
+      "last_human_verification": "",
+      "notes": "General quick snippet catalog. Human freshness verification is still pending."
+    },
+    {
+      "id": "sap-transaction-catalog",
+      "file": "platforms/windows/data/sap-transaction-catalog.json",
+      "status": "pending_human_review",
+      "last_human_verification": "",
+      "notes": "Primary SAP transaction catalog. Human freshness verification is still pending."
+    },
+    {
+      "id": "sap-transaction-shortcuts",
+      "file": "platforms/windows/data/sap-transaction-shortcuts.json",
+      "status": "pending_human_review",
+      "last_human_verification": "",
+      "notes": "Shortcut SAP transaction catalog. Human freshness verification is still pending."
+    },
+    {
+      "id": "ymt-commands",
+      "file": "platforms/windows/data/ymt-commands.json",
+      "status": "pending_human_review",
+      "last_human_verification": "",
+      "notes": "YMT command catalog. Human freshness verification is still pending."
+    }
+  ]
+}

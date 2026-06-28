@@ -12,6 +12,8 @@
     "ai/repo-map.json",
     "AGENTS.md",
     "README.md",
+    "ai/current-plan.md",
+    "ai/catalog-review.json",
     "platforms/windows/keyflow.ahk",
     "platforms/windows/library/bootstrap.ahk",
     "platforms/windows/library/automation/sap-session.ahk",
@@ -123,7 +125,8 @@
         "health-check.json",
         "repo-map.json",
         "current-plan.md",
-        "agent-prompts.md"
+        "agent-prompts.md",
+        "catalog-review.json"
       ]
     }
   ],
@@ -168,6 +171,6 @@
   "standalone": [
     "platforms/windows/hotkeys/layouts/colemak-dh.ahk"
   ],
-  "current-focus": "Stable multi-agent guide layer with simplified runtime APIs and a completed runtime-simplification pass. The next focus is turning catalog freshness review into explicit machine-visible repo state.",
-  "next-frontier": "Execute ai/current-plan.md to add catalog review state, wire it into health_check.py, and make human freshness verification resumable from repo files alone."
+  "current-focus": "Stable multi-agent guide layer with simplified runtime APIs and a machine-visible catalog review contract for versioned catalogs.",
+  "next-frontier": "Record human verification outcomes in ai/catalog-review.json and only open a new technical plan if that review exposes a real contract or runtime issue."
 }

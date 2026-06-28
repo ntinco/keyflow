@@ -84,4 +84,4 @@ The preferred startup contract lives in `local-startup.ini`:
 - One intentional global remains: `services` in `platforms/windows/keyflow.ahk`.
 - The `utils` global object is gone; utility behavior lives in free `util*()` functions.
 - Launcher and window-group flows now use clearer intent-first names instead of legacy helper wording.
-- Catalog content freshness is still pending human verification; the next cycle formalizes that review as explicit AI-first repo state.
+- Catalog review state now lives in `ai/catalog-review.json`; content freshness itself still requires human verification.

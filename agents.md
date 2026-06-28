@@ -105,6 +105,7 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 | Hotkey triggers | `platforms/windows/hotkeys/` |
 | Startup launchers | `platforms/windows/tools/startup/` |
 | Versioned catalogs | `platforms/windows/data/*.json` |
+| Catalog review state | `ai/catalog-review.json` |
 | AI tooling and navigation | `ai/` |
 
 ## Current model
@@ -116,12 +117,13 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 - `DynamicService` now exposes intent-first actions only; the raw action-chain runner is internal.
 - `LauncherService` and `WindowGroupService` now use clearer intent/state naming; historical internal state fields were removed.
 - Catalog counts are stable; content freshness still requires human verification.
+- Catalog review contract now lives in `ai/catalog-review.json`; agents may maintain the contract, but only a human should change freshness status to `verified`.
 - A detailed multi-agent plan is currently active at `ai/current-plan.md`.
 
 ## Next evolution frontier
 
-- Execute the new `ai/current-plan.md`: formalize catalog review state so human freshness verification becomes explicit and machine-visible.
-- Human action still matters, but the next technical step is to create the review contract before doing the human verification itself.
+- Record human verification outcomes in `ai/catalog-review.json` for the active catalogs, starting with `sap-transaction-catalog` and `autocorrect`.
+- If human review exposes a real schema or runtime issue, open a new technical plan from that evidence.
 
 ## Validation
 
