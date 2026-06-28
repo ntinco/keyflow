@@ -20,9 +20,25 @@ If those files disagree, the earlier item wins.
 3. Edit the smallest responsible file set.
 4. Run `python ai/health_check.py --pretty --output ai/health-check.json --output-summary ai/health-check.summary.json`.
 5. If runtime wiring changed, smoke-test with `platforms/windows/tools/exe/AutoHotkey64.exe /ErrorStdOut=CP65001 platforms/windows/keyflow.ahk`.
-6. Before closing the cycle, update the AI operating guide if behavior, routing, rules, or current evolution status changed.
+6. **Close the cycle by updating the AI operating guide** — see *Guide update rule* below.
 
 If step 2 or 4 returns `ok: false`, fix the reported issues before doing anything else.
+
+## Guide update rule
+
+The cycle is not closed until the guide reflects the current state. This is mandatory, not optional.
+
+After every execution cycle that removes, renames, or rewires anything:
+
+| Artifact | What to write |
+|---|---|
+| `ai/health-check.summary.json` | Regenerate with `health_check.py`. Source of objective truth. |
+| `ai/repo-map.json` | Remove entries for deleted paths. Update `current-focus` and `next-frontier`. Never leave dead routes. |
+| `AGENTS.md` → *Current evolution status* | **Replace**, do not append. Write what is true now: what completed, what no longer applies, what is next. |
+| `README.md` → *Current evolution status* | Same: replace, not append. Remove mentions of completed frontiers. |
+| `next.md` | One paragraph: next frontier and current state. Overwrite the previous content. Not a log. |
+
+**Replacement rule:** these sections shrink or stay flat, they do not grow. History that no longer serves the next AI reader belongs in the git log or gets discarded. If a section is growing, the update was done wrong.
 
 ## Hard rules
 
@@ -32,6 +48,7 @@ If step 2 or 4 returns `ok: false`, fix the reported issues before doing anythin
 - Never guess machine paths; use `*.example.*` only as shape references.
 - Never depend on Git metadata at runtime.
 - Never reintroduce a separate paste service without first proving it adds value over the existing launcher flow.
+- Never leave dead paths in `repo-map.json` after deleting a file or directory.
 
 ## Naming contract
 
@@ -61,9 +78,10 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 ## Current evolution status
 
 - Runtime entrypoint is stable and health-check driven.
-- SAP session wiring is now business-name-first and KeePass-first.
-- Startup scripts are part of the repo, but treated as secondary launchers, not the core runtime.
-- Next frontier: keep shrinking dormant public surface and optional UI helpers after every successful rename.
+- SAP session wiring is business-name-first and KeePass-first.
+- Startup scripts are secondary launchers, not the source of truth for runtime behavior.
+- Aggressive simplification is active: deleting dormant UI helpers, collapsing thin aggregator files, removing wrapper classes with no added value, and shrinking the constants surface.
+- Next frontier: execute `evolution-plan.md` starting at Frente 1 (dead UI helpers), then Frente 2 (hotkey aggregators).
 
 ## Validation
 

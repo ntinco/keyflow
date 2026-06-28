@@ -1,0 +1,1 @@
+Plan de evolución agresivo activo en `evolution-plan.md`. Estado: `ok: true`, 0 issues, simplificación en curso. Siguiente frente: Frente 1 — eliminar `library/ui/dark-theme.ahk` y `library/ui/window-border-overlay.ahk` (código muerto, nunca incluido en bootstrap). Al cerrar cada frente actualizar `repo-map.json`, `AGENTS.md`, `README.md` y este archivo con el estado nuevo.

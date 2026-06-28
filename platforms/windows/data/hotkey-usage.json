@@ -14,6 +14,13 @@
       "sourceFile": "hotkeys\/global.ahk",
       "sourceGroup": "global"
     },
+    "#esc": {
+      "count": 1,
+      "firstSeenUtc": "20260628031554",
+      "lastSeenUtc": "20260628031554",
+      "sourceFile": "hotkeys\/global.ahk",
+      "sourceGroup": "global"
+    },
     "^+k": {
       "count": 21,
       "firstSeenUtc": "20260626194324",
@@ -50,15 +57,15 @@
       "sourceGroup": "global"
     },
     "~^c": {
-      "count": 25,
+      "count": 29,
       "firstSeenUtc": "20260626163544",
-      "lastSeenUtc": "20260626212802",
+      "lastSeenUtc": "20260628032144",
       "sourceFile": "hotkeys\/global.ahk",
       "sourceGroup": "global"
     }
   },
   "meta": {
-    "updatedAtUtc": "20260628030810",
+    "updatedAtUtc": "20260628032144",
     "version": 1
   }
 }
