@@ -55,7 +55,7 @@
       "ai/repo-map.json",
       "ai/health-check.summary.json"
     ],
-    "next_frontier": "No active frontier. Next technical plan deferred until a real frontier appears. Replace ai/current-plan.md when a new technical frontier is identified."
+    "next_frontier": "Execute ai/current-plan.md to add machine-readable runtime execution observability for AutoHotkey smoke runs."
   },
   "issues": {
     "include_missing": [],
@@ -798,6 +798,9 @@
         "This repository is permanently operated as a multi-agent AI-first repo.",
         "This repo is shared by multiple AIs.",
         "Write for the next agent, not for your own memory."
+      ],
+      "required_current_model_phrases": [
+        "validate_local_only_contract()"
       ],
       "frontier_policy": {
         "when_human_only_work_remains": "Do not invent a new technical plan. Keep the human frontier explicit.",

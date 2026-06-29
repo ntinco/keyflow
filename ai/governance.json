@@ -30,6 +30,9 @@
     "This repo is shared by multiple AIs.",
     "Write for the next agent, not for your own memory."
   ],
+  "required_current_model_phrases": [
+    "validate_local_only_contract()"
+  ],
   "frontier_policy": {
     "when_human_only_work_remains": "Do not invent a new technical plan. Keep the human frontier explicit.",
     "when_new_technical_work_is_clear": "Replace ai/current-plan.md in the same cycle."

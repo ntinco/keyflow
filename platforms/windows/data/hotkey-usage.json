@@ -28,6 +28,13 @@
       "sourceFile": "hotkeys\/sap-eclipse.ahk",
       "sourceGroup": "sap-eclipse"
     },
+    "^+n": {
+      "count": 1,
+      "firstSeenUtc": "20260629153608",
+      "lastSeenUtc": "20260629153608",
+      "sourceFile": "hotkeys\/domains.ahk",
+      "sourceGroup": "firefox"
+    },
     "^d": {
       "count": 1,
       "firstSeenUtc": "20260626202137",
@@ -57,15 +64,15 @@
       "sourceGroup": "global"
     },
     "~^c": {
-      "count": 36,
+      "count": 39,
       "firstSeenUtc": "20260626163544",
-      "lastSeenUtc": "20260629013807",
+      "lastSeenUtc": "20260629154436",
       "sourceFile": "hotkeys\/global.ahk",
       "sourceGroup": "global"
     }
   },
   "meta": {
-    "updatedAtUtc": "20260629145015",
+    "updatedAtUtc": "20260629154436",
     "version": 1
   }
 }

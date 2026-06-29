@@ -14,6 +14,7 @@
     "README.md",
     "ai/current-plan.md",
     "ai/governance.json",
+    "ai/agent-prompts.md",
     "ai/catalog-review.json",
     "platforms/windows/keyflow.ahk",
     "platforms/windows/library/bootstrap.ahk",
@@ -180,6 +181,6 @@
   "standalone": [
     "platforms/windows/hotkeys/layouts/colemak-dh.ahk"
   ],
-  "current-focus": "Stable AI-first runtime, normalized local-only contract, and machine-enforced multi-agent governance that makes guide-layer drift visible to both execution and review checks.",
-  "next-frontier": "No active frontier. Next technical plan deferred until a real frontier appears. Replace ai/current-plan.md when a new technical frontier is identified."
+  "current-focus": "Stable AI-first runtime, normalized local-only contract, and machine-enforced multi-agent governance, with the next tooling step focused on runtime execution observability beyond guide-layer health.",
+  "next-frontier": "Execute ai/current-plan.md to add machine-readable runtime execution observability for AutoHotkey smoke runs."
 }

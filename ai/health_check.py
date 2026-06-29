@@ -82,6 +82,9 @@ REQUIRED_AGENTS_PHRASES = (
     "This repo is shared by multiple AIs.",
     "Write for the next agent, not for your own memory.",
 )
+REQUIRED_CURRENT_MODEL_PHRASES = (
+    "validate_local_only_contract()",
+)
 
 
 def to_repo_path(path: Path, repo_root: Path) -> str:
@@ -590,6 +593,15 @@ def validate_governance_contract(
                 "type": "governance_agents_phrases_mismatch",
                 "file": GOVERNANCE_FILE,
                 "message": "governance.json required_agents_phrases do not match the enforced multi-agent contract.",
+            }
+        )
+
+    if payload.get("required_current_model_phrases") != list(REQUIRED_CURRENT_MODEL_PHRASES):
+        issues.append(
+            {
+                "type": "governance_current_model_phrases_mismatch",
+                "file": GOVERNANCE_FILE,
+                "message": "governance.json required_current_model_phrases do not match the enforced current-model contract.",
             }
         )
 

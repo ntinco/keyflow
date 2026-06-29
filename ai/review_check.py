@@ -25,6 +25,11 @@ _FALLBACK_AGENTS_PHRASES = (
     "Write for the next agent, not for your own memory.",
 )
 
+# Fallback current-model phrases used only when governance.json is unavailable or malformed.
+_FALLBACK_CURRENT_MODEL_PHRASES = (
+    "validate_local_only_contract()",
+)
+
 
 def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8-sig")
@@ -89,6 +94,7 @@ def build_review(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]
 
     # Load multi-agent contract requirements from governance (single source of truth).
     required_agents_phrases: list[str] = governance.get("required_agents_phrases") or list(_FALLBACK_AGENTS_PHRASES)
+    required_current_model_phrases: list[str] = governance.get("required_current_model_phrases") or list(_FALLBACK_CURRENT_MODEL_PHRASES)
 
     agents_frontier = find_section(agents_text, "Next evolution frontier")
     agents_model = find_section(agents_text, "Current model")
@@ -272,15 +278,18 @@ def build_review(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]
                 }
             )
 
-    if "validate_local_only_contract()" in agents_model:
-        add_check("agents-current-model-detail", True, "AGENTS current model records the local-only contract enforcement")
-    else:
-        add_check("agents-current-model-detail", False, "AGENTS current model is missing the reviewer-relevant local-only contract note")
+    missing_model_phrases = [phrase for phrase in required_current_model_phrases if phrase not in agents_model]
+    add_check(
+        "agents-current-model-detail",
+        len(missing_model_phrases) == 0,
+        "AGENTS current model records all required governance-enforced detail phrases",
+    )
+    for phrase in missing_model_phrases:
         warnings.append(
             {
                 "type": "agents_current_model_missing_detail",
                 "file": "AGENTS.md",
-                "message": "AGENTS current model is missing a reviewer-relevant note about local-only contract enforcement.",
+                "message": f"AGENTS current model is missing required detail phrase: {phrase}",
             }
         )
 

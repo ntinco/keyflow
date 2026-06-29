@@ -137,12 +137,13 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 - `ai/review_check.py` is the reviewer-oriented audit for cycle closure, guide alignment, and multi-agent handoff quality.
 - `ai/review_check.py` now distinguishes stale generated artifacts (`stale_summary` with regeneration command) from real contract failures, eliminating reviewer false positives caused by un-regenerated summaries.
 - `ai/health_check.py` and `ai/review_check.py` now load `required_agents_sections` and `required_agents_phrases` from `ai/governance.json` instead of maintaining parallel hardcoded constants. `ai/governance.json` is the single enforced source for the multi-agent contract.
+- `ai/governance.json` now declares `required_current_model_phrases`; `ai/review_check.py` loads this list instead of hardcoding `"validate_local_only_contract()"`, and `ai/health_check.py` validates the governance value against `REQUIRED_CURRENT_MODEL_PHRASES`.
+- `ai/agent-prompts.md` is now included in `ai/repo-map.json` `read-order`, making it visible to agents on first read.
 
 ## Next evolution frontier
 
-- Governance single-source and reviewer robustness plan is complete. `ai/review_check.py` emits `stale_summary` with regeneration command instead of misleading failures; both validators load contract requirements from `ai/governance.json`.
-- No human-only pending work remains from the completed plan.
-- Next technical plan: deferred. No new technical frontier is identified at this time. Replace `ai/current-plan.md` when a real frontier appears.
+- Execute `ai/current-plan.md`: add runtime execution observability so agents can prove what actually ran, not only that the guide layer is healthy.
+- Start with a small machine-readable run artifact under `ai/` that captures smoke execution result, timestamp, command, and basic outcome.
 
 ## Validation
 
