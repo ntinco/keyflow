@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "guide_authority": [
+    "ai/health-check.summary.json",
+    "ai/repo-map.json",
+    "AGENTS.md",
+    "README.md"
+  ],
+  "required_cycle_outputs": [
+    "ai/health-check.summary.json",
+    "ai/repo-map.json",
+    "AGENTS.md"
+  ],
+  "detailed_plan_path": "ai/current-plan.md",
+  "human_owned_contracts": [
+    "ai/catalog-review.json"
+  ],
+  "machine_validated_contracts": [
+    "ai/repo-map.json",
+    "ai/catalog-review.json"
+  ],
+  "frontier_policy": {
+    "when_human_only_work_remains": "Do not invent a new technical plan. Keep the human frontier explicit.",
+    "when_new_technical_work_is_clear": "Replace ai/current-plan.md in the same cycle."
+  }
+}

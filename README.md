@@ -5,6 +5,7 @@ Private Windows automation workspace built on AutoHotkey v2. This repo is optimi
 ## AI operating guide
 
 For operational maintenance, use `ai/health-check.summary.json`, `ai/repo-map.json`, and `AGENTS.md` before changing runtime files.
+Machine-readable governance rules also live in `ai/governance.json`.
 
 ## Architecture
 
@@ -84,4 +85,5 @@ The preferred startup contract lives in `local-startup.ini`:
 - One intentional global remains: `services` in `platforms/windows/keyflow.ahk`.
 - The `utils` global object is gone; utility behavior lives in free `util*()` functions.
 - Launcher and window-group flows now use clearer intent-first names instead of legacy helper wording.
-- Catalog review state now lives in `ai/catalog-review.json`; content freshness itself still requires human verification.
+- Catalog review state now lives in `ai/catalog-review.json`, and the current active catalog entries are marked `verified`.
+- AI governance contract now lives in `ai/governance.json`.

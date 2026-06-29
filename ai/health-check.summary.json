@@ -22,14 +22,17 @@
     "quick-snippets": 15,
     "sap-transaction-shortcuts": 19,
     "sap-transaction-catalog": 198,
-    "abap-snippets": 21,
     "ymt-commands": 6
   },
   "catalog_review": {
     "file": "ai/catalog-review.json",
     "exists": true,
-    "pending_human_review_count": 6,
-    "verified_count": 0
+    "pending_human_review_count": 0,
+    "verified_count": 5
+  },
+  "governance": {
+    "file": "ai/governance.json",
+    "exists": true
   },
   "hotkey_counts": {
     "platforms/windows/hotkeys/domains/comms.ahk": 11,
@@ -51,5 +54,5 @@
     "ai/repo-map.json",
     "ai/health-check.summary.json"
   ],
-  "next_frontier": "Record human verification outcomes in ai/catalog-review.json and only open a new technical plan if that review exposes a real contract or runtime issue."
+  "next_frontier": "AI governance hardening is complete for this cycle. Open the next technical plan only when a real runtime, contract, or workflow hotspot appears."
 }

@@ -6,46 +6,39 @@
   ],
   "catalogs": [
     {
-      "id": "abap-snippets",
-      "file": "platforms/windows/data/abap-snippets.json",
-      "status": "verified",
-      "last_human_verification": "2026-06-28",
-      "notes": "Versioned SAP snippet catalog. Freshness has not been re-verified in the AI-first maintenance model."
-    },
-    {
       "id": "autocorrect",
       "file": "platforms/windows/data/autocorrect.json",
       "status": "verified",
       "last_human_verification": "2026-06-28",
-      "notes": "High-volume text replacement catalog. Human freshness verification is still pending."
+      "notes": "Verified by human review for the current operating context."
     },
     {
       "id": "quick-snippets",
       "file": "platforms/windows/data/quick-snippets.json",
       "status": "verified",
       "last_human_verification": "2026-06-28",
-      "notes": "General quick snippet catalog. Human freshness verification is still pending."
+      "notes": "Verified by human review for the current operating context."
     },
     {
       "id": "sap-transaction-catalog",
       "file": "platforms/windows/data/sap-transaction-catalog.json",
       "status": "verified",
       "last_human_verification": "2026-06-28",
-      "notes": "Primary SAP transaction catalog. Human freshness verification is still pending."
+      "notes": "Verified by human review for the current operating context."
     },
     {
       "id": "sap-transaction-shortcuts",
       "file": "platforms/windows/data/sap-transaction-shortcuts.json",
       "status": "verified",
       "last_human_verification": "2026-06-28",
-      "notes": "Shortcut SAP transaction catalog. Human freshness verification is still pending."
+      "notes": "Verified by human review for the current operating context."
     },
     {
       "id": "ymt-commands",
       "file": "platforms/windows/data/ymt-commands.json",
       "status": "verified",
       "last_human_verification": "2026-06-28",
-      "notes": "YMT command catalog. Human freshness verification is still pending."
+      "notes": "Verified by human review for the current operating context."
     }
   ]
 }

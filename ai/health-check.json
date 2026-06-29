@@ -23,14 +23,17 @@
       "quick-snippets": 15,
       "sap-transaction-shortcuts": 19,
       "sap-transaction-catalog": 198,
-      "abap-snippets": 21,
       "ymt-commands": 6
     },
     "catalog_review": {
       "file": "ai/catalog-review.json",
       "exists": true,
-      "pending_human_review_count": 6,
-      "verified_count": 0
+      "pending_human_review_count": 0,
+      "verified_count": 5
+    },
+    "governance": {
+      "file": "ai/governance.json",
+      "exists": true
     },
     "hotkey_counts": {
       "platforms/windows/hotkeys/domains/comms.ahk": 11,
@@ -52,7 +55,7 @@
       "ai/repo-map.json",
       "ai/health-check.summary.json"
     ],
-    "next_frontier": "Record human verification outcomes in ai/catalog-review.json and only open a new technical plan if that review exposes a real contract or runtime issue."
+    "next_frontier": "AI governance hardening is complete for this cycle. Open the next technical plan only when a real runtime, contract, or workflow hotspot appears."
   },
   "issues": {
     "include_missing": [],
@@ -61,6 +64,7 @@
     "profiles": [],
     "guide_contracts": [],
     "catalog_review": [],
+    "governance": [],
     "unclosed_hotif": [],
     "forbidden_references": []
   },
@@ -707,16 +711,6 @@
         "item_count": 198
       },
       {
-        "label": "abap-snippets",
-        "group": "group_sap_runtime_windows",
-        "mode": "autocorrect",
-        "file": "platforms/windows/data/abap-snippets.json",
-        "exists": true,
-        "json_valid": true,
-        "has_items_array": true,
-        "item_count": 21
-      },
-      {
         "label": "ymt-commands",
         "group": "group_sap_runtime_windows",
         "mode": "ymtCommand",
@@ -732,50 +726,71 @@
       "exists": true,
       "catalogs": [
         {
-          "id": "abap-snippets",
-          "file": "platforms/windows/data/abap-snippets.json",
-          "status": "pending_human_review",
-          "last_human_verification": "",
-          "notes": "Versioned SAP snippet catalog. Freshness has not been re-verified in the AI-first maintenance model."
-        },
-        {
           "id": "autocorrect",
           "file": "platforms/windows/data/autocorrect.json",
-          "status": "pending_human_review",
-          "last_human_verification": "",
-          "notes": "High-volume text replacement catalog. Human freshness verification is still pending."
+          "status": "verified",
+          "last_human_verification": "2026-06-28",
+          "notes": "Verified by human review for the current operating context."
         },
         {
           "id": "quick-snippets",
           "file": "platforms/windows/data/quick-snippets.json",
-          "status": "pending_human_review",
-          "last_human_verification": "",
-          "notes": "General quick snippet catalog. Human freshness verification is still pending."
+          "status": "verified",
+          "last_human_verification": "2026-06-28",
+          "notes": "Verified by human review for the current operating context."
         },
         {
           "id": "sap-transaction-catalog",
           "file": "platforms/windows/data/sap-transaction-catalog.json",
-          "status": "pending_human_review",
-          "last_human_verification": "",
-          "notes": "Primary SAP transaction catalog. Human freshness verification is still pending."
+          "status": "verified",
+          "last_human_verification": "2026-06-28",
+          "notes": "Verified by human review for the current operating context."
         },
         {
           "id": "sap-transaction-shortcuts",
           "file": "platforms/windows/data/sap-transaction-shortcuts.json",
-          "status": "pending_human_review",
-          "last_human_verification": "",
-          "notes": "Shortcut SAP transaction catalog. Human freshness verification is still pending."
+          "status": "verified",
+          "last_human_verification": "2026-06-28",
+          "notes": "Verified by human review for the current operating context."
         },
         {
           "id": "ymt-commands",
           "file": "platforms/windows/data/ymt-commands.json",
-          "status": "pending_human_review",
-          "last_human_verification": "",
-          "notes": "YMT command catalog. Human freshness verification is still pending."
+          "status": "verified",
+          "last_human_verification": "2026-06-28",
+          "notes": "Verified by human review for the current operating context."
         }
       ],
-      "pending_human_review_count": 6,
-      "verified_count": 0
+      "pending_human_review_count": 0,
+      "verified_count": 5
+    },
+    "governance": {
+      "file": "ai/governance.json",
+      "exists": true,
+      "version": 1,
+      "guide_authority": [
+        "ai/health-check.summary.json",
+        "ai/repo-map.json",
+        "AGENTS.md",
+        "README.md"
+      ],
+      "required_cycle_outputs": [
+        "ai/health-check.summary.json",
+        "ai/repo-map.json",
+        "AGENTS.md"
+      ],
+      "detailed_plan_path": "ai/current-plan.md",
+      "human_owned_contracts": [
+        "ai/catalog-review.json"
+      ],
+      "machine_validated_contracts": [
+        "ai/repo-map.json",
+        "ai/catalog-review.json"
+      ],
+      "frontier_policy": {
+        "when_human_only_work_remains": "Do not invent a new technical plan. Keep the human frontier explicit.",
+        "when_new_technical_work_is_clear": "Replace ai/current-plan.md in the same cycle."
+      }
     },
     "public_service_calls": [
       {

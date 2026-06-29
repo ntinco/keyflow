@@ -17,6 +17,7 @@ Roles are fixed:
 - `ai/repo-map.json`: navigation and ownership map
 - `AGENTS.md`: workflow, rules, handoff, plan policy
 - `README.md`: architecture and onboarding
+- `ai/governance.json`: machine-readable governance contract
 
 ## Mandatory workflow
 
@@ -106,6 +107,7 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 | Startup launchers | `platforms/windows/tools/startup/` |
 | Versioned catalogs | `platforms/windows/data/*.json` |
 | Catalog review state | `ai/catalog-review.json` |
+| Governance contract | `ai/governance.json` |
 | AI tooling and navigation | `ai/` |
 
 ## Current model
@@ -116,14 +118,14 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 - SAP ownership is now explicit by composition: `SapService` delegates session/login concerns to `SapSessionService` instead of inheriting them.
 - `DynamicService` now exposes intent-first actions only; the raw action-chain runner is internal.
 - `LauncherService` and `WindowGroupService` now use clearer intent/state naming; historical internal state fields were removed.
-- Catalog counts are stable; content freshness still requires human verification.
-- Catalog review contract now lives in `ai/catalog-review.json`; agents may maintain the contract, but only a human should change freshness status to `verified`.
+- Catalog counts are stable and the current catalog-review entries are marked `verified`.
+- Catalog review contract lives in `ai/catalog-review.json`, and governance rules are now also represented in `ai/governance.json`.
 - A detailed multi-agent plan is currently active at `ai/current-plan.md`.
 
 ## Next evolution frontier
 
-- Record human verification outcomes in `ai/catalog-review.json` for the active catalogs, starting with `sap-transaction-catalog` and `autocorrect`.
-- If human review exposes a real schema or runtime issue, open a new technical plan from that evidence.
+- AI governance hardening is complete for this cycle.
+- There is no active technical frontier right now; create the next `ai/current-plan.md` only when a real runtime, contract, or workflow hotspot appears.
 
 ## Validation
 

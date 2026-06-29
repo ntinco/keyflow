@@ -13,6 +13,7 @@
     "AGENTS.md",
     "README.md",
     "ai/current-plan.md",
+    "ai/governance.json",
     "ai/catalog-review.json",
     "platforms/windows/keyflow.ahk",
     "platforms/windows/library/bootstrap.ahk",
@@ -126,6 +127,7 @@
         "repo-map.json",
         "current-plan.md",
         "agent-prompts.md",
+        "governance.json",
         "catalog-review.json"
       ]
     }
@@ -171,6 +173,6 @@
   "standalone": [
     "platforms/windows/hotkeys/layouts/colemak-dh.ahk"
   ],
-  "current-focus": "Stable multi-agent guide layer with simplified runtime APIs and a machine-visible catalog review contract for versioned catalogs.",
-  "next-frontier": "Record human verification outcomes in ai/catalog-review.json and only open a new technical plan if that review exposes a real contract or runtime issue."
+  "current-focus": "Stable multi-agent guide layer with simplified runtime APIs, verified active catalog review state, and machine-visible governance contracts.",
+  "next-frontier": "AI governance hardening is complete for this cycle. Open the next technical plan only when a real runtime, contract, or workflow hotspot appears."
 }

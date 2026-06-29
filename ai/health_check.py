@@ -70,6 +70,7 @@ KNOWN_DEAD_CLASSES = {"PasteService"}
 KNOWN_DEAD_CONSTANTS: tuple[str, ...] = ()
 CATALOG_REVIEW_FILE = "ai/catalog-review.json"
 CATALOG_REVIEW_STATUS_VALUES = {"pending_human_review", "verified"}
+GOVERNANCE_FILE = "ai/governance.json"
 
 
 def to_repo_path(path: Path, repo_root: Path) -> str:
@@ -431,6 +432,15 @@ def validate_catalog_review(
                             "message": f"Catalog {catalog_id} has an invalid last_human_verification date: {verified_on}",
                         }
                     )
+            notes_text = str(entry.get("notes", ""))
+            if re.search(r"\bpending\b", notes_text, re.IGNORECASE):
+                issues.append(
+                    {
+                        "type": "catalog_review_note_stale",
+                        "file": CATALOG_REVIEW_FILE,
+                        "message": f"Verified catalog {catalog_id} still contains stale pending wording in notes.",
+                    }
+                )
 
     missing_ids = sorted(set(expected_catalogs) - seen_ids)
     for missing_id in missing_ids:
@@ -444,6 +454,128 @@ def validate_catalog_review(
 
     result["pending_human_review_count"] = pending_count
     result["verified_count"] = verified_count
+    return result, issues
+
+
+def validate_governance_contract(
+    repo_root: Path,
+    repo_map: dict[str, object],
+) -> tuple[dict[str, object], list[dict[str, str]]]:
+    governance_path = repo_root / GOVERNANCE_FILE
+    result: dict[str, object] = {
+        "file": GOVERNANCE_FILE,
+        "exists": governance_path.exists(),
+    }
+    issues: list[dict[str, str]] = []
+
+    expected_guide_authority = [
+        "ai/health-check.summary.json",
+        "ai/repo-map.json",
+        "AGENTS.md",
+        "README.md",
+    ]
+    expected_required_cycle_outputs = [
+        "ai/health-check.summary.json",
+        "ai/repo-map.json",
+        "AGENTS.md",
+    ]
+    expected_detailed_plan_path = "ai/current-plan.md"
+    expected_human_owned_contracts = [CATALOG_REVIEW_FILE]
+    expected_machine_validated_contracts = [
+        "ai/repo-map.json",
+        CATALOG_REVIEW_FILE,
+    ]
+
+    if not governance_path.exists():
+        issues.append(
+            {
+                "type": "governance_missing",
+                "file": GOVERNANCE_FILE,
+                "message": "Governance contract is missing.",
+            }
+        )
+        return result, issues
+
+    try:
+        payload = json.loads(governance_path.read_text(encoding="utf-8-sig"))
+    except json.JSONDecodeError as exc:
+        issues.append(
+            {
+                "type": "governance_invalid_json",
+                "file": GOVERNANCE_FILE,
+                "message": str(exc),
+            }
+        )
+        return result, issues
+
+    result.update(payload)
+
+    if payload.get("guide_authority") != expected_guide_authority:
+        issues.append(
+            {
+                "type": "governance_guide_authority_mismatch",
+                "file": GOVERNANCE_FILE,
+                "message": "governance.json guide_authority does not match the repo guide contract.",
+            }
+        )
+
+    if payload.get("required_cycle_outputs") != expected_required_cycle_outputs:
+        issues.append(
+            {
+                "type": "governance_cycle_outputs_mismatch",
+                "file": GOVERNANCE_FILE,
+                "message": "governance.json required_cycle_outputs do not match the repo workflow contract.",
+            }
+        )
+
+    if payload.get("detailed_plan_path") != expected_detailed_plan_path:
+        issues.append(
+            {
+                "type": "governance_plan_path_mismatch",
+                "file": GOVERNANCE_FILE,
+                "message": "governance.json detailed_plan_path must point to ai/current-plan.md.",
+            }
+        )
+
+    if payload.get("human_owned_contracts") != expected_human_owned_contracts:
+        issues.append(
+            {
+                "type": "governance_human_contracts_mismatch",
+                "file": GOVERNANCE_FILE,
+                "message": "governance.json human_owned_contracts do not match the current repo contract.",
+            }
+        )
+
+    if payload.get("machine_validated_contracts") != expected_machine_validated_contracts:
+        issues.append(
+            {
+                "type": "governance_machine_contracts_mismatch",
+                "file": GOVERNANCE_FILE,
+                "message": "governance.json machine_validated_contracts do not match the current repo contract.",
+            }
+        )
+
+    for rel_path in expected_guide_authority + expected_human_owned_contracts + [expected_detailed_plan_path]:
+        if not (repo_root / rel_path).exists():
+            issues.append(
+                {
+                    "type": "governance_referenced_file_missing",
+                    "file": GOVERNANCE_FILE,
+                    "message": f"governance.json depends on a missing file: {rel_path}",
+                }
+            )
+
+    repo_map_read_order = repo_map.get("read-order", []) if isinstance(repo_map, dict) else []
+    for required_read_path in ["ai/current-plan.md", "ai/governance.json", "ai/catalog-review.json"]:
+        if required_read_path not in repo_map_read_order:
+            issues.append(
+                {
+                    "type": "governance_repo_map_read_order_missing",
+                    "file": "ai/repo-map.json",
+                    "message": f"repo-map read-order must include {required_read_path}.",
+                }
+            )
+
     return result, issues
 
 
@@ -849,6 +981,7 @@ def build_summary(
     profile_issues: list,
     guide_contract_issues: list,
     catalog_review_issues: list,
+    governance_issues: list,
     dead_candidates: dict,
     profile_results: list,
     registry: dict,
@@ -856,9 +989,10 @@ def build_summary(
     hotkey_counts: dict,
     unclosed_hotif: list,
     catalog_review_result: dict[str, object],
+    governance_result: dict[str, object],
     next_frontier: str = "",
 ) -> dict[str, object]:
-    issues = include_missing + registry_issues + service_call_issues + profile_issues + guide_contract_issues + catalog_review_issues + unclosed_hotif + forbidden_references
+    issues = include_missing + registry_issues + service_call_issues + profile_issues + guide_contract_issues + catalog_review_issues + governance_issues + unclosed_hotif + forbidden_references
     profile_counts = {p["label"]: p.get("item_count", 0) for p in profile_results}
     ai_readiness = compute_ai_readiness(issues, dead_candidates, forbidden_references)
     return {
@@ -872,6 +1006,10 @@ def build_summary(
             "exists": catalog_review_result.get("exists", False),
             "pending_human_review_count": catalog_review_result.get("pending_human_review_count", 0),
             "verified_count": catalog_review_result.get("verified_count", 0),
+        },
+        "governance": {
+            "file": governance_result.get("file", GOVERNANCE_FILE),
+            "exists": governance_result.get("exists", False),
         },
         "hotkey_counts": hotkey_counts,
         "dead_class_candidates": [c["class"] for c in dead_candidates["dead_class_candidates"]],
@@ -908,6 +1046,7 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
     profiles = parse_hotstring_profiles(bootstrap_text)
     profile_results, profile_issues = validate_profiles(profiles, data_dir, repo_root)
     catalog_review_result, catalog_review_issues = validate_catalog_review(repo_root, profiles)
+    governance_result, governance_issues = validate_governance_contract(repo_root, repo_map)
     service_contracts, registry_issues, service_call_issues, public_api_candidates = build_service_contracts(registry, class_lookup, file_index)
     public_calls = collect_public_service_calls(file_index)
     dead_candidates = detect_dead_candidates(file_index, registry, token_counter)
@@ -926,6 +1065,7 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
         profile_issues,
         repo_map_contract_issues + guide_contract_issues,
         catalog_review_issues,
+        governance_issues,
         dead_candidates,
         profile_results,
         registry,
@@ -933,6 +1073,7 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
         hotkey_counts,
         unclosed_hotif,
         catalog_review_result,
+        governance_result,
         next_frontier,
     )
 
@@ -945,6 +1086,7 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
             "profiles": profile_issues,
             "guide_contracts": repo_map_contract_issues + guide_contract_issues,
             "catalog_review": catalog_review_issues,
+            "governance": governance_issues,
             "unclosed_hotif": unclosed_hotif,
             "forbidden_references": forbidden_references,
         },
@@ -959,6 +1101,7 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
             "service_registry": service_contracts,
             "hotstring_profiles": profile_results,
             "catalog_review": catalog_review_result,
+            "governance": governance_result,
             "public_service_calls": public_calls,
         },
         "repo": {
