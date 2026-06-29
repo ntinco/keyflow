@@ -107,7 +107,7 @@ Use only one persistent plan location at a time.
 | External labels | Keep as-is |
 | SAP session names | Use business names like `pluz dev`, `pluz qas`, `pluz prd` |
 
-Preferred vocabulary: `session` `entry` `provider` `catalog` `window` `workspace` `target` `profile` `group` `context` `command` `run` `action` `path` `secret` `constant`
+Preferred vocabulary: `session` `entry` `provider` `catalog` `window` `workspace` `target` `profile` `group` `context` `command` `run` `action` `path` `secret` `constant` `frontier` `cycle`
 
 Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui synonyms, `run` with open/execute/start unless the distinction is real.
 

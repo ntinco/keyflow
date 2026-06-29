@@ -4,7 +4,7 @@ Strong reusable prompts for dual-role work in `keyflow` and similar AI-first rep
 
 ## Short instruction
 
-`Read AGENTS.md and execute ai/current-plan.md.`
+`Read AGENTS.md and execute ai/current-plan.md. If ai/current-plan.md is deferred or absent, report that and stop.`
 
 ## Execute current repo
 

@@ -89,3 +89,4 @@ The preferred startup contract lives in `local-startup.ini`:
 - Launcher and window-group flows now use clearer intent-first names instead of legacy helper wording.
 - Catalog review state now lives in `ai/catalog-review.json`, and the current active catalog entries are marked `verified`.
 - AI governance contract now lives in `ai/governance.json` and centers on the architect/executor role model.
+- This is a summary; AGENTS.md Current Model is authoritative.
