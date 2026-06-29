@@ -788,6 +788,17 @@
         "ai/repo-map.json",
         "ai/catalog-review.json"
       ],
+      "multi_agent_repo": true,
+      "required_agents_sections": [
+        "## Repo identity",
+        "## Multi-agent rules",
+        "## Next evolution frontier"
+      ],
+      "required_agents_phrases": [
+        "This repository is permanently operated as a multi-agent AI-first repo.",
+        "This repo is shared by multiple AIs.",
+        "Write for the next agent, not for your own memory."
+      ],
       "frontier_policy": {
         "when_human_only_work_remains": "Do not invent a new technical plan. Keep the human frontier explicit.",
         "when_new_technical_work_is_clear": "Replace ai/current-plan.md in the same cycle."

@@ -180,6 +180,6 @@
   "standalone": [
     "platforms/windows/hotkeys/layouts/colemak-dh.ahk"
   ],
-  "current-focus": "Stable AI-first runtime and normalized local-only contract, with the next hardening step focused on making the multi-agent governance contract impossible to weaken silently.",
-  "next-frontier": "Execute ai/current-plan.md to harden the multi-agent governance contract and make guide-layer drift machine-visible."
+  "current-focus": "Stable AI-first runtime, normalized local-only contract, and machine-enforced multi-agent governance that makes guide-layer drift visible to both execution and review checks.",
+  "next-frontier": "No active frontier. Next technical plan deferred until a real frontier appears. Replace ai/current-plan.md when a new technical frontier is identified."
 }

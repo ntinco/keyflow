@@ -133,12 +133,13 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 - Catalog review contract lives in `ai/catalog-review.json`, and governance rules are now also represented in `ai/governance.json`.
 - The runtime-local artifact contract is now fully normalized: `hotkey-usage.json` is consistently classified across `.gitignore`, `AGENTS.md`, `README.md`, `ai/repo-map.json`, and `ai/health_check.py`.
 - `ai/health_check.py` now enforces runtime-local boundary consistency via `validate_local_only_contract()`.
+- `ai/health_check.py` and `ai/review_check.py` now make multi-agent governance drift machine-visible by enforcing required guide sections, phrases, frontier state, and reviewer handoff commands.
 - `ai/review_check.py` is the reviewer-oriented audit for cycle closure, guide alignment, and multi-agent handoff quality.
 
 ## Next evolution frontier
 
-- Execute `ai/current-plan.md`: harden the multi-agent governance contract so another AI cannot silently weaken the repo's AI-first handoff model.
-- Start with machine-validation of mandatory multi-agent language in `AGENTS.md`, `ai/governance.json`, and `ai/repo-map.json`.
+- No active frontier. Next technical plan deferred until a real frontier appears. Replace `ai/current-plan.md` when a new technical frontier is identified.
+- Human-only pending work: verify real machine behavior only when future local config or launcher changes require it.
 
 ## Validation
 
