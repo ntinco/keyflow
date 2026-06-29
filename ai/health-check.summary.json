@@ -54,5 +54,5 @@
     "ai/repo-map.json",
     "ai/health-check.summary.json"
   ],
-  "next_frontier": "No active frontier. Next technical plan deferred until a real frontier appears. Replace ai/current-plan.md when a new technical frontier is identified."
+  "next_frontier": "Execute ai/current-plan.md to make governance the single source of truth for multi-agent enforcement and to detect stale summary state explicitly."
 }

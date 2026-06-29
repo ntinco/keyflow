@@ -138,8 +138,8 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 
 ## Next evolution frontier
 
-- No active frontier. Next technical plan deferred until a real frontier appears. Replace `ai/current-plan.md` when a new technical frontier is identified.
-- Human-only pending work: verify real machine behavior only when future local config or launcher changes require it.
+- Execute `ai/current-plan.md`: make governance the single source of truth for multi-agent enforcement and remove stale-summary false positives from reviewer flow.
+- Start with `ai/review_check.py` summary-staleness handling and duplicated required-phrase constants across validators.
 
 ## Validation
 
