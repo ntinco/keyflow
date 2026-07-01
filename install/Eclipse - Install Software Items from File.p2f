@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?p2f version='1.0.0'?>
+<p2f version='1.0.0'>
+  <ius size='8'>
+    <iu id='com.sap.adt.tools.bopf.devedition.feature.group' name='ABAP Business Object Tools (Developer Edition)' version='1.192.0'>
+      <repositories size='1'>
+        <repository location='https://tools.hana.ondemand.com/latest'/>
+      </repositories>
+    </iu>
+    <iu id='com.sap.adt.abapcleaner.feature.feature.group' name='ABAP cleaner' version='1.21.3'>
+      <repositories size='1'>
+        <repository location='https://sap.github.io/abap-cleaner/updatesite'/>
+      </repositories>
+    </iu>
+    <iu id='com.sap.adt.core.devedition.feature.group' name='ABAP Core Development Tools (Developer Edition)' version='3.52.3'>
+      <repositories size='1'>
+        <repository location='https://tools.hana.ondemand.com/latest'/>
+      </repositories>
+    </iu>
+    <iu id='com.sap.adt.tools.hana.devedition.feature.group' name='ABAP Development Tools for SAP HANA (Developer Edition)' version='3.52.0'>
+      <repositories size='1'>
+        <repository location='https://tools.hana.ondemand.com/latest'/>
+      </repositories>
+    </iu>
+    <iu id='com.sap.adt.wda.core.devedition.feature.group' name='ABAP Development Tools for Web Dynpro (Developer Edition)' version='1.208.0'>
+      <repositories size='1'>
+        <repository location='https://tools.hana.ondemand.com/latest'/>
+      </repositories>
+    </iu>
+    <iu id='com.sap.adt.pitools.tlf.devedition.feature.group' name='ABAP Enterprise Services and Integration Development Tools (Developer Edition)' version='1.208.1'>
+      <repositories size='1'>
+        <repository location='https://tools.hana.ondemand.com/latest'/>
+      </repositories>
+    </iu>
+    <iu id='com.microsoft.copilot.eclipse.feature.feature.group' name='GitHub Copilot' version='0.11.0.202508291001'>
+      <repositories size='1'>
+        <repository location='https://azuredownloads-g3ahgwb5b8bkbxhd.b01.azurefd.net/github-copilot/'/>
+      </repositories>
+    </iu>
+  </ius>
+</p2f>
