@@ -2,7 +2,6 @@
 loadSecretConstants() {
   global
   local secretsFile := secretsFilePath()
-  nttOfficePass := secretConfigValue(secretsFile, "nttOfficePass", "")
   keepassProviderCommand := secretConfigValue(secretsFile, "keepassProviderCommand", "")
 }
 
@@ -16,4 +15,3 @@ secretsFilePath() {
 secretConfigValue(secretsFile, key, defaultValue := "") {
   return IniRead(secretsFile, "secrets", key, defaultValue)
 }
-

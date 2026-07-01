@@ -35,10 +35,6 @@ class DynamicService {
     return this._runActionChain("^+{backspace}; {enter};", 2000)
   }
 
-  fillNttOfficeCredentials() {
-    return this._runActionChain("%nttOfficePass%; tab; %nttOfficePass%; enter")
-  }
-  
   /** 
    * Executes an action chain separated by ";"
    * @param actions - action string: "Send1; WWA,title; Send2; SL,1000"
