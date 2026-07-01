@@ -1,0 +1,6 @@
+git
+node
+python
+sevenzip
+imagemagick
+mas
