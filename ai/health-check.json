@@ -37,7 +37,7 @@
     },
     "hotkey_counts": {
       "platforms/windows/hotkeys/domains/comms.ahk": 11,
-      "platforms/windows/hotkeys/domains/media-web.ahk": 4,
+      "platforms/windows/hotkeys/domains/media-web.ahk": 3,
       "platforms/windows/hotkeys/domains/productivity.ahk": 6,
       "platforms/windows/hotkeys/editors-ide.ahk": 9,
       "platforms/windows/hotkeys/editors-office.ahk": 13,
@@ -87,6 +87,7 @@
         "service": "dynamic",
         "class": "DynamicService",
         "methods": [
+          "openEdgeReadAloud",
           "clearChatAndSend"
         ],
         "reason": "Public service methods are exposed but have no services.* callers."
@@ -371,7 +372,6 @@
         "class_file": "platforms/windows/library/automation/dynamic.ahk",
         "referenced_methods": [
           "copyAndRefreshAppTime",
-          "openEdgeReadAloud",
           "openEditorCommandPaletteWithPercent",
           "openSublimeCommandPaletteByTag",
           "openTeamsSearchAndGoToField",
@@ -824,12 +824,6 @@
           "whatsapp.archive",
           "whatsapp.clearArchive",
           "whatsapp.delete"
-        ]
-      },
-      {
-        "file": "platforms/windows/hotkeys/domains/media-web.ahk",
-        "calls": [
-          "dynamic.openEdgeReadAloud"
         ]
       },
       {

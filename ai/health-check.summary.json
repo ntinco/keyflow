@@ -36,7 +36,7 @@
   },
   "hotkey_counts": {
     "platforms/windows/hotkeys/domains/comms.ahk": 11,
-    "platforms/windows/hotkeys/domains/media-web.ahk": 4,
+    "platforms/windows/hotkeys/domains/media-web.ahk": 3,
     "platforms/windows/hotkeys/domains/productivity.ahk": 6,
     "platforms/windows/hotkeys/editors-ide.ahk": 9,
     "platforms/windows/hotkeys/editors-office.ahk": 13,

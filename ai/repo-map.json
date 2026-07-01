@@ -47,11 +47,6 @@
       "role": "Optional host launcher."
     },
     {
-      "id": "startup-vmware",
-      "path": "platforms/windows/tools/startup/vmware-startup.ahk",
-      "role": "Optional VMware launcher."
-    },
-    {
       "id": "health-check",
       "path": "ai/health_check.py",
       "role": "Validation guard and machine-readable state generator."
@@ -173,8 +168,7 @@
   "startup-config-sections": [
     "runtime-env",
     "sap-defaults",
-    "sap-delays",
-    "startup-host"
+    "sap-delays"
   ],
   "local-only-files": [
     "ai/run-result.json",
