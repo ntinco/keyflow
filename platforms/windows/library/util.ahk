@@ -30,7 +30,8 @@ utilClipboardRead(copyKeys := "^+c", waitSeconds := 0.5) {
 }
 
 utilPaste(data, noExit := "", clear := "") {
-  if clear  Send("{backspace}")
+  if clear 
+    Send("{backspace}")
   clipboardsaved := ClipboardAll()
   A_Clipboard := data
   ClipWait(0.5)
@@ -46,11 +47,11 @@ utilTooltip(msgv1, msgv2 := "", timer := 3000) {
   if message {
     if WinActive(exeEverything) {
       CaretGetPos(&x, &y)
-      if !x  x := 0
-      if !y  y := 0
-      try ToolTip(message, x + 15, y + 30, 13)
+      if !x x := 0
+        if !y y := 0
+          try ToolTip(message, x + 15, y + 30, 13)
     }
-    else  ToolTip(message, , , 13)
+    else ToolTip(message, , , 13)
     SetTimer(tooltipClose, timer)
   }
   tooltipClose() {

@@ -143,40 +143,14 @@ class SapService {
     services.windowGroup.activateGroup(appActivationTargets, "apps_sap_eclipse")
   }
 
-  _openAbapObject(objectName := "") {
-    objectName := Trim(objectName)
-    if !objectName
-      return
-
+  promptAndOpenAbapObject() {
     Send("^+a")
     Sleep(this._resolveOperationDelayMs())
-    utilPaste(objectName, true)
-    Send("{enter}")
-  }
-
-  promptAndOpenAbapObject() {
-    objectName := this._promptValue("ABAP object", "Open ABAP Object")
-    if !objectName
-      return
-    this._openAbapObject(objectName)
-  }
-
-  _searchAbapObject(searchText := "") {
-    searchText := Trim(searchText)
-    if !searchText
-      return
-
-    Send("^h")
-    Sleep(this._resolveOperationDelayMs())
-    utilPaste(searchText, true)
-    Send("{enter}")
+    utilPaste("zpm*", true)
   }
 
   promptAndSearchAbapObject() {
-    searchText := this._promptValue("Wildcard", "Search ABAP Object")
-    if !searchText
-      return
-    this._searchAbapObject(searchText)
+    Send("^o")
   }
 
   _runQuickDebug() {
@@ -257,12 +231,5 @@ class SapService {
     finally {
       A_Clipboard := savedClipboard
     }
-  }
-
-  _promptValue(promptLabel, titleText) {
-    result := InputBox("Enter " promptLabel, titleText, "w360 h140")
-    if (result.Result != "OK")
-      return ""
-    return Trim(result.Value)
   }
 }

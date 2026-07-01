@@ -10,7 +10,7 @@ syncBatchFile := readStartupValue(localStartupFile, "startup-host", "syncBatchFi
 flowLauncherLogsDir := readStartupValue(localStartupFile, "startup-host", "flowLauncherLogsDir", "")
 aimpPortableLink := readStartupValue(localStartupFile, "startup-host", "aimpPortableLink", baseDrive "\.sync\links\AimpPortable.exe.lnk")
 dittoPortableLink := readStartupValue(localStartupFile, "startup-host", "dittoPortableLink", baseDrive "\.sync\links\DittoPortable.exe.lnk")
-portableLinksCsv := readStartupValue(localStartupFile, "startup-host", "portableLinksCsv", "")
+portableLinksCsv := readStartupValue(localStartupFile, "startup-host", "portableLinksCsv", "\.sync\links\everything.exe.lnk;\.sync\links\flow.Launcher.exe.lnk;\.sync\links\keePassXCPortable.exe.lnk;\.sync\links\rbtray.exe.lnk;\.sync\links\ShareX.exe.lnk;\.sync\links\Snipaste.exe.lnk;\.sync\links\stretchly.exe.lnk;\.sync\links\workrave.exe.lnk;\.sync\links\tbaction.exe.lnk;\.sync\links\handy.exe.lnk;\.sync\links\cherry-studio.exe.lnk")
 launchDelayMs := readStartupNumber(localStartupFile, "startup-host", "launchDelayMs", 5000)
 
 run(A_ComSpec ' /k subst ' baseDrive ' "' downloadsPath '"', , "hide")
@@ -45,17 +45,17 @@ runPortableLink(linkPath) {
 }
 
 runWeeklyCleanup(baseDrive, flowLauncherLogsDir, syncBatchFile) {
-  folderDelete(baseDrive "\.sync\..apps\PortableApps\LibreOfficePortable\Data\settings\cache")
-  folderDelete(baseDrive "\.sync\..apps\PortableApps\LibreOfficePortable\Data\settings\crash")
-  folderDelete(baseDrive "\.sync\..apps\PortableApps\LibreOfficePortable\Data\settings\temp")
-  folderDelete(baseDrive "\.sync\..apps\PortableApps\LibreOfficePortable\Data\settings\updates")
-  folderDelete(baseDrive "\.sync\..apps\PortableApps\Notepad++Portable\Data\Config\backup")
-  folderDelete(baseDrive "\.sync\..apps\PortableApps_updauto\Snipaste\history")
+  folderDelete(baseDrive "\.sync\..apps_win\PortableApps\LibreOfficePortable\Data\settings\cache")
+  folderDelete(baseDrive "\.sync\..apps_win\PortableApps\LibreOfficePortable\Data\settings\crash")
+  folderDelete(baseDrive "\.sync\..apps_win\PortableApps\LibreOfficePortable\Data\settings\temp")
+  folderDelete(baseDrive "\.sync\..apps_win\PortableApps\LibreOfficePortable\Data\settings\updates")
+  folderDelete(baseDrive "\.sync\..apps_win\PortableApps\Notepad++Portable\Data\Config\backup")
+  folderDelete(baseDrive "\.sync\..apps_win\PortableApps_updauto\Snipaste\history")
   folderDelete(flowLauncherLogsDir)
-  folderDelete(baseDrive "\.sync\..apps\PortableApps_updmanual\ShareX\ShareX\Backup")
-  folderDelete(baseDrive "\.sync\..apps\PortableApps_updmanual\ShareX\ShareX\Logs")
-  folderDelete(baseDrive "\.sync\..apps\PortableApps_updmanual\xyplorer_full_noinstall\Data\AutoBackup")
-  fileDeleteIfExists(baseDrive "\.sync\..apps\PortableApps_updauto\Snipaste\splog.txt")
+  folderDelete(baseDrive "\.sync\..apps_win\PortableApps_updmanual\ShareX\ShareX\Backup")
+  folderDelete(baseDrive "\.sync\..apps_win\PortableApps_updmanual\ShareX\ShareX\Logs")
+  folderDelete(baseDrive "\.sync\..apps_win\PortableApps_updmanual\xyplorer_full_noinstall\Data\AutoBackup")
+  fileDeleteIfExists(baseDrive "\.sync\..apps_win\PortableApps_updauto\Snipaste\splog.txt")
 
   if syncBatchFile && FileExist(syncBatchFile)
     RunWait(syncBatchFile)

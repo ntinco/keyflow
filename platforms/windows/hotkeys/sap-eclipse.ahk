@@ -20,10 +20,6 @@ Send("^1")
 trackSapEclipseHotkeyUsage("backtick")
 services.sap.promptAndOpenAbapObject()
 }
-; ^`::{
-; trackSapEclipseHotkeyUsage("ctrl+backtick")
-; Send("^w")
-; }
 ^/::{
 trackSapEclipseHotkeyUsage("^/")
 Send("^7")

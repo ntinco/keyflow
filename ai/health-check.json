@@ -559,9 +559,7 @@
           "saveCodeArtifact",
           "focusGuiWindows",
           "focusEclipseWindows",
-          "_openAbapObject",
           "promptAndOpenAbapObject",
-          "_searchAbapObject",
           "promptAndSearchAbapObject",
           "_runQuickDebug",
           "startQuickDebug",
@@ -574,8 +572,7 @@
           "_submitTcodeButton",
           "_resolveOperationDelayMs",
           "_syncYmtProgramFromLocal",
-          "_readActiveInputValue",
-          "_promptValue"
+          "_readActiveInputValue"
         ]
       },
       {
