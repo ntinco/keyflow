@@ -21,7 +21,7 @@ Run(rootDir "\keyflow.ahk")
 runPortableLink(aimpPortableLink)
 runPortableLink(dittoPortableLink)
 for linkPath in startupConfigCsvArray(portableLinksCsv)
-  runPortableLink(linkPath)
+  runPortableLink(baseDrive . linkPath)
 
 runPortableLink(linkPath) {
   if !linkPath

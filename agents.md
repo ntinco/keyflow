@@ -38,7 +38,7 @@ This repository is permanently operated as a dual-role AI-first repo.
    - `ai/health-check.summary.json`
 5. Edit the smallest responsible file set.
 6. Run `python ai/health_check.py --pretty --output ai/health-check.json --output-summary ai/health-check.summary.json`.
-7. If runtime wiring changed, smoke-test with `platforms/windows/tools/exe/AutoHotkey64.exe /ErrorStdOut=CP65001 platforms/windows/keyflow.ahk`.
+7. If runtime wiring changed, smoke-test with `platforms/windows/tools/exe/AutoHotkey64.exe /ErrorStdOut=CP65001 platforms/windows/keyflow.ahk` and record the result with `python ai/run_smoke.py`.
 8. If you changed guides, plan state, or cycle status, rerun `python ai/review_check.py --pretty --summary`.
 9. Close the cycle by updating the guide layer if routing, behavior, constraints, or next frontier changed.
 10. In the final handoff, state which actions are still human-only and whether a new technical plan should be created now or deferred.
