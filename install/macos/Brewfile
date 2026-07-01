@@ -1,5 +1,0 @@
-# Homebrew Bundle placeholder for keyflow workstation setup.
-# The executable installer currently reads these manifests instead:
-# - install/macos/brew-formulae.txt
-# - install/macos/brew-casks-core.txt
-# This file exists so a future migration to `brew bundle` has a stable path.
