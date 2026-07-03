@@ -39,12 +39,12 @@
       "platforms/windows/hotkeys/domains/comms.ahk": 11,
       "platforms/windows/hotkeys/domains/media-web.ahk": 3,
       "platforms/windows/hotkeys/domains/productivity.ahk": 6,
-      "platforms/windows/hotkeys/editors-ide.ahk": 9,
-      "platforms/windows/hotkeys/editors-office.ahk": 13,
+      "platforms/windows/hotkeys/editors-ide.ahk": 3,
+      "platforms/windows/hotkeys/editors-office.ahk": 11,
       "platforms/windows/hotkeys/editors-text.ahk": 18,
       "platforms/windows/hotkeys/global.ahk": 20,
       "platforms/windows/hotkeys/sap-eclipse.ahk": 22,
-      "platforms/windows/hotkeys/sap-gui.ahk": 19
+      "platforms/windows/hotkeys/sap-gui.ahk": 18
     },
     "dead_class_candidates": [],
     "dead_constant_candidates": [],
@@ -75,6 +75,11 @@
   },
   "audits": {
     "unused_assignments": [
+      {
+        "file": "platforms/windows/library/config/constants-core.ahk",
+        "symbol": "titleLibreCalc",
+        "reason": "Assignment appears to be declared but not referenced elsewhere."
+      },
       {
         "file": "platforms/windows/library/config/constants-core.ahk",
         "symbol": "titleChatGpt",
