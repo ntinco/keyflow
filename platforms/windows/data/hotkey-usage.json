@@ -1,18 +1,32 @@
 ﻿{
   "hotkeys": {
     "!6": {
-      "count": 6,
+      "count": 13,
       "firstSeenUtc": "20260630135517",
-      "lastSeenUtc": "20260701163030",
+      "lastSeenUtc": "20260702222726",
+      "sourceFile": "hotkeys\/sap-gui.ahk",
+      "sourceGroup": "sap-gui-session"
+    },
+    "!7": {
+      "count": 3,
+      "firstSeenUtc": "20260701215055",
+      "lastSeenUtc": "20260702004102",
       "sourceFile": "hotkeys\/sap-gui.ahk",
       "sourceGroup": "sap-gui-session"
     },
     "!8": {
-      "count": 2,
+      "count": 11,
       "firstSeenUtc": "20260626194036",
-      "lastSeenUtc": "20260626201910",
+      "lastSeenUtc": "20260702165554",
       "sourceFile": "hotkeys\/sap-gui.ahk",
       "sourceGroup": "sap-gui-session"
+    },
+    "!e": {
+      "count": 1,
+      "firstSeenUtc": "20260701215218",
+      "lastSeenUtc": "20260701215218",
+      "sourceFile": "hotkeys\/global.ahk",
+      "sourceGroup": "global"
     },
     "!f": {
       "count": 1,
@@ -28,31 +42,38 @@
       "sourceFile": "hotkeys\/editors.ahk",
       "sourceGroup": "excel"
     },
+    "!s": {
+      "count": 1,
+      "firstSeenUtc": "20260701215218",
+      "lastSeenUtc": "20260701215218",
+      "sourceFile": "hotkeys\/global.ahk",
+      "sourceGroup": "global"
+    },
     "#!right": {
-      "count": 2,
+      "count": 4,
       "firstSeenUtc": "20260626163132",
-      "lastSeenUtc": "20260630193808",
+      "lastSeenUtc": "20260702171000",
       "sourceFile": "hotkeys\/global.ahk",
       "sourceGroup": "global"
     },
     "#esc": {
-      "count": 12,
+      "count": 24,
       "firstSeenUtc": "20260628031554",
-      "lastSeenUtc": "20260701150459",
+      "lastSeenUtc": "20260703000743",
       "sourceFile": "hotkeys\/global.ahk",
       "sourceGroup": "global"
     },
     "$^!+a": {
-      "count": 7,
+      "count": 9,
       "firstSeenUtc": "20260630200653",
-      "lastSeenUtc": "20260630201458",
+      "lastSeenUtc": "20260702162303",
       "sourceFile": "hotkeys\/global.ahk",
       "sourceGroup": "global"
     },
     "^+k": {
-      "count": 101,
+      "count": 240,
       "firstSeenUtc": "20260626194324",
-      "lastSeenUtc": "20260701145528",
+      "lastSeenUtc": "20260702223426",
       "sourceFile": "hotkeys\/sap-eclipse.ahk",
       "sourceGroup": "sap-eclipse"
     },
@@ -70,10 +91,24 @@
       "sourceFile": "hotkeys\/sap-gui.ahk",
       "sourceGroup": "sap-gui-session"
     },
+    "^n": {
+      "count": 2,
+      "firstSeenUtc": "20260701174813",
+      "lastSeenUtc": "20260702220358",
+      "sourceFile": "hotkeys\/sap-eclipse.ahk",
+      "sourceGroup": "sap-eclipse"
+    },
+    "^s": {
+      "count": 5,
+      "firstSeenUtc": "20260701192024",
+      "lastSeenUtc": "20260702223106",
+      "sourceFile": "hotkeys\/sap-eclipse.ahk",
+      "sourceGroup": "sap-eclipse"
+    },
     "backtick": {
-      "count": 18,
+      "count": 34,
       "firstSeenUtc": "20260626194142",
-      "lastSeenUtc": "20260701171027",
+      "lastSeenUtc": "20260702222354",
       "sourceFile": "hotkeys\/sap-eclipse.ahk",
       "sourceGroup": "sap-eclipse"
     },
@@ -84,37 +119,44 @@
       "sourceFile": "hotkeys\/sap-eclipse.ahk",
       "sourceGroup": "sap-eclipse"
     },
+    "f2": {
+      "count": 14,
+      "firstSeenUtc": "20260701195149",
+      "lastSeenUtc": "20260702154810",
+      "sourceFile": "hotkeys\/sap-eclipse.ahk",
+      "sourceGroup": "sap-eclipse"
+    },
     "f5": {
-      "count": 43,
+      "count": 51,
       "firstSeenUtc": "20260626163737",
-      "lastSeenUtc": "20260701161323",
+      "lastSeenUtc": "20260702234935",
       "sourceFile": "hotkeys\/domains.ahk",
       "sourceGroup": "xyplorer"
     },
     "xbutton2": {
-      "count": 6,
+      "count": 17,
       "firstSeenUtc": "20260630133859",
-      "lastSeenUtc": "20260701151527",
+      "lastSeenUtc": "20260702215219",
       "sourceFile": "hotkeys\/global.ahk",
       "sourceGroup": "global"
     },
     "~\\": {
-      "count": 4,
+      "count": 7,
       "firstSeenUtc": "20260626163556",
-      "lastSeenUtc": "20260701010002",
+      "lastSeenUtc": "20260702160011",
       "sourceFile": "hotkeys\/global.ahk",
       "sourceGroup": "global"
     },
     "~^c": {
-      "count": 142,
+      "count": 370,
       "firstSeenUtc": "20260626163544",
-      "lastSeenUtc": "20260701170525",
+      "lastSeenUtc": "20260703001016",
       "sourceFile": "hotkeys\/global.ahk",
       "sourceGroup": "global"
     }
   },
   "meta": {
-    "updatedAtUtc": "20260701171027",
+    "updatedAtUtc": "20260703001016",
     "version": 1
   }
 }

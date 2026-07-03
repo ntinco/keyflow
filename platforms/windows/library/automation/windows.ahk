@@ -34,10 +34,12 @@
     utilGetMonitor(&right, &monH)
   }
 
-  _taskbarHeight() {
+_taskbarHeight() {
+    if !WinExist("ahk_class Shell_TrayWnd")
+        return 0
     WinGetPos(, &y1, , &h, "ahk_class Shell_TrayWnd")
-    return (y1 = A_Screenheight - h) ? h : 0
-  }
+    return (y1 = A_ScreenHeight - h) ? h : 0
+}
 
   soundToggle(lmin, lmax) {
     sleep(300)
