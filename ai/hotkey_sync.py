@@ -481,5 +481,19 @@ if __name__ == "__main__":
         list_hotkeys(_best_source(), inactive_only=False)
     elif "--list-inactive" in args:
         list_hotkeys(_best_source(), inactive_only=True)
+    elif not args:
+        # No arguments: auto-sync if DB is ready, otherwise show help
+        if DB_PATH.exists():
+            print("No argument given — auto-syncing from hotkeys.db")
+            entries = _best_source(label="sync")
+            written = sync(entries)
+            print(f"Regenerated {len(written)} file(s):")
+            for w in written:
+                print(f"  {w}")
+        else:
+            print("hotkeys.db not found. First run:")
+            print("  python ai/hotkey_sync.py --init-db")
+            print()
+            print(__doc__)
     else:
         print(__doc__)
