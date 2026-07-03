@@ -289,9 +289,13 @@ FILE_HEADERS = {
 # GENERATOR
 # ---------------------------------------------------------------------------
 
+def _ahk_str(s):
+    """Escape a Python string for use inside an AHK v2 double-quoted string."""
+    return s.replace("`", "``").replace('"', '`"')
+
 def _fmt_track(entry):
     args = entry["track_args"]
-    quoted = ", ".join(f'"{a}"' for a in args)
+    quoted = ", ".join(f'"{_ahk_str(a)}"' for a in args)
     return f'{entry["track_fn"]}({quoted})'
 
 def _fmt_hotif(entry):

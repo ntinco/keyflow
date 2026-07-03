@@ -20,7 +20,7 @@ trackSapEclipseHotkeyUsage("^g")
 Send("^1")
 }
 `::{
-trackSapEclipseHotkeyUsage("`")
+trackSapEclipseHotkeyUsage("``")
 services.sap.promptAndOpenAbapObject()
 }
 ^/::{

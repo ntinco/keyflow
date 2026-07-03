@@ -155,9 +155,9 @@
       "sourceGroup": "xyplorer"
     },
     "xbutton2": {
-      "count": 17,
+      "count": 18,
       "firstSeenUtc": "20260630133859",
-      "lastSeenUtc": "20260702215219",
+      "lastSeenUtc": "20260703142549",
       "sourceFile": "hotkeys\/global.ahk",
       "sourceGroup": "global"
     },
@@ -169,15 +169,15 @@
       "sourceGroup": "global"
     },
     "~^c": {
-      "count": 387,
+      "count": 388,
       "firstSeenUtc": "20260626163544",
-      "lastSeenUtc": "20260703032901",
+      "lastSeenUtc": "20260703142553",
       "sourceFile": "hotkeys\/global.ahk",
       "sourceGroup": "global"
     }
   },
   "meta": {
-    "updatedAtUtc": "20260703045736",
+    "updatedAtUtc": "20260703142553",
     "version": 1
   }
 }
