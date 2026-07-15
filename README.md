@@ -16,21 +16,17 @@ platforms/windows/keyflow.ahk
   library/bootstrap.ahk
     library/config/constants-core.ahk
     library/config/constants-secrets.ahk
-    library/automation/ (13 services)
+    library/automation/ (10 services)
   hotkeys/hotkey-tracking.ahk
   hotkeys/global.ahk
   hotkeys/sap-gui.ahk
   hotkeys/sap-eclipse.ahk
-  hotkeys/editors-ide.ahk
-  hotkeys/editors-office.ahk
-  hotkeys/editors-text.ahk
-  hotkeys/domains/comms.ahk
   hotkeys/domains/productivity.ahk
 ```
 
 Main service surface:
 
-`dynamic` `everything` `hotkeyTracker` `hotstring` `launcher` `memory` `run` `sap` `snipaste` `video` `whatsapp` `windowGroup` `windows`
+`everything` `hotkeyTracker` `hotstring` `launcher` `memory` `run` `sap` `snipaste` `windowGroup` `windows`
 
 ## Hotkey catalog
 
@@ -44,6 +40,12 @@ python ai/hotkey_sync.py --check
 ```
 
 Generic application remaps belong in each application's native keymap. Keyflow keeps compound workflows, SAP/ADT business actions, and Windows automations that still provide meaningful leverage.
+
+The catalog separates implementation from intent:
+
+- `platform` identifies where the current action is implemented. Every current AHK action is `windows`.
+- `portability=portable-intent` marks behavior worth evaluating for a native macOS binding.
+- `portability=windows-only` marks behavior tied to Windows applications or APIs.
 
 ## SAP model
 
@@ -64,7 +66,7 @@ All machine-specific configuration is local-only. Use these versioned examples a
 
 | Example file | Purpose |
 |---|---|
-| `platforms/windows/data/local-paths.example.ini` | Machine paths, app targets, ABAP workspace hints |
+| `platforms/windows/data/local-paths.example.ini` | Machine paths and ABAP workspace hints |
 | `platforms/windows/data/local-startup.example.ini` | Runtime env, SAP defaults, UI config, startup launcher config |
 | `platforms/windows/data/local-secrets.example.ini` | Secrets and `keepassProviderCommand` |
 | `platforms/windows/data/sap-keepass-layout.example.md` | Expected KeePass entry layout |
@@ -100,6 +102,8 @@ The preferred startup contract lives in `local-startup.ini`:
 - The `utils` global object is gone; utility behavior lives in free `util*()` functions.
 - Launcher and window-group flows now use clearer intent-first names instead of legacy helper wording.
 - The human hotkey catalog is `hotkeys.db`; generated AHK and Markdown drift is enforced by `ai/hotkey_sync.py --check` through the health check.
+- The Windows runtime is reduced to 54 hotkeys, 6 hotstrings, and 10 registered services; portable intent is cataloged separately from implementation platform.
+- Hotkey tracking remains temporary and records new usage by context instead of merging identical key combinations across applications.
 - Catalog review state now lives in `ai/catalog-review.json`, and the current active catalog entries are marked `verified`.
 - AI governance contract now lives in `ai/governance.json` and centers on the architect/executor role model.
 - This is a summary; AGENTS.md Current Model is authoritative.

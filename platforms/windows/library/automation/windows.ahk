@@ -14,19 +14,6 @@
     WinMove(x, targetY, width, targetHeight, "A")
   }
 
-  snapWindowRight(){
-    this.resizeHeight()
-    this._winSizes(&x, &y, &width, &height, &right, &bottom)
-    WinMove(x, y, right - x, height, "A")
-  }
-
-  snapWindowLeft(){
-    this.resizeHeight()
-    this._winSizes(&x, &y, &width, &height, &right, &monitorHeight)
-    height += y * -1 * 2 - this._taskbarHeight()
-    WinMove(0, 0, x + width, height, "A")
-  }
-
   _winSizes(&x, &y, &w, &h, &right, &monH) {
     CoordMode("Mouse")
     WinGetPos(&x, &y, &w, &h, "A")
@@ -40,20 +27,6 @@ _taskbarHeight() {
     WinGetPos(, &y1, , &h, "ahk_class Shell_TrayWnd")
     return (y1 = A_ScreenHeight - h) ? h : 0
 }
-
-  soundToggle(lmin, lmax) {
-    sleep(300)
-    level := SoundGetVolume()
-
-    If (level >= lmax)
-      level := lmin
-    Else If (level < lmax)
-      level := lmax
-
-    SoundSetVolume(level)
-    sleep 2000
-    Send("{Media_play_pause}")
-  }
 
   microphoneToggle(){
     CoordMode "Pixel"

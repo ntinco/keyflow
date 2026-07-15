@@ -24,25 +24,9 @@ utilPaste("summary in prompt",,true)
 trackHotkeyEvent("!e", "hotkeys/global.ahk", "global")
 services.windowGroup.activateGroup(appActivationTargets,"apps_sap_workspace")
 }
-!a::{
-trackHotkeyEvent("!a", "hotkeys/global.ahk", "global")
-services.windowGroup.activateGroup(appActivationTargets,"apps_control")
-}
-!s::{
-trackHotkeyEvent("!s", "hotkeys/global.ahk", "global")
-services.windowGroup.activateGroup(appActivationTargets,"apps_support")
-}
 !d::{
 trackHotkeyEvent("!d", "hotkeys/global.ahk", "global")
 services.windowGroup.activateGroup(appActivationTargets,"apps_ide")
-}
-!f::{
-trackHotkeyEvent("!f", "hotkeys/global.ahk", "global")
-services.windowGroup.activateGroup(appActivationTargets,"apps_note")
-}
-f12::{
-trackHotkeyEvent("f12", "hotkeys/global.ahk", "global")
-services.video.control()
 }
 #f1::{
 trackHotkeyEvent("#f1", "hotkeys/global.ahk", "global")
@@ -60,21 +44,9 @@ services.sap.openPluzPrdSession()
 trackHotkeyEvent("#esc", "hotkeys/global.ahk", "global")
 services.windows.resizeHeight()
 }
-#!left::{
-trackHotkeyEvent("#!left", "hotkeys/global.ahk", "global")
-services.windows.snapWindowLeft()
-}
-#!right::{
-trackHotkeyEvent("#!right", "hotkeys/global.ahk", "global")
-services.windows.snapWindowRight()
-}
 #e::{
 trackHotkeyEvent("#e", "hotkeys/global.ahk", "global")
 services.run.openApp(exeXyplorer)
-}
-#b::{
-trackHotkeyEvent("#b", "hotkeys/global.ahk", "global")
-services.windows.soundToggle("40","90")
 }
 ~\::{
 trackHotkeyEvent("~\", "hotkeys/global.ahk", "global")
@@ -83,10 +55,6 @@ services.windows.microphoneToggle()
 xbutton2::{
 trackHotkeyEvent("xbutton2", "hotkeys/global.ahk", "global")
 services.snipaste.copyPaste("{printscreen}",snipasteTargets)
-}
-xbutton1::{
-trackHotkeyEvent("xbutton1", "hotkeys/global.ahk", "global")
-services.snipaste.copyPaste("^{printscreen}",snipasteTargets)
 }
 $^!+a::{
 trackHotkeyEvent("$^!+a", "hotkeys/global.ahk", "global")

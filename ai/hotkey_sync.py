@@ -47,14 +47,15 @@ CREATE TABLE IF NOT EXISTS hotkeys (
     label         TEXT NOT NULL,
     platform      TEXT NOT NULL,
     active        INTEGER NOT NULL DEFAULT 1,
-    notes         TEXT DEFAULT ''
+    notes         TEXT DEFAULT '',
+    portability   TEXT NOT NULL DEFAULT 'windows-only'
 );
 """
 
 DB_COLUMNS = [
     "sort_order", "id", "file", "type", "key", "trigger", "options",
     "context", "context_fn", "context_label", "track_fn", "track_args",
-    "action", "label", "platform", "active", "notes",
+    "action", "label", "platform", "active", "notes", "portability",
 ]
 
 FILE_HEADERS = {
@@ -66,10 +67,6 @@ FILE_TITLES = {
     "global": "Global",
     "sap-gui": "SAP GUI and NWBC",
     "sap-eclipse": "SAP Eclipse / ADT",
-    "editors-ide": "IDE commands",
-    "editors-office": "Office workflows",
-    "editors-text": "Text editor commands",
-    "domains/comms": "Communication workflows",
     "domains/productivity": "Productivity workflows",
 }
 
@@ -149,6 +146,8 @@ def validate_entries(entries: list[dict[str, object]]) -> None:
         platforms = entry.get("platform")
         if not isinstance(platforms, list) or not platforms:
             issues.append(f"{entry_id}: platform must be a non-empty JSON array")
+        if entry.get("portability") not in {"windows-only", "portable-intent"}:
+            issues.append(f"{entry_id}: portability must be windows-only or portable-intent")
         if not str(entry.get("action") or "").strip() or not str(entry.get("label") or "").strip():
             issues.append(f"{entry_id}: action and label are required")
     if issues:
@@ -268,13 +267,14 @@ def generate_readme(entries: list[dict[str, object]]) -> str:
     ]
     ordered_files = sorted(by_file, key=lambda name: (FILE_ORDER.get(name, 999), name))
     for file_key in ordered_files:
-        lines.extend(["", f"## {FILE_TITLES.get(file_key, file_key)}", "", "| Trigger | Context | Action | Platform |", "|---|---|---|---|"])
+        lines.extend(["", f"## {FILE_TITLES.get(file_key, file_key)}", "", "| Trigger | Context | Action | Implementation | Portability |", "|---|---|---|---|---|"])
         for entry in by_file[file_key]:
             trigger = _display_key(entry).replace("|", "\\|")
             context = str(entry.get("context_label") or "global").replace("|", "\\|")
             label = str(entry["label"]).replace("|", "\\|")
             platforms = ", ".join(str(value) for value in entry["platform"])
-            lines.append(f"| `{trigger}` | {context} | {label} | {platforms} |")
+            portability = str(entry["portability"])
+            lines.append(f"| `{trigger}` | {context} | {label} | {platforms} | {portability} |")
     return "\n".join(lines) + "\n"
 
 
@@ -334,11 +334,11 @@ def check(entries: list[dict[str, object]]) -> bool:
 
 def list_entries(entries: list[dict[str, object]], inactive_only: bool = False) -> None:
     rows = [entry for entry in entries if (not entry["active"]) == inactive_only]
-    print(f"{'ID':<30} {'FILE':<22} {'KEY/TRIGGER':<18} {'PLATFORM':<18} LABEL")
-    print("-" * 116)
+    print(f"{'ID':<30} {'FILE':<22} {'KEY/TRIGGER':<18} {'PLATFORM':<12} {'PORTABILITY':<16} LABEL")
+    print("-" * 130)
     for entry in rows:
         platforms = ",".join(str(value) for value in entry["platform"])
-        print(f"{entry['id']:<30} {entry['file']:<22} {_display_key(entry):<18} {platforms:<18} {entry['label']}")
+        print(f"{entry['id']:<30} {entry['file']:<22} {_display_key(entry):<18} {platforms:<12} {entry['portability']:<16} {entry['label']}")
     print(f"\n{len(rows)} entries")
 
 

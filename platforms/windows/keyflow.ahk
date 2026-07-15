@@ -6,8 +6,4 @@ global services := keyflowInitServices()
 #Include hotkeys\global.ahk
 #Include hotkeys\sap-gui.ahk
 #Include hotkeys\sap-eclipse.ahk
-#Include hotkeys\editors-ide.ahk
-#Include hotkeys\editors-office.ahk
-#Include hotkeys\editors-text.ahk
-#Include hotkeys\domains\comms.ahk
 #Include hotkeys\domains\productivity.ahk

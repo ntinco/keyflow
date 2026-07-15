@@ -3,7 +3,6 @@
   "issue_count": 0,
   "ai_readiness": 100,
   "services": [
-    "dynamic",
     "everything",
     "hotkeyTracker",
     "hotstring",
@@ -12,8 +11,6 @@
     "run",
     "sap",
     "snipaste",
-    "video",
-    "whatsapp",
     "windowGroup",
     "windows"
   ],
@@ -35,12 +32,8 @@
     "exists": true
   },
   "hotkey_counts": {
-    "platforms/windows/hotkeys/domains/comms.ahk": 4,
-    "platforms/windows/hotkeys/domains/productivity.ahk": 6,
-    "platforms/windows/hotkeys/editors-ide.ahk": 1,
-    "platforms/windows/hotkeys/editors-office.ahk": 3,
-    "platforms/windows/hotkeys/editors-text.ahk": 1,
-    "platforms/windows/hotkeys/global.ahk": 19,
+    "platforms/windows/hotkeys/domains/productivity.ahk": 5,
+    "platforms/windows/hotkeys/global.ahk": 11,
     "platforms/windows/hotkeys/sap-eclipse.ahk": 20,
     "platforms/windows/hotkeys/sap-gui.ahk": 18
   },

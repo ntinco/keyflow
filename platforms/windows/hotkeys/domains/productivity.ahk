@@ -23,11 +23,7 @@ services.launcher.openSelectedMedia()
 #hotif winactive(exeXyplorer)
 f5::{
 trackDomainsHotkeyUsage("f5", "xyplorer")
-services.dynamic.refreshAndCloseXyplorerTab()
-}
-#hotif winactive(titleTaskTimeTracker)
-f1::{
-trackDomainsHotkeyUsage("f1", "task-time-tracker")
-services.dynamic.copyAndRefreshAppTime()
+Send("{f5}")
+Send("^+{f4}")
 }
 #hotif

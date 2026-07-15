@@ -4,7 +4,6 @@
     "issue_count": 0,
     "ai_readiness": 100,
     "services": [
-      "dynamic",
       "everything",
       "hotkeyTracker",
       "hotstring",
@@ -13,8 +12,6 @@
       "run",
       "sap",
       "snipaste",
-      "video",
-      "whatsapp",
       "windowGroup",
       "windows"
     ],
@@ -36,12 +33,8 @@
       "exists": true
     },
     "hotkey_counts": {
-      "platforms/windows/hotkeys/domains/comms.ahk": 4,
-      "platforms/windows/hotkeys/domains/productivity.ahk": 6,
-      "platforms/windows/hotkeys/editors-ide.ahk": 1,
-      "platforms/windows/hotkeys/editors-office.ahk": 3,
-      "platforms/windows/hotkeys/editors-text.ahk": 1,
-      "platforms/windows/hotkeys/global.ahk": 19,
+      "platforms/windows/hotkeys/domains/productivity.ahk": 5,
+      "platforms/windows/hotkeys/global.ahk": 11,
       "platforms/windows/hotkeys/sap-eclipse.ahk": 20,
       "platforms/windows/hotkeys/sap-gui.ahk": 18
     },
@@ -74,61 +67,14 @@
     "dead_constant_candidates": []
   },
   "audits": {
-    "unused_assignments": [
-      {
-        "file": "platforms/windows/library/config/constants-core.ahk",
-        "symbol": "exeTodoist",
-        "reason": "Assignment appears to be declared but not referenced elsewhere."
-      },
-      {
-        "file": "platforms/windows/library/config/constants-core.ahk",
-        "symbol": "classExcel",
-        "reason": "Assignment appears to be declared but not referenced elsewhere."
-      },
-      {
-        "file": "platforms/windows/library/config/constants-core.ahk",
-        "symbol": "titleLibreCalc",
-        "reason": "Assignment appears to be declared but not referenced elsewhere."
-      },
-      {
-        "file": "platforms/windows/library/config/constants-core.ahk",
-        "symbol": "titleChatGpt",
-        "reason": "Assignment appears to be declared but not referenced elsewhere."
-      }
-    ],
+    "unused_assignments": [],
     "unused_groups_or_targets": [],
-    "public_service_methods_without_callers": [
-      {
-        "service": "dynamic",
-        "class": "DynamicService",
-        "methods": [
-          "openEdgeReadAloud",
-          "clearChatAndSend"
-        ],
-        "reason": "Public service methods are exposed but have no services.* callers."
-      }
-    ]
+    "public_service_methods_without_callers": []
   },
   "contracts": {
     "include_graph": [
       {
-        "file": "platforms/windows/hotkeys/domains/comms.ahk",
-        "includes": []
-      },
-      {
         "file": "platforms/windows/hotkeys/domains/productivity.ahk",
-        "includes": []
-      },
-      {
-        "file": "platforms/windows/hotkeys/editors-ide.ahk",
-        "includes": []
-      },
-      {
-        "file": "platforms/windows/hotkeys/editors-office.ahk",
-        "includes": []
-      },
-      {
-        "file": "platforms/windows/hotkeys/editors-text.ahk",
         "includes": []
       },
       {
@@ -176,35 +122,11 @@
             "exists": true
           },
           {
-            "include": "hotkeys/editors-ide.ahk",
-            "target": "platforms/windows/hotkeys/editors-ide.ahk",
-            "exists": true
-          },
-          {
-            "include": "hotkeys/editors-office.ahk",
-            "target": "platforms/windows/hotkeys/editors-office.ahk",
-            "exists": true
-          },
-          {
-            "include": "hotkeys/editors-text.ahk",
-            "target": "platforms/windows/hotkeys/editors-text.ahk",
-            "exists": true
-          },
-          {
-            "include": "hotkeys/domains/comms.ahk",
-            "target": "platforms/windows/hotkeys/domains/comms.ahk",
-            "exists": true
-          },
-          {
             "include": "hotkeys/domains/productivity.ahk",
             "target": "platforms/windows/hotkeys/domains/productivity.ahk",
             "exists": true
           }
         ]
-      },
-      {
-        "file": "platforms/windows/library/automation/dynamic.ahk",
-        "includes": []
       },
       {
         "file": "platforms/windows/library/automation/everything.ahk",
@@ -246,14 +168,6 @@
       },
       {
         "file": "platforms/windows/library/automation/snipaste.ahk",
-        "includes": []
-      },
-      {
-        "file": "platforms/windows/library/automation/video.ahk",
-        "includes": []
-      },
-      {
-        "file": "platforms/windows/library/automation/whatsapp.ahk",
         "includes": []
       },
       {
@@ -318,11 +232,6 @@
             "exists": true
           },
           {
-            "include": "automation/dynamic.ahk",
-            "target": "platforms/windows/library/automation/dynamic.ahk",
-            "exists": true
-          },
-          {
             "include": "automation/windows.ahk",
             "target": "platforms/windows/library/automation/windows.ahk",
             "exists": true
@@ -338,18 +247,8 @@
             "exists": true
           },
           {
-            "include": "automation/video.ahk",
-            "target": "platforms/windows/library/automation/video.ahk",
-            "exists": true
-          },
-          {
             "include": "automation/snipaste.ahk",
             "target": "platforms/windows/library/automation/snipaste.ahk",
-            "exists": true
-          },
-          {
-            "include": "automation/whatsapp.ahk",
-            "target": "platforms/windows/library/automation/whatsapp.ahk",
             "exists": true
           }
         ]
@@ -372,37 +271,6 @@
       }
     ],
     "service_registry": [
-      {
-        "service": "dynamic",
-        "class": "DynamicService",
-        "class_file": "platforms/windows/library/automation/dynamic.ahk",
-        "referenced_methods": [
-          "copyAndRefreshAppTime",
-          "openEditorCommandPaletteWithPercent",
-          "openSublimeCommandPaletteByTag",
-          "openTeamsSearchAndGoToField",
-          "refreshAndCloseXyplorerTab"
-        ],
-        "declared_methods": [
-          "openEditorCommandPaletteWithPercent",
-          "openSublimeCommandPaletteByTag",
-          "openTeamsSearchAndGoToField",
-          "refreshAndCloseXyplorerTab",
-          "copyAndRefreshAppTime",
-          "openEdgeReadAloud",
-          "clearChatAndSend",
-          "_runActionChain",
-          "_executeAction",
-          "_parseActionParts",
-          "_handleWWA",
-          "_handleSL",
-          "_handleClick",
-          "_handleSend",
-          "_resolveMemoryVars",
-          "_logDebug",
-          "_logError"
-        ]
-      },
       {
         "service": "everything",
         "class": "EverythingService",
@@ -427,7 +295,8 @@
           "_saveUsageData",
           "_normalizeUsageData",
           "_defaultUsageData",
-          "_normalizeKey"
+          "_normalizeKey",
+          "_usageKey"
         ]
       },
       {
@@ -599,46 +468,14 @@
         "class_file": "platforms/windows/library/automation/snipaste.ahk",
         "referenced_methods": [
           "copyPaste",
-          "ctrlC",
-          "pasteResizeOffice",
-          "resizeOffice"
+          "ctrlC"
         ],
         "declared_methods": [
           "__new",
           "ctrlC",
           "copyPaste",
-          "pasteResizeOffice",
-          "resizeOffice",
           "_lastEditorActive",
           "_hasImageInClipboard"
-        ]
-      },
-      {
-        "service": "video",
-        "class": "VideoService",
-        "class_file": "platforms/windows/library/automation/video.ahk",
-        "referenced_methods": [
-          "control"
-        ],
-        "declared_methods": [
-          "control",
-          "_activate"
-        ]
-      },
-      {
-        "service": "whatsapp",
-        "class": "WhatsappService",
-        "class_file": "platforms/windows/library/automation/whatsapp.ahk",
-        "referenced_methods": [
-          "archive",
-          "clearArchive",
-          "delete"
-        ],
-        "declared_methods": [
-          "archive",
-          "delete",
-          "clearArchive",
-          "_performContextAction"
         ]
       },
       {
@@ -669,18 +506,12 @@
         "class_file": "platforms/windows/library/automation/windows.ahk",
         "referenced_methods": [
           "microphoneToggle",
-          "resizeHeight",
-          "snapWindowLeft",
-          "snapWindowRight",
-          "soundToggle"
+          "resizeHeight"
         ],
         "declared_methods": [
           "resizeHeight",
-          "snapWindowRight",
-          "snapWindowLeft",
           "_winSizes",
           "_taskbarHeight",
-          "soundToggle",
           "microphoneToggle"
         ]
       }
@@ -797,11 +628,13 @@
       ],
       "detailed_plan_path": "ai/current-plan.md",
       "human_owned_contracts": [
-        "ai/catalog-review.json"
+        "ai/catalog-review.json",
+        "platforms/windows/data/hotkeys.db"
       ],
       "machine_validated_contracts": [
         "ai/repo-map.json",
-        "ai/catalog-review.json"
+        "ai/catalog-review.json",
+        "platforms/windows/data/hotkeys.db"
       ],
       "dual_role_repo": true,
       "required_role_sections": [
@@ -824,42 +657,12 @@
     },
     "public_service_calls": [
       {
-        "file": "platforms/windows/hotkeys/domains/comms.ahk",
-        "calls": [
-          "dynamic.openTeamsSearchAndGoToField",
-          "whatsapp.archive",
-          "whatsapp.clearArchive",
-          "whatsapp.delete"
-        ]
-      },
-      {
         "file": "platforms/windows/hotkeys/domains/productivity.ahk",
         "calls": [
-          "dynamic.copyAndRefreshAppTime",
-          "dynamic.refreshAndCloseXyplorerTab",
           "launcher.openSelectedMedia",
           "launcher.pasteSelectedFiles",
           "launcher.saveClipboardToSelectedFile",
           "snipaste.copyPaste"
-        ]
-      },
-      {
-        "file": "platforms/windows/hotkeys/editors-ide.ahk",
-        "calls": [
-          "dynamic.openEditorCommandPaletteWithPercent"
-        ]
-      },
-      {
-        "file": "platforms/windows/hotkeys/editors-office.ahk",
-        "calls": [
-          "snipaste.pasteResizeOffice",
-          "snipaste.resizeOffice"
-        ]
-      },
-      {
-        "file": "platforms/windows/hotkeys/editors-text.ahk",
-        "calls": [
-          "dynamic.openSublimeCommandPaletteByTag"
         ]
       },
       {
@@ -873,13 +676,9 @@
           "sap.openPluzQasSession",
           "snipaste.copyPaste",
           "snipaste.ctrlC",
-          "video.control",
           "windowGroup.activateGroup",
           "windows.microphoneToggle",
-          "windows.resizeHeight",
-          "windows.snapWindowLeft",
-          "windows.snapWindowRight",
-          "windows.soundToggle"
+          "windows.resizeHeight"
         ]
       },
       {
@@ -913,12 +712,6 @@
           "sap.reopenSessionFromProjectWindow",
           "sap.runTcodeFromFocusedInput",
           "sap.toggleDebugMode"
-        ]
-      },
-      {
-        "file": "platforms/windows/library/automation/dynamic.ahk",
-        "calls": [
-          "memory.getValue"
         ]
       },
       {

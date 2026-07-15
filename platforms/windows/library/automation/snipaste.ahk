@@ -46,42 +46,12 @@
         }
         if instr(target[1], "paste")
           Send("^v")
-        if instr(target[1], "resize")
-          this.resizeOffice("70")
         break
       }
     }
 
     If utilIsExit()
       Exit()
-  }
-
-  pasteResizeOffice(size := "80", paste := "") {
-    IF paste
-      Send("^v")
-    If this._hasImageInClipboard() AND this.ctrlCSourceExe != "EXCEL.EXE"
-    {
-      Sleep(500)
-      Send("+{left}")
-      this.resizeOffice(size)
-    }
-
-    this.ctrlCSourceExe := ""
-  }
-
-  resizeOffice(size) {
-    Send("{appskey}{z}")
-    If WinWaitActive("Layout", , 5)
-    {
-      ControlClick(controlOfficeImage)
-      If (StrReplace(ControlGetText(controlOfficeImage), "%") > size)
-      {
-        ControlSetText(size, controlOfficeImage)
-        Send("{space}{enter}{right}")
-      }
-      Else
-        Send("{esc}")
-    }
   }
 
   _lastEditorActive(snipasteTargets := []) {

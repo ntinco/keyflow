@@ -4,7 +4,7 @@ class HotkeyTrackerService {
       return
 
     usageData := this._loadUsageData()
-    key := this._normalizeKey(hotkeyId)
+    key := this._usageKey(hotkeyId, sourceFile, sourceGroup)
     nowUtc := A_NowUTC
 
     if !usageData["hotkeys"].Has(key) {
@@ -12,6 +12,7 @@ class HotkeyTrackerService {
         "count", 0,
         "firstSeenUtc", nowUtc,
         "lastSeenUtc", nowUtc,
+        "hotkeyId", this._normalizeKey(hotkeyId),
         "sourceFile", sourceFile,
         "sourceGroup", sourceGroup
       )
@@ -56,8 +57,7 @@ class HotkeyTrackerService {
       parsed["meta"] := Map()
     if !parsed.Has("hotkeys") || !(parsed["hotkeys"] is Map)
       parsed["hotkeys"] := Map()
-    if !parsed["meta"].Has("version")
-      parsed["meta"]["version"] := 1
+    parsed["meta"]["version"] := 2
     if !parsed["meta"].Has("updatedAtUtc")
       parsed["meta"]["updatedAtUtc"] := A_NowUTC
     return parsed
@@ -66,7 +66,7 @@ class HotkeyTrackerService {
   _defaultUsageData() {
     return Map(
       "meta", Map(
-        "version", 1,
+        "version", 2,
         "updatedAtUtc", A_NowUTC
       ),
       "hotkeys", Map()
@@ -75,5 +75,10 @@ class HotkeyTrackerService {
 
   _normalizeKey(hotkeyId) {
     return StrLower(Trim(hotkeyId))
+  }
+
+  _usageKey(hotkeyId, sourceFile, sourceGroup) {
+    context := sourceGroup ? sourceGroup : sourceFile
+    return StrLower(Trim(context)) "::" this._normalizeKey(hotkeyId)
   }
 }

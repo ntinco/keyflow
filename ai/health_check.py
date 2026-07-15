@@ -72,6 +72,7 @@ KNOWN_DEAD_CLASSES = {"PasteService"}
 # hotkeyTrackerJsonFile: used indirectly by HotkeyTrackerService via the global assigned in constants-core.ahk.
 KNOWN_DEAD_CONSTANTS: tuple[str, ...] = ()
 CATALOG_REVIEW_FILE = "ai/catalog-review.json"
+HOTKEY_CATALOG_FILE = "platforms/windows/data/hotkeys.db"
 CATALOG_REVIEW_STATUS_VALUES = {"pending_human_review", "verified"}
 GOVERNANCE_FILE = "ai/governance.json"
 REQUIRED_ROLE_SECTIONS = (
@@ -496,10 +497,11 @@ def validate_governance_contract(
         "AGENTS.md",
     ]
     expected_detailed_plan_path = "ai/current-plan.md"
-    expected_human_owned_contracts = [CATALOG_REVIEW_FILE]
+    expected_human_owned_contracts = [CATALOG_REVIEW_FILE, HOTKEY_CATALOG_FILE]
     expected_machine_validated_contracts = [
         "ai/repo-map.json",
         CATALOG_REVIEW_FILE,
+        HOTKEY_CATALOG_FILE,
     ]
 
     if not governance_path.exists():

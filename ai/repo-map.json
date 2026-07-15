@@ -84,7 +84,7 @@
       "id": "runtime-services",
       "path": "platforms/windows/library/automation/",
       "owns": [
-        "13 registered services exposed as services.*"
+        "10 registered services exposed as services.*"
       ]
     },
     {
@@ -103,7 +103,6 @@
         "global triggers",
         "SAP GUI triggers",
         "SAP Eclipse triggers",
-        "editor triggers",
         "domain triggers",
         "standalone layout script"
       ]
@@ -148,7 +147,6 @@
     }
   ],
   "runtime-api": [
-    "dynamic",
     "everything",
     "hotkeyTracker",
     "hotstring",
@@ -157,8 +155,6 @@
     "run",
     "sap",
     "snipaste",
-    "video",
-    "whatsapp",
     "windowGroup",
     "windows"
   ],
@@ -187,6 +183,6 @@
   "standalone": [
     "platforms/windows/hotkeys/layouts/colemak-dh.ahk"
   ],
-  "current-focus": "Stable simplified Windows hotkey runtime with human-owned hotkeys.db, machine-checked generated artifacts, and a clean boundary for future macOS implementation.",
+  "current-focus": "Stable reduced Windows runtime with 54 hotkeys, 10 services, explicit portability classification, context-qualified usage tracking, and preserved SAP/ADT workflows.",
   "next-frontier": "No active frontier. Next technical plan deferred until a real frontier appears. Replace ai/current-plan.md when a new technical frontier is identified."
 }

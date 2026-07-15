@@ -13,11 +13,13 @@
   ],
   "detailed_plan_path": "ai/current-plan.md",
   "human_owned_contracts": [
-    "ai/catalog-review.json"
+    "ai/catalog-review.json",
+    "platforms/windows/data/hotkeys.db"
   ],
   "machine_validated_contracts": [
     "ai/repo-map.json",
-    "ai/catalog-review.json"
+    "ai/catalog-review.json",
+    "platforms/windows/data/hotkeys.db"
   ],
   "dual_role_repo": true,
   "required_role_sections": [

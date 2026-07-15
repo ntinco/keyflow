@@ -135,7 +135,6 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 - One intentional global remains: `services` in `platforms/windows/keyflow.ahk`.
 - The guide layer is now leaner by role: policy in `AGENTS.md`, architecture in `README.md`, routing in `ai/repo-map.json`, objective state in `ai/health-check.summary.json`.
 - SAP ownership is now explicit by composition: `SapService` delegates session/login concerns to `SapSessionService` instead of inheriting them.
-- `DynamicService` now exposes intent-first actions only; the raw action-chain runner is internal.
 - `LauncherService` and `WindowGroupService` now use clearer intent/state naming; historical internal state fields were removed.
 - Catalog counts are stable and the current catalog-review entries are marked `verified`.
 - Catalog review contract lives in `ai/catalog-review.json`, and governance rules are now also represented in `ai/governance.json`.
@@ -150,13 +149,16 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 - `ai/prompts/agent-prompts.md` is now included in `ai/repo-map.json` `read-order`, making it visible to agents on first read.
 - `ai/run_smoke.py` records runtime smoke execution into `ai/run-result.json` so agents can distinguish "guide layer healthy" from "runtime smoke actually ran without parse errors".
 - `hotkeys.db` is the only human-managed hotkey source; generated AHK and hotkey reference files are checked for drift by `ai/hotkey_sync.py --check` through `ai/health_check.py`.
+- The Windows runtime now exposes 10 services and 54 hotkeys; generic editor, Office, communication, video, and low-use global routes have been retired.
+- `hotkeys.db` separates implementation `platform` from `portability`, so macOS candidates are explicit without pretending AHK actions are cross-platform.
+- Temporary hotkey tracking uses context-qualified keys for new events, preventing cross-application usage collisions.
 
 ## Next evolution frontier
 
-- The hotkey simplification and macOS preparation cycle is technically complete; `ai/current-plan.md` records the validated outcome.
-- The active catalog now contains 72 hotkeys and 6 hotstrings, with generic application remaps removed.
-- Human-only work is limited to future personal shortcut management in `hotkeys.db` followed by sync/check generation.
-- No new technical frontier is currently evident, so plan creation is deferred until macOS requirements or another concrete workflow hotspot appears.
+- The Windows reduction and portability-classification cycle is technically complete; `ai/current-plan.md` records the validated outcome.
+- The stable runtime now contains 54 hotkeys, 6 hotstrings, 10 services, and no machine-detected orphaned code.
+- Human-only work is normal Windows usage so context-qualified tracking evidence can accumulate.
+- No further Windows reduction is currently justified; the macOS implementation plan is deferred until its native stack and first portable-intent slice are selected.
 
 ## Validation
 
