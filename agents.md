@@ -121,6 +121,8 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 | Free utility functions | `platforms/windows/library/util.ahk` |
 | Hotkey tracking infrastructure | `platforms/windows/hotkeys/hotkey-tracking.ahk` |
 | Hotkey triggers | `platforms/windows/hotkeys/` |
+| Human-managed hotkey catalog | `platforms/windows/data/hotkeys.db` |
+| Hotkey artifact generation and drift check | `ai/hotkey_sync.py` |
 | Startup launchers | `platforms/windows/tools/startup/` |
 | Versioned catalogs | `platforms/windows/data/*.json` |
 | Catalog review state | `ai/catalog-review.json` |
@@ -147,13 +149,14 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 - `ai/governance.json` now declares `required_current_model_phrases`; `ai/review_check.py` reads this list for reviewer audits, and `ai/health_check.py` validates the governance value against `REQUIRED_CURRENT_MODEL_PHRASES`.
 - `ai/prompts/agent-prompts.md` is now included in `ai/repo-map.json` `read-order`, making it visible to agents on first read.
 - `ai/run_smoke.py` records runtime smoke execution into `ai/run-result.json` so agents can distinguish "guide layer healthy" from "runtime smoke actually ran without parse errors".
+- `hotkeys.db` is the only human-managed hotkey source; generated AHK and hotkey reference files are checked for drift by `ai/hotkey_sync.py --check` through `ai/health_check.py`.
 
 ## Next evolution frontier
 
-- The aggressive governance and prompt-structure evolution is complete.
-- No active frontier remains from the consolidation cycle.
-- No new technical frontier is currently evident, so planning is deferred until a real runtime, contract, or workflow hotspot appears.
-- Replace `ai/current-plan.md` in the same cycle once that next technical frontier is identified.
+- The hotkey simplification and macOS preparation cycle is technically complete; `ai/current-plan.md` records the validated outcome.
+- The active catalog now contains 72 hotkeys and 6 hotstrings, with generic application remaps removed.
+- Human-only work is limited to future personal shortcut management in `hotkeys.db` followed by sync/check generation.
+- No new technical frontier is currently evident, so plan creation is deferred until macOS requirements or another concrete workflow hotspot appears.
 
 ## Validation
 

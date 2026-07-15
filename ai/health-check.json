@@ -36,14 +36,13 @@
       "exists": true
     },
     "hotkey_counts": {
-      "platforms/windows/hotkeys/domains/comms.ahk": 11,
-      "platforms/windows/hotkeys/domains/media-web.ahk": 3,
+      "platforms/windows/hotkeys/domains/comms.ahk": 4,
       "platforms/windows/hotkeys/domains/productivity.ahk": 6,
-      "platforms/windows/hotkeys/editors-ide.ahk": 3,
-      "platforms/windows/hotkeys/editors-office.ahk": 11,
-      "platforms/windows/hotkeys/editors-text.ahk": 18,
-      "platforms/windows/hotkeys/global.ahk": 20,
-      "platforms/windows/hotkeys/sap-eclipse.ahk": 22,
+      "platforms/windows/hotkeys/editors-ide.ahk": 1,
+      "platforms/windows/hotkeys/editors-office.ahk": 3,
+      "platforms/windows/hotkeys/editors-text.ahk": 1,
+      "platforms/windows/hotkeys/global.ahk": 19,
+      "platforms/windows/hotkeys/sap-eclipse.ahk": 20,
       "platforms/windows/hotkeys/sap-gui.ahk": 18
     },
     "dead_class_candidates": [],
@@ -66,6 +65,7 @@
     "catalog_review": [],
     "governance": [],
     "local_only_contract": [],
+    "hotkey_catalog": [],
     "unclosed_hotif": [],
     "forbidden_references": []
   },
@@ -75,6 +75,16 @@
   },
   "audits": {
     "unused_assignments": [
+      {
+        "file": "platforms/windows/library/config/constants-core.ahk",
+        "symbol": "exeTodoist",
+        "reason": "Assignment appears to be declared but not referenced elsewhere."
+      },
+      {
+        "file": "platforms/windows/library/config/constants-core.ahk",
+        "symbol": "classExcel",
+        "reason": "Assignment appears to be declared but not referenced elsewhere."
+      },
       {
         "file": "platforms/windows/library/config/constants-core.ahk",
         "symbol": "titleLibreCalc",
@@ -103,10 +113,6 @@
     "include_graph": [
       {
         "file": "platforms/windows/hotkeys/domains/comms.ahk",
-        "includes": []
-      },
-      {
-        "file": "platforms/windows/hotkeys/domains/media-web.ahk",
         "includes": []
       },
       {
@@ -187,11 +193,6 @@
           {
             "include": "hotkeys/domains/comms.ahk",
             "target": "platforms/windows/hotkeys/domains/comms.ahk",
-            "exists": true
-          },
-          {
-            "include": "hotkeys/domains/media-web.ahk",
-            "target": "platforms/windows/hotkeys/domains/media-web.ahk",
             "exists": true
           },
           {

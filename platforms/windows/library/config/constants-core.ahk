@@ -148,6 +148,8 @@ loadCoreRuleConstants() {
   GroupAdd("group_launcher", exeFlowlauncher)
   GroupAdd("group_launcher_apps", exeEverything)
   GroupAdd("group_launcher_apps", exeFlowlauncher)
+  GroupAdd("group_sap_gui_windows", classSapGuiSession)
+  GroupAdd("group_sap_gui_windows", exeNwbc)
   GroupAdd("group_sap_runtime_windows", classSapGuiSession)
   GroupAdd("group_sap_runtime_windows", exeNwbc)
   GroupAdd("group_sap_runtime_windows", "eclipse-workspace - DS")

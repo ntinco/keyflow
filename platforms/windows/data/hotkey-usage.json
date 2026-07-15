@@ -1,9 +1,9 @@
 ﻿{
   "hotkeys": {
     "!6": {
-      "count": 18,
+      "count": 20,
       "firstSeenUtc": "20260630135517",
-      "lastSeenUtc": "20260703230937",
+      "lastSeenUtc": "20260714142535",
       "sourceFile": "hotkeys\/sap-gui.ahk",
       "sourceGroup": "sap-gui-session"
     },
@@ -15,9 +15,9 @@
       "sourceGroup": "sap-gui-session"
     },
     "!8": {
-      "count": 13,
+      "count": 16,
       "firstSeenUtc": "20260626194036",
-      "lastSeenUtc": "20260704001542",
+      "lastSeenUtc": "20260714163929",
       "sourceFile": "hotkeys\/sap-gui.ahk",
       "sourceGroup": "sap-gui-session"
     },
@@ -36,9 +36,9 @@
       "sourceGroup": "global"
     },
     "!e": {
-      "count": 3,
+      "count": 4,
       "firstSeenUtc": "20260701215218",
-      "lastSeenUtc": "20260703211005",
+      "lastSeenUtc": "20260714142539",
       "sourceFile": "hotkeys\/global.ahk",
       "sourceGroup": "global"
     },
@@ -49,6 +49,13 @@
       "sourceFile": "hotkeys\/global.ahk",
       "sourceGroup": "global"
     },
+    "!p": {
+      "count": 2,
+      "firstSeenUtc": "20260715023846",
+      "lastSeenUtc": "20260715024317",
+      "sourceFile": "hotkeys\/domains.ahk",
+      "sourceGroup": "launcher"
+    },
     "!right": {
       "count": 1,
       "firstSeenUtc": "20260630203730",
@@ -57,9 +64,9 @@
       "sourceGroup": "excel"
     },
     "!s": {
-      "count": 3,
+      "count": 4,
       "firstSeenUtc": "20260701215218",
-      "lastSeenUtc": "20260703211005",
+      "lastSeenUtc": "20260714142538",
       "sourceFile": "hotkeys\/global.ahk",
       "sourceGroup": "global"
     },
@@ -78,9 +85,9 @@
       "sourceGroup": "global"
     },
     "#esc": {
-      "count": 36,
+      "count": 43,
       "firstSeenUtc": "20260628031554",
-      "lastSeenUtc": "20260706145920",
+      "lastSeenUtc": "20260715003404",
       "sourceFile": "hotkeys\/global.ahk",
       "sourceGroup": "global"
     },
@@ -92,18 +99,18 @@
       "sourceGroup": "global"
     },
     "$^!+a": {
-      "count": 11,
+      "count": 12,
       "firstSeenUtc": "20260630200653",
-      "lastSeenUtc": "20260706135119",
+      "lastSeenUtc": "20260714142542",
       "sourceFile": "hotkeys\/global.ahk",
       "sourceGroup": "global"
     },
     "^+k": {
-      "count": 429,
+      "count": 442,
       "firstSeenUtc": "20260626194324",
-      "lastSeenUtc": "20260704005625",
-      "sourceFile": "hotkeys\/sap-gui.ahk",
-      "sourceGroup": "sap-gui-session"
+      "lastSeenUtc": "20260714163742",
+      "sourceFile": "hotkeys\/sap-eclipse.ahk",
+      "sourceGroup": "sap-eclipse"
     },
     "^+n": {
       "count": 1,
@@ -120,9 +127,9 @@
       "sourceGroup": "sap-eclipse"
     },
     "^d": {
-      "count": 3,
+      "count": 4,
       "firstSeenUtc": "20260626202137",
-      "lastSeenUtc": "20260704001608",
+      "lastSeenUtc": "20260714163101",
       "sourceFile": "hotkeys\/sap-gui.ahk",
       "sourceGroup": "sap-gui-session"
     },
@@ -141,9 +148,9 @@
       "sourceGroup": "sap-eclipse"
     },
     "`": {
-      "count": 31,
+      "count": 46,
       "firstSeenUtc": "20260703150618",
-      "lastSeenUtc": "20260704002753",
+      "lastSeenUtc": "20260714190153",
       "sourceFile": "hotkeys\/sap-eclipse.ahk",
       "sourceGroup": "sap-eclipse"
     },
@@ -155,11 +162,11 @@
       "sourceGroup": "sap-eclipse"
     },
     "f1": {
-      "count": 2,
+      "count": 3,
       "firstSeenUtc": "20260701004414",
-      "lastSeenUtc": "20260701004802",
-      "sourceFile": "hotkeys\/sap-eclipse.ahk",
-      "sourceGroup": "sap-eclipse"
+      "lastSeenUtc": "20260706155344",
+      "sourceFile": "hotkeys\/editors.ahk",
+      "sourceGroup": "obsidian"
     },
     "f2": {
       "count": 18,
@@ -169,16 +176,16 @@
       "sourceGroup": "sap-eclipse"
     },
     "f5": {
-      "count": 68,
+      "count": 78,
       "firstSeenUtc": "20260626163737",
-      "lastSeenUtc": "20260706142104",
+      "lastSeenUtc": "20260715031015",
       "sourceFile": "hotkeys\/domains.ahk",
       "sourceGroup": "xyplorer"
     },
     "xbutton2": {
-      "count": 21,
+      "count": 27,
       "firstSeenUtc": "20260630133859",
-      "lastSeenUtc": "20260703222029",
+      "lastSeenUtc": "20260714224956",
       "sourceFile": "hotkeys\/global.ahk",
       "sourceGroup": "global"
     },
@@ -190,15 +197,15 @@
       "sourceGroup": "global"
     },
     "~^c": {
-      "count": 542,
+      "count": 605,
       "firstSeenUtc": "20260626163544",
-      "lastSeenUtc": "20260706145609",
+      "lastSeenUtc": "20260715015632",
       "sourceFile": "hotkeys\/global.ahk",
       "sourceGroup": "global"
     }
   },
   "meta": {
-    "updatedAtUtc": "20260706145920",
+    "updatedAtUtc": "20260715031015",
     "version": 1
   }
 }

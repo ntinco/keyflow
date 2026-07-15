@@ -25,13 +25,25 @@ platforms/windows/keyflow.ahk
   hotkeys/editors-office.ahk
   hotkeys/editors-text.ahk
   hotkeys/domains/comms.ahk
-  hotkeys/domains/media-web.ahk
   hotkeys/domains/productivity.ahk
 ```
 
 Main service surface:
 
 `dynamic` `everything` `hotkeyTracker` `hotstring` `launcher` `memory` `run` `sap` `snipaste` `video` `whatsapp` `windowGroup` `windows`
+
+## Hotkey catalog
+
+`platforms/windows/data/hotkeys.db` is the only human-managed source of hotkey definitions. Humans may edit it with a SQLite editor. The AHK trigger modules and `platforms/windows/hotkeys/README.md` are generated AI-maintenance artifacts.
+
+After changing the database:
+
+```powershell
+python ai/hotkey_sync.py --sync
+python ai/hotkey_sync.py --check
+```
+
+Generic application remaps belong in each application's native keymap. Keyflow keeps compound workflows, SAP/ADT business actions, and Windows automations that still provide meaningful leverage.
 
 ## SAP model
 
@@ -87,6 +99,7 @@ The preferred startup contract lives in `local-startup.ini`:
 - One intentional global remains: `services` in `platforms/windows/keyflow.ahk`.
 - The `utils` global object is gone; utility behavior lives in free `util*()` functions.
 - Launcher and window-group flows now use clearer intent-first names instead of legacy helper wording.
+- The human hotkey catalog is `hotkeys.db`; generated AHK and Markdown drift is enforced by `ai/hotkey_sync.py --check` through the health check.
 - Catalog review state now lives in `ai/catalog-review.json`, and the current active catalog entries are marked `verified`.
 - AI governance contract now lives in `ai/governance.json` and centers on the architect/executor role model.
 - This is a summary; AGENTS.md Current Model is authoritative.

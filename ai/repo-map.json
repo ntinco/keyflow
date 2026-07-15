@@ -99,6 +99,7 @@
       "path": "platforms/windows/hotkeys/",
       "owns": [
         "tracking infrastructure",
+        "generated triggers from hotkeys.db",
         "global triggers",
         "SAP GUI triggers",
         "SAP Eclipse triggers",
@@ -111,6 +112,7 @@
       "id": "catalogs",
       "path": "platforms/windows/data/",
       "owns": [
+        "human-managed hotkeys.db",
         "versioned catalogs",
         "example config contracts"
       ]
@@ -126,6 +128,7 @@
       "id": "ai-tooling",
       "path": "ai/",
       "owns": [
+        "hotkey_sync.py",
         "health_check.py",
         "review_check.py",
         "run_smoke.py",
@@ -184,6 +187,6 @@
   "standalone": [
     "platforms/windows/hotkeys/layouts/colemak-dh.ahk"
   ],
-  "current-focus": "Stable AI-first runtime, normalized local-only contract, machine-enforced role governance, architect/executor handoff, and runtime execution observability via ai/run_smoke.py and ai/run-result.json.",
+  "current-focus": "Stable simplified Windows hotkey runtime with human-owned hotkeys.db, machine-checked generated artifacts, and a clean boundary for future macOS implementation.",
   "next-frontier": "No active frontier. Next technical plan deferred until a real frontier appears. Replace ai/current-plan.md when a new technical frontier is identified."
 }

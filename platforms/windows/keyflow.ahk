@@ -10,5 +10,4 @@ global services := keyflowInitServices()
 #Include hotkeys\editors-office.ahk
 #Include hotkeys\editors-text.ahk
 #Include hotkeys\domains\comms.ahk
-#Include hotkeys\domains\media-web.ahk
 #Include hotkeys\domains\productivity.ahk

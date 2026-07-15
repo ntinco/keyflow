@@ -1,23 +1,29 @@
-# Plan status
+# Hotkey simplification plan
 
-Status: deferred
-Plan: deferred
+Status: completed
+Plan: completed
 
-## Decision
+## Outcome
 
-The consolidation cycle is complete, and no new technical frontier is currently evident from the runtime, contract, or guide layer state.
+- Reduced the catalog from 112 to 72 active hotkeys while preserving 6 hotstrings.
+- Removed generic editor, Office, communication, media/web, and identity remaps.
+- Kept high-value SAP/ADT, launcher, Snipaste, window-group, and compound application workflows.
+- Made `platforms/windows/data/hotkeys.db` the only human-managed source.
+- Made `ai/hotkey_sync.py` generate AHK modules and the hotkey reference and detect drift with `--check`.
+- Separated SAP GUI/NWBC hotkey context from Eclipse while retaining the broader runtime group for hotstrings.
+- Added hotkey catalog drift validation to `ai/health_check.py`.
 
-## Why planning is deferred
+## Validation
 
-- `ai/health-check.summary.json` reports `ok: true` and `ai_readiness: 100`.
-- `ai/repo-map.json` already declares that no active frontier remains.
-- The planner, architect, and executor prompt scaffold is already present and discoverable from the guide layer.
-- No new technical frontier is ready to justify another persistent multi-step plan.
-
-## Next trigger
-
-Replace this file only when a concrete runtime, contract, or workflow hotspot appears and a new technical frontier is clear.
+- `python ai/hotkey_sync.py --check`: passed.
+- `python ai/health_check.py --pretty --summary`: passed at 100/100 before closure regeneration.
+- `python ai/run_smoke.py --pretty`: launched with no immediate parse errors.
+- Final generated health and reviewer checks are required after guide closure.
 
 ## Human-only pending work
 
-None.
+- Manage future personal shortcut changes directly in `hotkeys.db` with a SQLite editor, then run the generated sync/check workflow.
+
+## Next plan decision
+
+No new technical frontier is evident. Plan creation is deferred until macOS implementation requirements or another concrete workflow hotspot appear.

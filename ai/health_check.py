@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
 from collections import Counter, defaultdict
 from datetime import date
@@ -1107,6 +1108,28 @@ def compute_ai_readiness(
     return max(0, score)
 
 
+def validate_hotkey_catalog(repo_root: Path) -> list[dict[str, object]]:
+    tool = repo_root / "ai/hotkey_sync.py"
+    result = subprocess.run(
+        [sys.executable, str(tool), "--check"],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+    )
+    if result.returncode == 0:
+        return []
+    detail = (result.stdout + result.stderr).strip()
+    return [{
+        "type": "hotkey_catalog_drift",
+        "file": "platforms/windows/data/hotkeys.db",
+        "message": detail or "Hotkey catalog validation failed.",
+        "fix": "python ai/hotkey_sync.py --sync",
+    }]
+
+
 def build_summary(
     include_missing: list,
     registry_issues: list,
@@ -1116,6 +1139,7 @@ def build_summary(
     catalog_review_issues: list,
     governance_issues: list,
     local_only_contract_issues: list,
+    hotkey_catalog_issues: list,
     dead_candidates: dict,
     profile_results: list,
     registry: dict,
@@ -1126,7 +1150,7 @@ def build_summary(
     governance_result: dict[str, object],
     next_frontier: str = "",
 ) -> dict[str, object]:
-    issues = include_missing + registry_issues + service_call_issues + profile_issues + guide_contract_issues + catalog_review_issues + governance_issues + local_only_contract_issues + unclosed_hotif + forbidden_references
+    issues = include_missing + registry_issues + service_call_issues + profile_issues + guide_contract_issues + catalog_review_issues + governance_issues + local_only_contract_issues + hotkey_catalog_issues + unclosed_hotif + forbidden_references
     profile_counts = {p["label"]: p.get("item_count", 0) for p in profile_results}
     ai_readiness = compute_ai_readiness(issues, dead_candidates, forbidden_references)
     return {
@@ -1192,6 +1216,7 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
     hotkey_counts = scan_hotkey_counts(hotkeys_dir, repo_root)
     unclosed_hotif = scan_unclosed_hotif(hotkeys_dir, repo_root)
     local_only_contract_issues = validate_local_only_contract(repo_root, repo_map) if repo_map else []
+    hotkey_catalog_issues = validate_hotkey_catalog(repo_root)
 
     summary = build_summary(
         include_missing,
@@ -1202,6 +1227,7 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
         catalog_review_issues,
         governance_issues,
         local_only_contract_issues,
+        hotkey_catalog_issues,
         dead_candidates,
         profile_results,
         registry,
@@ -1224,6 +1250,7 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
             "catalog_review": catalog_review_issues,
             "governance": governance_issues,
             "local_only_contract": local_only_contract_issues,
+            "hotkey_catalog": hotkey_catalog_issues,
             "unclosed_hotif": unclosed_hotif,
             "forbidden_references": forbidden_references,
         },
