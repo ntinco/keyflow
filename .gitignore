@@ -10,3 +10,6 @@ ai/run-result.json
 *data/rom.ini
 storage.db
 */storage.db
+
+# graphify-axet
+*.graphify*
