@@ -42,5 +42,5 @@
     "ai/repo-map.json",
     "ai/health-check.summary.json"
   ],
-  "next_frontier": "No active frontier. Next technical plan deferred until a real frontier appears. Replace ai/current-plan.md when a new technical frontier is identified."
+  "next_frontier": "macOS migration plan proposed in ai/current-plan.md: Hammerspoon-based first vertical slice (6 hotstrings + 5 SAP Eclipse/ADT hotkeys). Awaiting human decisions on hotstring-expansion approach and confirmed macOS app set before implementation starts."
 }

@@ -160,5 +160,5 @@
     "platforms/windows/hotkeys/layouts/colemak-dh.ahk"
   ],
   "current-focus": "Stable reduced Windows runtime with 22 hotkeys, 6 focused service surfaces, free utility helpers for value and command resolution, no credential-provider dependency, no hotkey usage tracking, explicit portability classification, and selected SAP/ADT workflows.",
-  "next-frontier": "No active frontier. Next technical plan deferred until a real frontier appears. Replace ai/current-plan.md when a new technical frontier is identified."
+  "next-frontier": "macOS migration plan proposed in ai/current-plan.md: Hammerspoon-based first vertical slice (6 hotstrings + 5 SAP Eclipse/ADT hotkeys). Awaiting human decisions on hotstring-expansion approach and confirmed macOS app set before implementation starts."
 }

@@ -156,10 +156,10 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 
 ## Next evolution frontier
 
-- The latest Windows catalog reduction, hotkey-tracking removal, and dead-code cleanup are technically complete; `ai/current-plan.md` records the validated outcome.
-- The stable runtime now contains 22 hotkeys, 6 hotstrings, 6 services, and no machine-detected orphaned classes or constants.
-- Human-only work is launching the refreshed runtime once on Windows to confirm it starts cleanly without the removed tracker.
-- No additional technical frontier is currently selected; the macOS implementation plan is deferred until its native stack and first portable-intent slice are chosen.
+- The Windows runtime reduction (72→22 hotkeys), hotkey-tracking removal, and dead-code cleanup are technically complete and stable at `ai_readiness: 100`.
+- A macOS implementation plan is now active: `ai/current-plan.md` proposes Hammerspoon as the native stack and defines a first vertical slice (6 hotstrings + 5 SAP Eclipse/ADT hotkeys, both already `portability=portable-intent` and free of Windows-only API dependencies).
+- The plan is `status: proposed` — it requires two human decisions before implementation starts: the hotstring-expansion approach (native Hammerspoon `hs.eventtap` vs. a companion tool) and confirmation of the installed macOS app set (SAP GUI for Java, Eclipse/ADT).
+- Human-only work also includes launching the refreshed Windows runtime once to confirm it starts cleanly without the removed tracker, and providing a Mac with Hammerspoon for manual verification of the first slice.
 
 ## Validation
 
