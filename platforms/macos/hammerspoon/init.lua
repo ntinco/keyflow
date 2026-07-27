@@ -1,15 +1,8 @@
--- Hammerspoon entrypoint for the keyflow macOS runtime.
--- Mirrors platforms/windows/keyflow.ahk: load generated bindings, load
--- hand-authored actions/hotstrings, bind hotkeys guarded by app context.
---
--- Scope: first vertical slice only (see ai/current-plan.md).
---   - 5 SAP Eclipse/ADT hotkeys, active only while Eclipse is frontmost.
---   - 6 global hotstrings, active everywhere.
--- Not included in this slice: SAP GUI, launcher, window-group, Snipaste.
+-- Hammerspoon entrypoint. Mirrors platforms/windows/keyflow.ahk.
+-- Scope: first vertical slice (see ai/current-plan.md) — 4 Eclipse/ADT
+-- hotkeys (active only while Eclipse is frontmost) + 6 global hotstrings.
 
 local scriptDir = hs.configdir .. "/keyflow/"
--- Fallback for running this file directly from the repo path during
--- development (outside ~/.hammerspoon/keyflow symlink setup).
 if not hs.fs.attributes(hs.configdir .. "/keyflow") then
   scriptDir = debug.getinfo and debug.getinfo(1, "S").source:match("@(.*/)") or "./"
 end
@@ -20,13 +13,7 @@ local bindings = dofile(scriptDir .. "generated/bindings.lua")
 local Actions = dofile(scriptDir .. "actions.lua")
 local Hotstrings = dofile(scriptDir .. "hotstrings.lua")
 
--- AHK key notation -> Hammerspoon modifier/key notation.
--- Only covers the symbols present in the current sap-eclipse catalog rows
--- (^ = ctrl, + = shift, ` = backtick, f1/f2 = function keys).
--- macOS keeps Eclipse ADT shortcuts on their SWT/cross-platform defaults
--- (Ctrl/Cmd as noted per-action in actions.lua), so bindings here use the
--- literal AHK modifier semantics translated 1:1 to Hammerspoon's ctrl/cmd —
--- verify against this machine's actual Eclipse keymap per action comments.
+-- AHK modifier notation -> Hammerspoon. Verify against real Eclipse keymap.
 local function parseAhkKey(ahkKey)
   local mods = {}
   local key = ahkKey
@@ -46,16 +33,14 @@ for _, binding in ipairs(bindings) do
     local action = Actions[binding.id]
     if action then
       local mods, key = parseAhkKey(binding.key)
-      local hotkey = hs.hotkey.new(mods, key, action)
-      table.insert(eclipseHotkeys, hotkey)
+      table.insert(eclipseHotkeys, hs.hotkey.new(mods, key, action))
     else
       hs.printf("keyflow: no action registered for binding id '%s'", binding.id)
     end
   end
 end
 
--- Context guard equivalent to AHK's `#hotif winactive(exeEclipse)`: only
--- enable the Eclipse-scoped hotkeys while Eclipse is the frontmost app.
+-- Mirrors AHK #hotif winactive(exeEclipse).
 local eclipseWatcher = hs.application.watcher.new(function(appName, eventType, app)
   if appName ~= "Eclipse" then
     return

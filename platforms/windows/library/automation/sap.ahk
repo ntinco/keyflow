@@ -1,10 +1,6 @@
 class SapService {
-  ; symbol is the hotstring trigger's second character ("+" or "-"),
-  ; preserved in the inserted text so the user can see which trigger fired.
-  ; "+"/"-  -> single-line inline comment (one code line).
-  ; *+/*-   -> multi-line comment frame: opens with "{", closes with "}",
-  ;            cursor is left on the blank line in between to write the
-  ;            commented code block right away.
+  ; symbol: trigger's "+"/"-". "+/-" = one line; *+/*- = {..} block frame,
+  ; cursor left on the blank line between open/close.
   insertCommentLine(symbol := "-") {
     this._insertCommentLine(symbol)
   }
@@ -19,8 +15,6 @@ class SapService {
 
   _insertCommentBlock(symbol) {
     utilPaste(this._buildCommentMarkup(symbol))
-    ; Move the cursor up from the closing line to the blank line left
-    ; between the opening and closing frame lines.
     Send("{Up}")
   }
 
