@@ -12,8 +12,6 @@
 --   eclipse_f2        -> Send("!+r")  (Eclipse rename-in-file shortcut)
 --   eclipse_ctrl_sh_b -> services.sap.focusEclipseWindows()
 --                        activates the Eclipse window group
---   eclipse_ctrl_5    -> services.sap.startQuickDebug()
---                        Send("^s") then Send("^+{f2}")
 
 local Actions = {}
 
@@ -48,14 +46,6 @@ Actions.eclipse_ctrl_sh_b = function()
   if app then
     app:activate()
   end
-end
-
--- Start quick debug: save (Cmd+S) then trigger debug (Cmd+Shift+F2 is the
--- closest ADT default; verify against this machine's actual keymap).
-Actions.eclipse_ctrl_5 = function()
-  hs.eventtap.keyStroke({"cmd"}, "s")
-  hs.timer.usleep(150000)
-  hs.eventtap.keyStroke({"cmd", "shift"}, "f2")
 end
 
 return Actions

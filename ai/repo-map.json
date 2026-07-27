@@ -176,5 +176,5 @@
     "platforms/windows/hotkeys/layouts/colemak-dh.ahk"
   ],
   "current-focus": "Stable reduced Windows runtime with 22 hotkeys, 6 focused service surfaces, free utility helpers for value and command resolution, no credential-provider dependency, no hotkey usage tracking, explicit portability classification, and selected SAP/ADT workflows.",
-  "next-frontier": "macOS first vertical slice technically implemented (Hammerspoon: init.lua, actions.lua, hotstrings.lua, generated bindings.lua for 6 hotstrings + 5 SAP Eclipse/ADT hotkeys). All static validation passes. Pending human verification inside real Eclipse/ADT and with real keystrokes; see ai/current-plan.md."
+  "next-frontier": "macOS first vertical slice technically implemented (Hammerspoon: init.lua, actions.lua, hotstrings.lua, generated bindings.lua for 6 hotstrings + 4 SAP Eclipse/ADT hotkeys). All static validation passes. Pending human verification inside real Eclipse/ADT and with real keystrokes; see ai/current-plan.md."
 }

@@ -28,7 +28,7 @@ Main service surface:
 
 ## Hotkey catalog
 
-`platforms/windows/data/hotkeys.db` is the only human-managed source of hotkey definitions. Humans may edit it with a SQLite editor. The AHK trigger modules and `platforms/windows/hotkeys/README.md` are generated AI-maintenance artifacts.
+`platforms/shared/data/hotkeys.db` is the only human-managed source of hotkey definitions, shared by both the Windows AHK runtime and the macOS Hammerspoon runtime. Humans may edit it with a SQLite editor. The AHK trigger modules, `platforms/windows/hotkeys/README.md`, and `platforms/macos/hammerspoon/generated/bindings.lua` are generated AI-maintenance artifacts.
 
 After changing the database:
 
@@ -88,7 +88,7 @@ The preferred startup contract lives in `local-startup.ini`:
 - One intentional global remains: `services` in `platforms/windows/keyflow.ahk`.
 - The `utils` global object is gone; utility behavior lives in free `util*()` functions.
 - Launcher and window-group flows now use clearer intent-first names instead of legacy helper wording.
-- The human hotkey catalog is `hotkeys.db`; generated AHK and Markdown drift is enforced by `ai/hotkey_sync.py --check` through the health check.
+- The human hotkey catalog is `platforms/shared/data/hotkeys.db`, shared by both platform runtimes; generated AHK, Markdown, and Lua binding drift is enforced by `ai/hotkey_sync.py --check` through the health check.
 - The Windows runtime is reduced to 22 hotkeys, 6 hotstrings, and 6 registered services; portable intent is cataloged separately from implementation platform.
 - Value resolution and shell-command execution are free utility functions; Everything run-count updates belong privately to `LauncherService`.
 - Service APIs and assets retired with removed hotkeys have been deleted; the remaining public methods all have runtime consumers.

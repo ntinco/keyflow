@@ -14,25 +14,38 @@ Verified via `mdls -name kMDItemCFBundleIdentifier` and filesystem inspection:
 | SAP GUI for Java | `com.sap.platin` | At `/Applications/SAP Clients/SAPGUI/SAPGUI.app` |
 | Snipaste | `com.Snipaste` | Native macOS build — not Windows-only here |
 
+## Catalog location
+
+`hotkeys.db` moved from `platforms/windows/data/` to `platforms/shared/data/`
+since it is no longer Windows-exclusive: it now drives both the AHK runtime
+and the macOS Hammerspoon runtime. Updated in `ai/hotkey_sync.py`,
+`ai/health_check.py`, `ai/governance.json`, `ai/repo-map.json`, `AGENTS.md`,
+`README.md`. All other Windows-only JSON catalogs (`autocorrect.json`, etc.)
+remain under `platforms/windows/data/` since they have no macOS consumer yet.
+
 ## Outcome
 
-- `hotkeys.db`: 11 rows (6 hotstrings + 5 SAP Eclipse/ADT hotkeys) now carry
-  `platform=["windows","macos"]`. All other rows remain `["windows"]`.
+- `hotkeys.db` (now at `platforms/shared/data/hotkeys.db`): 10 rows (6
+  hotstrings + 4 SAP Eclipse/ADT hotkeys) carry `platform=["windows","macos"]`.
+  All other rows remain `["windows"]`. (`eclipse_ctrl_5` was manually removed
+  from the catalog by the user during this cycle — human decision, not a
+  migration artifact.)
 - `ai/hotkey_sync.py` extended with a macOS generation target: emits
   `platforms/macos/hammerspoon/generated/bindings.lua` (binding metadata
   only — id, key/trigger, contextLabel, label) for every row targeting
   macOS. The Windows AHK generator is untouched.
 - Hand-authored `platforms/macos/hammerspoon/actions.lua`: one function per
-  Eclipse/ADT hotkey id, reimplementing the AHK behavior natively (not a
-  line-by-line port). Each function documents the AHK behavior it mirrors.
+  Eclipse/ADT hotkey id (4 total: backtick, f1, f2, ctrl_sh_b), reimplementing
+  the AHK behavior natively (not a line-by-line port). Each function
+  documents the AHK behavior it mirrors.
 - Hand-authored `platforms/macos/hammerspoon/hotstrings.lua`: a native
   `hs.eventtap` keystroke watcher reproducing AHK's `:*:` (immediate) and
   `::` (terminator-based) hotstring semantics for the 6 catalog entries.
 - Hand-authored `platforms/macos/hammerspoon/init.lua`: loads bindings,
-  actions, and hotstrings; binds the 5 Eclipse/ADT hotkeys via
-  `hs.hotkey.new` guarded by an `hs.application.watcher` that
-  enables/disables them based on Eclipse focus (mirrors AHK `#hotif
-  winactive(exeEclipse)`); starts the hotstring watcher globally.
+  actions, and hotstrings; binds the Eclipse/ADT hotkeys via `hs.hotkey.new`
+  guarded by an `hs.application.watcher` that enables/disables them based on
+  Eclipse focus (mirrors AHK `#hotif winactive(exeEclipse)`); starts the
+  hotstring watcher globally.
 - `ai/health_check.py`: added `validate_macos_runtime()`, which checks that
   every `dofile()` target referenced by `init.lua` exists. Returns no
   issues if the macOS runtime hasn't been started (no Windows/macOS parity
@@ -50,7 +63,7 @@ Verified via `mdls -name kMDItemCFBundleIdentifier` and filesystem inspection:
 - `python ai/run_smoke.py --platform macos --pretty`: `outcome: exited_clean`,
   0 errors across 4 Lua files.
 - `python ai/hotkey_sync.py --check`: 6 generated artifacts current (5 AHK +
-  1 Lua bindings file).
+  1 Lua bindings file) from 27 catalog entries.
 - `python ai/health_check.py --pretty --summary`: `ai_readiness: 100`, 0
   issues, `macos_runtime` issue list empty (all 3 `dofile()` targets in
   `init.lua` resolve).
@@ -112,12 +125,13 @@ loading the config inside Hammerspoon at least once.**
 1. Hammerspoon is already wired to load `platforms/macos/hammerspoon/init.lua`
    via `~/.hammerspoon/keyflow` symlink + `dofile()` in `~/.hammerspoon/init.lua`.
    Reload the config (`hs -c "hs.reload()"` or menu bar → Reload Config) to
-   pick up the trailing-slash path fix above, and confirm the console prints
-   `keyflow: loaded 5 eclipse hotkey(s), hotstring watcher active` with no errors.
-2. Open Eclipse/ADT and manually test each of the 5 hotkeys
-   (`` ` ``, F1, F2, Cmd+Shift+B, Cmd+5) against this machine's actual
-   Eclipse keymap; adjust `actions.lua` if any binding is wrong.
+   pick up the trailing-slash path fix and the `eclipse_ctrl_5` removal, and
+   confirm the console prints `keyflow: loaded 4 eclipse hotkey(s), hotstring
+   watcher active` with no errors.
+2. Open Eclipse/ADT and manually test each of the 4 hotkeys
+   (`` ` ``, F1, F2, Cmd+Shift+B) against this machine's actual Eclipse
+   keymap; adjust `actions.lua` if any binding is wrong.
 3. Test the 6 hotstrings (`;;`, `"+`, `"-`, `*+`, `*-`, `sp `) in a plain
    text field to confirm the `hs.eventtap` watcher fires correctly and does
    not interfere with normal typing.
-4. Report back which of the 11 bindings work as-is vs. need adjustment.
+4. Report back which of the 10 bindings work as-is vs. need adjustment.

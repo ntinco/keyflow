@@ -31,7 +31,7 @@
     "hotkey_counts": {
       "platforms/windows/hotkeys/domains/productivity.ahk": 4,
       "platforms/windows/hotkeys/global.ahk": 6,
-      "platforms/windows/hotkeys/sap-eclipse.ahk": 5,
+      "platforms/windows/hotkeys/sap-eclipse.ahk": 4,
       "platforms/windows/hotkeys/sap-gui.ahk": 7
     },
     "dead_class_candidates": [],
@@ -43,7 +43,7 @@
       "ai/repo-map.json",
       "ai/health-check.summary.json"
     ],
-    "next_frontier": "macOS first vertical slice technically implemented (Hammerspoon: init.lua, actions.lua, hotstrings.lua, generated bindings.lua for 6 hotstrings + 5 SAP Eclipse/ADT hotkeys). All static validation passes. Pending human verification inside real Eclipse/ADT and with real keystrokes; see ai/current-plan.md."
+    "next_frontier": "macOS first vertical slice technically implemented (Hammerspoon: init.lua, actions.lua, hotstrings.lua, generated bindings.lua for 6 hotstrings + 4 SAP Eclipse/ADT hotkeys). All static validation passes. Pending human verification inside real Eclipse/ADT and with real keystrokes; see ai/current-plan.md."
   },
   "issues": {
     "include_missing": [],
@@ -66,7 +66,16 @@
   "audits": {
     "unused_assignments": [],
     "unused_groups_or_targets": [],
-    "public_service_methods_without_callers": []
+    "public_service_methods_without_callers": [
+      {
+        "service": "sap",
+        "class": "SapService",
+        "methods": [
+          "startQuickDebug"
+        ],
+        "reason": "Public service methods are exposed but have no services.* callers."
+      }
+    ]
   },
   "contracts": {
     "include_graph": [
@@ -268,8 +277,7 @@
           "openWorkbenchOptions",
           "promptAndOpenAbapObject",
           "promptAndSearchAbapObject",
-          "runTcode",
-          "startQuickDebug"
+          "runTcode"
         ],
         "declared_methods": [
           "insertCommentLine",
@@ -463,12 +471,12 @@
       "detailed_plan_path": "ai/current-plan.md",
       "human_owned_contracts": [
         "ai/catalog-review.json",
-        "platforms/windows/data/hotkeys.db"
+        "platforms/shared/data/hotkeys.db"
       ],
       "machine_validated_contracts": [
         "ai/repo-map.json",
         "ai/catalog-review.json",
-        "platforms/windows/data/hotkeys.db"
+        "platforms/shared/data/hotkeys.db"
       ],
       "dual_role_repo": true,
       "required_role_sections": [
@@ -515,8 +523,7 @@
         "calls": [
           "sap.focusEclipseWindows",
           "sap.promptAndOpenAbapObject",
-          "sap.promptAndSearchAbapObject",
-          "sap.startQuickDebug"
+          "sap.promptAndSearchAbapObject"
         ]
       },
       {
