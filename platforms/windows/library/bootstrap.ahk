@@ -7,10 +7,7 @@ loadCoreConstants()
 #Include json-service.ahk
 #Include util.ahk
 
-#Include automation\memory.ahk
 #Include automation\hotkey-tracker.ahk
-#Include automation\run.ahk
-#Include automation\everything.ahk
 #Include automation\launcher.ahk
 #Include automation\hotstring.ahk
 #Include automation\windows.ahk
@@ -23,13 +20,10 @@ keyflowServiceRegistry() {
     sap: SapService(),
     windows: WindowsService(),
     windowGroup: WindowGroupService(),
-    run: RunService(),
-    memory: MemoryService(),
     launcher: LauncherService(),
     snipaste: SnipasteService(),
     hotstring: HotstringService(),
     hotkeyTracker: HotkeyTrackerService(),
-    everything: EverythingService(),
   }
 }
 

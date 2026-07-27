@@ -24,8 +24,8 @@
     if this._isMediaPath(filename)
     {
       this.dismissLauncherUi()
-      services.everything.incrementRunCount(filename)
-      services.run.runCommand("aimpportable " filename)
+      this._incrementRunCount(filename)
+      utilRunCommand("aimpportable " filename)
     }
   }
 
@@ -43,7 +43,7 @@
       if !FileExist(selectedFile)
         continue
 
-      services.everything.incrementRunCount(selectedFile)
+      this._incrementRunCount(selectedFile)
       utilPaste(Fileread(selectedFile), True)
       pastedAny := true
     }
@@ -61,7 +61,7 @@
 
     If codes and selectedFile
     {
-      services.everything.incrementRunCount(selectedFile)
+      this._incrementRunCount(selectedFile)
       FileDelete(selectedFile)
       FileAppend(codes, selectedFile, "UTF-8")
       A_Clipboard := ""
@@ -78,6 +78,14 @@
       files := utilClipboardRead("^+c", 0.7)
     }
     return files
+  }
+
+  _incrementRunCount(filename) {
+    if SubStr(filename, -1) = "\"
+      filename := SubStr(filename, 1, -1)
+
+    if InStr(filename, ":\")
+      utilRunCommand('""' fileEverythingCli '" -inc-run-count "' filename '""')
   }
 
   _readSelectedFile() {

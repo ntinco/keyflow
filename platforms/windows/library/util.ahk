@@ -29,6 +29,30 @@ utilClipboardRead(copyKeys := "^+c", waitSeconds := 0.5) {
   }
 }
 
+utilResolveMemoryValue(name) {
+  value := ""
+  try value := IniRead(memoryVarsIniFile, "data", name, "")
+  catch
+    value := ""
+  if value != ""
+    return value
+
+  try value := %name%
+  if value != ""
+    return value
+
+  return name
+}
+
+utilRunCommand(command) {
+  global services
+  if InStr(A_Thishotkey, "b0:") && services.HasOwnProp("launcher")
+    services.launcher.dismissLauncherUi()
+
+  utilTooltip(command)
+  Run(A_Comspec ' /c ' command, , "hide")
+}
+
 utilPaste(data, noExit := "", clear := "") {
   if clear 
     Send("{backspace}")

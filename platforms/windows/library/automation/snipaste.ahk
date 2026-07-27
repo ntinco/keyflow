@@ -40,7 +40,7 @@
       {
         if instr(target[1], "magick")
         {
-          services.run.runCommand("magick clipboard: -resize 80% clipboard:")
+          utilRunCommand("magick clipboard: -resize 80% clipboard:")
           utilTooltip("magick clipboard 80%")
           sleep 600
         }

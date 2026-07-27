@@ -72,7 +72,7 @@
       "id": "runtime-services",
       "path": "platforms/windows/library/automation/",
       "owns": [
-        "10 registered services exposed as services.*"
+        "7 registered services exposed as services.*"
       ]
     },
     {
@@ -135,12 +135,9 @@
     }
   ],
   "runtime-api": [
-    "everything",
     "hotkeyTracker",
     "hotstring",
     "launcher",
-    "memory",
-    "run",
     "sap",
     "snipaste",
     "windowGroup",
@@ -164,6 +161,6 @@
   "standalone": [
     "platforms/windows/hotkeys/layouts/colemak-dh.ahk"
   ],
-  "current-focus": "Stable reduced Windows runtime with 22 hotkeys, 10 lean service surfaces, no credential-provider dependency, explicit portability classification, context-qualified usage tracking, and selected SAP/ADT workflows.",
+  "current-focus": "Stable reduced Windows runtime with 22 hotkeys, 7 focused service surfaces, free utility helpers for value and command resolution, no credential-provider dependency, explicit portability classification, context-qualified usage tracking, and selected SAP/ADT workflows.",
   "next-frontier": "No active frontier. Next technical plan deferred until a real frontier appears. Replace ai/current-plan.md when a new technical frontier is identified."
 }

@@ -15,7 +15,7 @@ This guide layer is intentionally dual-role: architect selects or reviews the fr
 platforms/windows/keyflow.ahk
   library/bootstrap.ahk
     library/config/constants-core.ahk
-    library/automation/ (10 services)
+    library/automation/ (7 services)
   hotkeys/hotkey-tracking.ahk
   hotkeys/global.ahk
   hotkeys/sap-gui.ahk
@@ -25,7 +25,7 @@ platforms/windows/keyflow.ahk
 
 Main service surface:
 
-`everything` `hotkeyTracker` `hotstring` `launcher` `memory` `run` `sap` `snipaste` `windowGroup` `windows`
+`hotkeyTracker` `hotstring` `launcher` `sap` `snipaste` `windowGroup` `windows`
 
 ## Hotkey catalog
 
@@ -90,7 +90,8 @@ The preferred startup contract lives in `local-startup.ini`:
 - The `utils` global object is gone; utility behavior lives in free `util*()` functions.
 - Launcher and window-group flows now use clearer intent-first names instead of legacy helper wording.
 - The human hotkey catalog is `hotkeys.db`; generated AHK and Markdown drift is enforced by `ai/hotkey_sync.py --check` through the health check.
-- The Windows runtime is reduced to 22 hotkeys, 6 hotstrings, and 10 registered services; portable intent is cataloged separately from implementation platform.
+- The Windows runtime is reduced to 22 hotkeys, 6 hotstrings, and 7 registered services; portable intent is cataloged separately from implementation platform.
+- Value resolution and shell-command execution are free utility functions; Everything run-count updates belong privately to `LauncherService`.
 - Service APIs and assets retired with removed hotkeys have been deleted; the remaining public methods all have runtime consumers.
 - Credential-provider and named SAP session-launch support are currently retired.
 - Hotkey tracking remains temporary and records new usage by context instead of merging identical key combinations across applications.

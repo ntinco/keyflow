@@ -138,6 +138,7 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 - Catalog review contract lives in `ai/catalog-review.json`, and governance rules are now also represented in `ai/governance.json`.
 - The runtime-local artifact contract is now fully normalized: `hotkey-usage.json` is consistently classified across `.gitignore`, `AGENTS.md`, `README.md`, `ai/repo-map.json`, and `ai/health_check.py`.
 - `ai/health_check.py` now enforces runtime-local boundary consistency via `validate_local_only_contract()`.
+- `ai/health_check.py` enforces that `ai/repo-map.json` `runtime-api` matches the actual bootstrap service registry.
 - `ai/health_check.py` and `ai/review_check.py` now make role-governance drift machine-visible by enforcing required guide sections, phrases, frontier state, and reviewer handoff commands.
 - `ai/review_check.py` is the reviewer-oriented audit for cycle closure, guide alignment, and architect/executor handoff quality.
 - `ai/review_check.py` now distinguishes stale generated artifacts (`stale_summary` with regeneration command) from real contract failures, eliminating reviewer false positives caused by un-regenerated summaries.
@@ -147,7 +148,8 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 - `ai/prompts/agent-prompts.md` is now included in `ai/repo-map.json` `read-order`, making it visible to agents on first read.
 - `ai/run_smoke.py` records runtime smoke execution into `ai/run-result.json` so agents can distinguish "guide layer healthy" from "runtime smoke actually ran without parse errors".
 - `hotkeys.db` is the only human-managed hotkey source; generated AHK and hotkey reference files are checked for drift by `ai/hotkey_sync.py --check` through `ai/health_check.py`.
-- The Windows runtime now exposes 10 services and 22 hotkeys; the human-managed catalog retains only the currently selected Windows, SAP GUI, SAP ADT, and launcher routes.
+- The Windows runtime now exposes 7 services and 22 hotkeys; the human-managed catalog retains only the currently selected Windows, SAP GUI, SAP ADT, and launcher routes.
+- Value resolution and shell-command execution are free utility functions; Everything run-count updates are private to `LauncherService`.
 - APIs, helpers, constants, and the microphone image retired with removed hotkeys have been deleted; every remaining public service method has a runtime consumer.
 - Credential-provider support, named SAP session launch, credential-window filling, and related portable-app startup wiring are retired for the current runtime.
 - `hotkeys.db` separates implementation `platform` from `portability`, so macOS candidates are explicit without pretending AHK actions are cross-platform.
@@ -156,7 +158,7 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 ## Next evolution frontier
 
 - The latest Windows catalog reduction and dead-code cleanup are technically complete; `ai/current-plan.md` records the validated outcome.
-- The stable runtime now contains 22 hotkeys, 6 hotstrings, 10 services, and no machine-detected orphaned classes or constants.
+- The stable runtime now contains 22 hotkeys, 6 hotstrings, 7 services, and no machine-detected orphaned classes or constants.
 - Human-only work is launching the refreshed runtime once on Windows, then using it normally so context-qualified tracking evidence can accumulate.
 - No additional technical frontier is currently selected; the macOS implementation plan is deferred until its native stack and first portable-intent slice are chosen.
 

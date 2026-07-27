@@ -16,7 +16,7 @@ class SapService {
   }
 
   _buildCodeSignature() {
-    commentUser := services.memory.getValue("sap_comment_user")
+    commentUser := utilResolveMemoryValue("sap_comment_user")
     if !commentUser || (commentUser = "sap_comment_user")
       commentUser := "NTP"
     return commentUser " " constDayEs

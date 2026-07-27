@@ -6,7 +6,7 @@ Plan: completed
 ## Outcome
 
 - Reduced the active catalog to 22 hotkeys while preserving 6 hotstrings.
-- Reduced the service registry from 13 to 10 services.
+- Reduced the service registry from 13 to 7 services.
 - Retained the user-selected global, SAP GUI, SAP ADT, and launcher routes.
 - Removed `DynamicService`, `VideoService`, and `WhatsappService` plus stale constants, groups, configuration, and public methods.
 - Removed the retired XYplorer action from the active catalog.
@@ -17,6 +17,9 @@ Plan: completed
 - Removed the empty YMT post-launch callback chain while preserving SAP transaction hotstrings and quick debug.
 - Retired credential-provider support, named SAP session launch, credential-window filling, related examples/constants, and portable-app startup wiring.
 - Scoped SAP transaction hotstrings to SAP GUI/NWBC now that Eclipse no longer has a credential-backed session-launch path.
+- Replaced the single-purpose memory and command services with `utilResolveMemoryValue()` and `utilRunCommand()`.
+- Moved Everything run-count updates into `LauncherService` and removed the three trivial service classes from both runtime registries.
+- Added a health-check contract that rejects drift between `ai/repo-map.json` `runtime-api` and the bootstrap service registry.
 
 ## Validation
 
