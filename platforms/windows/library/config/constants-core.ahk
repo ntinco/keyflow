@@ -36,8 +36,6 @@ loadCorePathConstants() {
   SplitPath(pathScript, , &pathScript)
   SplitPath(pathScript, , &pathScriptOnelevelup)
   dataDir := resolveDataDir(pathScript)
-  memoryVarsIniFile := dataDir "memory-vars.ini"
-  hotkeyTrackerJsonFile := dataDir "hotkey-usage.json"
   localPathsFile := localPathsFilePath(pathScript)
   pathAbapGitRepo := pathConfigValue(localPathsFile, "pathAbapGitRepo", "")
   pathYmWorkspace := pathConfigValue(localPathsFile, "pathYmWorkspace", "")

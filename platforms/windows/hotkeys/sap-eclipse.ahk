@@ -5,23 +5,18 @@
 
 #hotif winactive(exeEclipse)
 `::{
-trackSapEclipseHotkeyUsage("``")
 services.sap.promptAndOpenAbapObject()
 }
 f1::{
-trackSapEclipseHotkeyUsage("f1")
 services.sap.promptAndSearchAbapObject()
 }
 f2::{
-trackSapEclipseHotkeyUsage("f2")
 Send("!+r")
 }
 ^+b::{
-trackSapEclipseHotkeyUsage("^+b")
 services.sap.focusEclipseWindows()
 }
 ^5::{
-trackSapEclipseHotkeyUsage("^5")
 services.sap.startQuickDebug()
 }
 #hotif

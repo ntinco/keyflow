@@ -5,31 +5,24 @@
 
 #hotif winactive("ahk_group group_sap_gui_windows")
 ^b::{
-trackSapGuiHotkeyUsage("^b", "sap-gui-session")
 services.sap.focusGuiWindows()
 }
 !5::{
-trackSapGuiHotkeyUsage("!5", "sap-gui-session")
 services.sap.openWorkbenchOptions()
 }
 !6::{
-trackSapGuiHotkeyUsage("!6", "sap-gui-session")
 services.sap.openSe16n()
 }
 !7::{
-trackSapGuiHotkeyUsage("!7", "sap-gui-session")
 services.sap.openSe37()
 }
 !8::{
-trackSapGuiHotkeyUsage("!8", "sap-gui-session")
 services.sap.openSe38()
 }
 !9::{
-trackSapGuiHotkeyUsage("!9", "sap-gui-session")
 services.sap.openSe09()
 }
 !0::{
-trackSapGuiHotkeyUsage("!0", "sap-gui-session")
 services.sap.openSe80()
 }
 #hotif

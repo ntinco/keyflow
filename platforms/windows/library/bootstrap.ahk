@@ -7,7 +7,6 @@ loadCoreConstants()
 #Include json-service.ahk
 #Include util.ahk
 
-#Include automation\hotkey-tracker.ahk
 #Include automation\launcher.ahk
 #Include automation\hotstring.ahk
 #Include automation\windows.ahk
@@ -23,7 +22,6 @@ keyflowServiceRegistry() {
     launcher: LauncherService(),
     snipaste: SnipasteService(),
     hotstring: HotstringService(),
-    hotkeyTracker: HotkeyTrackerService(),
   }
 }
 

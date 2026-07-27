@@ -21,26 +21,20 @@ services.sap.insertCommentBlock()
 utilPaste("summary in prompt",,true)
 }
 !e::{
-trackHotkeyEvent("!e", "hotkeys/global.ahk", "global")
 services.windowGroup.activateGroup(appActivationTargets,"apps_sap_workspace")
 }
 !d::{
-trackHotkeyEvent("!d", "hotkeys/global.ahk", "global")
 services.windowGroup.activateGroup(appActivationTargets,"apps_ide")
 }
 #esc::{
-trackHotkeyEvent("#esc", "hotkeys/global.ahk", "global")
 services.windows.resizeHeight()
 }
 xbutton2::{
-trackHotkeyEvent("xbutton2", "hotkeys/global.ahk", "global")
 services.snipaste.copyPaste("{printscreen}",snipasteTargets)
 }
 $^!+a::{
-trackHotkeyEvent("$^!+a", "hotkeys/global.ahk", "global")
 reload()
 }
 ~^c::{
-trackHotkeyEvent("~^c", "hotkeys/global.ahk", "global")
 services.snipaste.ctrlC()
 }

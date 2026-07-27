@@ -4,20 +4,16 @@
 
 #hotif winactive(titleSnipaste)
 ~enter::{
-trackDomainsHotkeyUsage("~enter", "snipaste")
 services.snipaste.copyPaste("",snipasteTargets)
 }
 #hotif winactive("ahk_group group_launcher")
 f12::{
-trackDomainsHotkeyUsage("f12", "launcher")
 services.launcher.pasteSelectedFiles()
 }
 ^s::{
-trackDomainsHotkeyUsage("^s", "launcher")
 services.launcher.saveClipboardToSelectedFile()
 }
 !p::{
-trackDomainsHotkeyUsage("!p", "launcher")
 services.launcher.openSelectedMedia()
 }
 #hotif

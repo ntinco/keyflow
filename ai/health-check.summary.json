@@ -3,7 +3,6 @@
   "issue_count": 0,
   "ai_readiness": 100,
   "services": [
-    "hotkeyTracker",
     "hotstring",
     "launcher",
     "sap",

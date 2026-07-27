@@ -41,8 +41,6 @@ CREATE TABLE IF NOT EXISTS hotkeys (
     context       TEXT,
     context_fn    TEXT,
     context_label TEXT,
-    track_fn      TEXT,
-    track_args    TEXT,
     action        TEXT NOT NULL,
     label         TEXT NOT NULL,
     platform      TEXT NOT NULL,
@@ -54,7 +52,7 @@ CREATE TABLE IF NOT EXISTS hotkeys (
 
 DB_COLUMNS = [
     "sort_order", "id", "file", "type", "key", "trigger", "options",
-    "context", "context_fn", "context_label", "track_fn", "track_args",
+    "context", "context_fn", "context_label",
     "action", "label", "platform", "active", "notes", "portability",
 ]
 
@@ -81,7 +79,6 @@ class CatalogError(RuntimeError):
 def _row_to_entry(row: tuple[object, ...]) -> dict[str, object]:
     entry = dict(zip(DB_COLUMNS, row))
     try:
-        entry["track_args"] = json.loads(entry["track_args"]) if entry["track_args"] else None
         entry["platform"] = json.loads(entry["platform"])
     except (TypeError, json.JSONDecodeError) as exc:
         raise CatalogError(f"Invalid JSON fields for hotkey {entry.get('id')}: {exc}") from exc
@@ -141,8 +138,6 @@ def validate_entries(entries: list[dict[str, object]]) -> None:
             issues.append(f"{entry_id}: hotstring requires trigger and options")
         if entry.get("context") and entry.get("context_fn"):
             issues.append(f"{entry_id}: context and context_fn are mutually exclusive")
-        if entry.get("track_fn") and not isinstance(entry.get("track_args"), list):
-            issues.append(f"{entry_id}: tracked hotkey requires JSON array track_args")
         platforms = entry.get("platform")
         if not isinstance(platforms, list) or not platforms:
             issues.append(f"{entry_id}: platform must be a non-empty JSON array")
@@ -158,12 +153,6 @@ def _ahk_str(value: str) -> str:
     return value.replace("`", "``").replace('"', '`"')
 
 
-def _format_track(entry: dict[str, object]) -> str:
-    args = entry["track_args"] or []
-    quoted = ", ".join(f'"{_ahk_str(str(arg))}"' for arg in args)
-    return f'{entry["track_fn"]}({quoted})'
-
-
 def _format_hotif(entry: dict[str, object]) -> str | None:
     if entry.get("context_fn"):
         return f'#hotif {entry["context_fn"]}'
@@ -176,10 +165,7 @@ def _render_block(entry: dict[str, object]) -> str:
     if entry["type"] == "hotstring":
         lines = [f'{entry["options"]}{entry["trigger"]}::{{', str(entry["action"]), "}"]
     else:
-        lines = [f'{entry["key"]}::{{']
-        if entry.get("track_fn"):
-            lines.append(_format_track(entry))
-        lines.extend([str(entry["action"]), "}"])
+        lines = [f'{entry["key"]}::{{', str(entry["action"]), "}"]
     return "\n".join(lines)
 
 
@@ -290,7 +276,7 @@ def expected_artifacts(entries: list[dict[str, object]]) -> dict[Path, str]:
 def stale_generated_files(expected_paths: set[Path]) -> list[Path]:
     stale: list[Path] = []
     for path in HOTKEYS_DIR.rglob("*.ahk"):
-        if path in expected_paths or path.name == "hotkey-tracking.ahk":
+        if path in expected_paths:
             continue
         try:
             first_line = path.read_text(encoding="utf-8-sig").splitlines()[0]

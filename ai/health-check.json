@@ -4,7 +4,6 @@
     "issue_count": 0,
     "ai_readiness": 100,
     "services": [
-      "hotkeyTracker",
       "hotstring",
       "launcher",
       "sap",
@@ -79,10 +78,6 @@
         "includes": []
       },
       {
-        "file": "platforms/windows/hotkeys/hotkey-tracking.ahk",
-        "includes": []
-      },
-      {
         "file": "platforms/windows/hotkeys/sap-eclipse.ahk",
         "includes": []
       },
@@ -96,11 +91,6 @@
           {
             "include": "library/bootstrap.ahk",
             "target": "platforms/windows/library/bootstrap.ahk",
-            "exists": true
-          },
-          {
-            "include": "hotkeys/hotkey-tracking.ahk",
-            "target": "platforms/windows/hotkeys/hotkey-tracking.ahk",
             "exists": true
           },
           {
@@ -124,10 +114,6 @@
             "exists": true
           }
         ]
-      },
-      {
-        "file": "platforms/windows/library/automation/hotkey-tracker.ahk",
-        "includes": []
       },
       {
         "file": "platforms/windows/library/automation/hotstring.ahk",
@@ -169,11 +155,6 @@
           {
             "include": "util.ahk",
             "target": "platforms/windows/library/util.ahk",
-            "exists": true
-          },
-          {
-            "include": "automation/hotkey-tracker.ahk",
-            "target": "platforms/windows/library/automation/hotkey-tracker.ahk",
             "exists": true
           },
           {
@@ -222,23 +203,6 @@
       }
     ],
     "service_registry": [
-      {
-        "service": "hotkeyTracker",
-        "class": "HotkeyTrackerService",
-        "class_file": "platforms/windows/library/automation/hotkey-tracker.ahk",
-        "referenced_methods": [
-          "track"
-        ],
-        "declared_methods": [
-          "track",
-          "_loadUsageData",
-          "_saveUsageData",
-          "_normalizeUsageData",
-          "_defaultUsageData",
-          "_normalizeKey",
-          "_usageKey"
-        ]
-      },
       {
         "service": "hotstring",
         "class": "HotstringService",
@@ -543,12 +507,6 @@
           "snipaste.ctrlC",
           "windowGroup.activateGroup",
           "windows.resizeHeight"
-        ]
-      },
-      {
-        "file": "platforms/windows/hotkeys/hotkey-tracking.ahk",
-        "calls": [
-          "hotkeyTracker.track"
         ]
       },
       {
