@@ -98,9 +98,15 @@
       "id": "catalogs",
       "path": "platforms/windows/data/",
       "owns": [
-        "human-managed hotkeys.db",
-        "versioned catalogs",
+        "versioned catalogs (autocorrect, quick-snippets, sap-transaction-catalog, sap-transaction-shortcuts, ymt-commands)",
         "example config contracts"
+      ]
+    },
+    {
+      "id": "shared-catalogs",
+      "path": "platforms/shared/data/",
+      "owns": [
+        "human-managed hotkeys.db (drives both the Windows AHK runtime and the macOS Hammerspoon runtime)"
       ]
     },
     {

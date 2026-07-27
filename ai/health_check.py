@@ -71,7 +71,7 @@ KNOWN_DEAD_CLASSES = {"PasteService"}
 # Constants that are declared but have no known consumers.
 KNOWN_DEAD_CONSTANTS: tuple[str, ...] = ()
 CATALOG_REVIEW_FILE = "ai/catalog-review.json"
-HOTKEY_CATALOG_FILE = "platforms/windows/data/hotkeys.db"
+HOTKEY_CATALOG_FILE = "platforms/shared/data/hotkeys.db"
 CATALOG_REVIEW_STATUS_VALUES = {"pending_human_review", "verified"}
 GOVERNANCE_FILE = "ai/governance.json"
 REQUIRED_ROLE_SECTIONS = (
@@ -1165,7 +1165,7 @@ def validate_hotkey_catalog(repo_root: Path) -> list[dict[str, object]]:
     detail = (result.stdout + result.stderr).strip()
     return [{
         "type": "hotkey_catalog_drift",
-        "file": "platforms/windows/data/hotkeys.db",
+        "file": HOTKEY_CATALOG_FILE,
         "message": detail or "Hotkey catalog validation failed.",
         "fix": "python ai/hotkey_sync.py --sync",
     }]

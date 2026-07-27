@@ -74,9 +74,24 @@ is hand-authored in `actions.lua`/`hotstrings.lua`, matched by `id`.
   shortcuts per action (documented inline per function) that may not match
   this machine's actual Eclipse keymap — this was not verifiable from the
   repo alone.
-- Loading `init.lua` inside the actual Hammerspoon app (e.g. via
-  `~/.hammerspoon/init.lua` requiring this file, or a symlink) and
-  confirming `hs.reload()` picks it up without console errors.
+
+## Real-load bug found and fixed (2026-07-27)
+
+First real load inside Hammerspoon surfaced a bug that `luac -p` could not
+catch, because it is a **runtime path bug**, not a syntax error:
+
+```
+*** ERROR: cannot open /Users/ntincopa/.hammerspoon/keyflowgenerated/bindings.lua: No such file or directory
+```
+
+Root cause: `scriptDir = hs.configdir .. "/keyflow"` produced a path with no
+trailing separator (`.../keyflow`), and `scriptDir .. "generated/bindings.lua"`
+concatenated directly into `.../keyflowgenerated/bindings.lua`. Fixed by
+adding the trailing `/` to `scriptDir` in both the primary and fallback
+branches. Re-verified with `luac -p` (still passes, as expected — parse-only
+checks cannot catch path-construction bugs) and lesson recorded here: **the
+static `luac -p` smoke check validates syntax only; it cannot substitute for
+loading the config inside Hammerspoon at least once.**
 
 ## Deferred fast-follow (not blocking, unblocked by app confirmation)
 
@@ -94,9 +109,11 @@ is hand-authored in `actions.lua`/`hotstrings.lua`, matched by `id`.
 
 ## Human-only pending work
 
-1. Set up Hammerspoon to load `platforms/macos/hammerspoon/init.lua`
-   (symlink or `dofile()` from `~/.hammerspoon/init.lua`) and reload the
-   config.
+1. Hammerspoon is already wired to load `platforms/macos/hammerspoon/init.lua`
+   via `~/.hammerspoon/keyflow` symlink + `dofile()` in `~/.hammerspoon/init.lua`.
+   Reload the config (`hs -c "hs.reload()"` or menu bar → Reload Config) to
+   pick up the trailing-slash path fix above, and confirm the console prints
+   `keyflow: loaded 5 eclipse hotkey(s), hotstring watcher active` with no errors.
 2. Open Eclipse/ADT and manually test each of the 5 hotkeys
    (`` ` ``, F1, F2, Cmd+Shift+B, Cmd+5) against this machine's actual
    Eclipse keymap; adjust `actions.lua` if any binding is wrong.

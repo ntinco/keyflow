@@ -118,7 +118,7 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 | Service wiring + hotstring profiles | `platforms/windows/library/bootstrap.ahk` |
 | Free utility functions | `platforms/windows/library/util.ahk` |
 | Hotkey triggers | `platforms/windows/hotkeys/` |
-| Human-managed hotkey catalog | `platforms/windows/data/hotkeys.db` |
+| Human-managed hotkey catalog | `platforms/shared/data/hotkeys.db` |
 | Hotkey artifact generation and drift check | `ai/hotkey_sync.py` |
 | Startup launchers | `platforms/windows/tools/startup/` |
 | Versioned catalogs | `platforms/windows/data/*.json` |
@@ -146,7 +146,7 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 - `ai/governance.json` now declares `required_current_model_phrases`; `ai/review_check.py` reads this list for reviewer audits, and `ai/health_check.py` validates the governance value against `REQUIRED_CURRENT_MODEL_PHRASES`.
 - `ai/prompts/agent-prompts.md` is now included in `ai/repo-map.json` `read-order`, making it visible to agents on first read.
 - `ai/run_smoke.py` records runtime smoke execution into `ai/run-result.json` so agents can distinguish "guide layer healthy" from "runtime smoke actually ran without parse errors".
-- `hotkeys.db` is the only human-managed hotkey source; generated AHK and hotkey reference files are checked for drift by `ai/hotkey_sync.py --check` through `ai/health_check.py`.
+- `platforms/shared/data/hotkeys.db` is the only human-managed hotkey source, shared across both platform runtimes; generated AHK, Markdown, and Lua binding files are checked for drift by `ai/hotkey_sync.py --check` through `ai/health_check.py`.
 - The Windows runtime now exposes 6 services and 22 hotkeys; the human-managed catalog retains only the currently selected Windows, SAP GUI, SAP ADT, and launcher routes.
 - Value resolution and shell-command execution are free utility functions; Everything run-count updates are private to `LauncherService`.
 - APIs, helpers, constants, and the microphone image retired with removed hotkeys have been deleted; every remaining public service method has a runtime consumer.
