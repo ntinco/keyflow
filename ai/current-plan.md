@@ -133,6 +133,30 @@ is unsafe whenever the typed content can contain a trigger substring;
 single-keystroke actions (paste, or a dedicated non-observed input method)
 are safe. This applies to any future hotstring/expansion work on macOS.
 
+## Third real-use bug found and fixed (2026-07-27): terminator-trigger deletion off-by-one
+
+Human testing surfaced a second functional bug: typing `sp` followed by a
+space produced `ssummary in prompt` instead of `summary in prompt` — a
+stray leading "s".
+
+Root cause: for terminator-based triggers (AHK `::` style, e.g. `hs_sp`),
+the keyDown callback fires *after* the terminator character is already on
+screen (the event was let through with `return false`). So on-screen text
+at fire time is `"<trigger><terminator>"`, e.g. `"sp "` (3 characters). The
+original code deleted only `#trigger.pattern` characters (2, for "sp"),
+which removed the terminator and the trigger's last character ("p ") but
+left the first character of the trigger ("s") on screen — a systematic
+off-by-one for every terminator-based trigger.
+
+Fix: delete `#trigger.pattern + 1` characters (removing the terminator
+too), then paste the replacement followed by the terminator character to
+reconstruct it correctly (`pasteText(trigger.replacement() .. terminatorChar)`).
+
+**Lesson generalized:** when a keyDown callback observes an event that was
+already let through (not intercepted), the on-screen state includes that
+character. Any "undo the trigger" deletion logic must account for
+already-passed-through characters, not just the pattern being matched.
+
 ## Deferred fast-follow (not blocking, unblocked by app confirmation)
 
 - Reclassify `snipaste_enter` to `portable-intent` and add a macOS binding +

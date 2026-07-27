@@ -87,13 +87,20 @@ local function fireTrigger(trigger)
   buffer = ""
 end
 
-local function fireTerminatedTrigger(trigger)
-  -- Backspace only the trigger text; the terminator character itself was
-  -- already typed by the user and stays on screen.
-  for _ = 1, #trigger.pattern do
+local function fireTerminatedTrigger(trigger, terminatorChar)
+  -- By the time this callback runs, the terminator character has already
+  -- been typed and is on screen (the keyDown event was let through). So the
+  -- on-screen text is "<trigger><terminator>", e.g. "sp ". We must delete
+  -- pattern length + 1 characters (removing the terminator too), then paste
+  -- the replacement followed by the terminator to reconstruct it correctly.
+  -- (Bug fixed 2026-07-27: deleting only #pattern chars removed the
+  -- terminator + the trigger's last character instead of the whole
+  -- trigger, leaving a stray leading character before the pasted text —
+  -- e.g. typing "sp " produced "ssummary in prompt".)
+  for _ = 1, #trigger.pattern + 1 do
     hs.eventtap.keyStroke({}, "delete")
   end
-  pasteText(trigger.replacement())
+  pasteText(trigger.replacement() .. terminatorChar)
   buffer = ""
 end
 
@@ -120,7 +127,7 @@ function Hotstrings.start()
       else
         local withTerminator = trigger.pattern .. chars
         if isTerminator(chars) and buffer:sub(-#withTerminator) == withTerminator then
-          fireTerminatedTrigger(trigger)
+          fireTerminatedTrigger(trigger, chars)
           return false
         end
       end
