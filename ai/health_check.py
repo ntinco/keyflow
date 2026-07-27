@@ -1119,6 +1119,36 @@ def compute_ai_readiness(
     return max(0, score)
 
 
+RE_LUA_DOFILE = re.compile(r'dofile\(scriptDir\s*\.\.\s*"([^"]+)"\)')
+
+
+def validate_macos_runtime(repo_root: Path) -> list[dict[str, object]]:
+    """Validate the macOS Hammerspoon include chain declared in init.lua.
+    This does NOT require Windows/macOS parity — the macOS runtime is
+    expected to cover a smaller slice than the Windows AHK runtime. It only
+    checks that init.lua's dofile() references resolve to real files, and
+    that the generated bindings.lua is current (delegated to hotkey_sync.py
+    via validate_hotkey_catalog, which already covers all platforms)."""
+    macos_dir = repo_root / "platforms/macos/hammerspoon"
+    init_file = macos_dir / "init.lua"
+    if not init_file.exists():
+        return []  # macOS runtime not started yet; nothing to validate.
+
+    issues: list[dict[str, object]] = []
+    text = read_text(init_file)
+    for include_value in RE_LUA_DOFILE.findall(text):
+        target = (macos_dir / include_value).resolve()
+        if not target.exists():
+            issues.append({
+                "type": "macos_include_missing",
+                "file": to_repo_path(init_file, repo_root),
+                "include": include_value,
+                "target": to_repo_path(target, repo_root),
+                "message": "init.lua references a dofile() target that does not exist.",
+            })
+    return issues
+
+
 def validate_hotkey_catalog(repo_root: Path) -> list[dict[str, object]]:
     tool = repo_root / "ai/hotkey_sync.py"
     result = subprocess.run(
@@ -1151,6 +1181,7 @@ def build_summary(
     governance_issues: list,
     local_only_contract_issues: list,
     hotkey_catalog_issues: list,
+    macos_runtime_issues: list,
     dead_candidates: dict,
     profile_results: list,
     registry: dict,
@@ -1161,7 +1192,7 @@ def build_summary(
     governance_result: dict[str, object],
     next_frontier: str = "",
 ) -> dict[str, object]:
-    issues = include_missing + registry_issues + service_call_issues + profile_issues + guide_contract_issues + catalog_review_issues + governance_issues + local_only_contract_issues + hotkey_catalog_issues + unclosed_hotif + forbidden_references
+    issues = include_missing + registry_issues + service_call_issues + profile_issues + guide_contract_issues + catalog_review_issues + governance_issues + local_only_contract_issues + hotkey_catalog_issues + macos_runtime_issues + unclosed_hotif + forbidden_references
     profile_counts = {p["label"]: p.get("item_count", 0) for p in profile_results}
     ai_readiness = compute_ai_readiness(issues, dead_candidates, forbidden_references)
     return {
@@ -1232,6 +1263,7 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
     unclosed_hotif = scan_unclosed_hotif(hotkeys_dir, repo_root)
     local_only_contract_issues = validate_local_only_contract(repo_root, repo_map) if repo_map else []
     hotkey_catalog_issues = validate_hotkey_catalog(repo_root)
+    macos_runtime_issues = validate_macos_runtime(repo_root)
 
     summary = build_summary(
         include_missing,
@@ -1243,6 +1275,7 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
         governance_issues,
         local_only_contract_issues,
         hotkey_catalog_issues,
+        macos_runtime_issues,
         dead_candidates,
         profile_results,
         registry,
@@ -1266,6 +1299,7 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
             "governance": governance_issues,
             "local_only_contract": local_only_contract_issues,
             "hotkey_catalog": hotkey_catalog_issues,
+            "macos_runtime": macos_runtime_issues,
             "unclosed_hotif": unclosed_hotif,
             "forbidden_references": forbidden_references,
         },

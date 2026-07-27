@@ -1,110 +1,106 @@
 # macOS migration — first vertical slice (Hammerspoon)
 
-Status: confirmed
-Plan: ready to implement
+Status: implemented
+Plan: technically complete; pending human verification
 
 ## App confirmation (verified on this machine)
 
-Verified via `mdls -name kMDItemCFBundleIdentifier` and filesystem inspection —
-no longer an open question:
+Verified via `mdls -name kMDItemCFBundleIdentifier` and filesystem inspection:
 
 | App | Bundle ID | Notes |
 |---|---|---|
-| Hammerspoon | `org.hammerspoon.Hammerspoon` | Installed via Homebrew (`hs` CLI available at `/opt/homebrew/bin/hs`) |
-| Eclipse | `epp.package.committers` | ADT plugins confirmed present (`com.sap.adt.*` jars under `Contents/Eclipse/plugins`) |
+| Hammerspoon | `org.hammerspoon.Hammerspoon` | Installed via Homebrew (`hs` CLI at `/opt/homebrew/bin/hs`) |
+| Eclipse | `epp.package.committers` | ADT plugins confirmed present (`com.sap.adt.*` jars) |
 | SAP GUI for Java | `com.sap.platin` | At `/Applications/SAP Clients/SAPGUI/SAPGUI.app` |
-| Snipaste | `com.Snipaste` | Native macOS build, not a Windows-only tool as previously assumed |
+| Snipaste | `com.Snipaste` | Native macOS build — not Windows-only here |
 
-This removes one of the two blocking open questions from the previous plan
-revision. Snipaste being present changes scope: it is not Windows-only here,
-so `snipaste_enter` (`~enter` in `hotkeys.db`, currently `portability=windows-only`)
-should be reclassified to `portable-intent` in a follow-up catalog edit —
-tracked as a fast-follow, not blocking this slice.
+## Outcome
 
-## Stack decision (unchanged)
+- `hotkeys.db`: 11 rows (6 hotstrings + 5 SAP Eclipse/ADT hotkeys) now carry
+  `platform=["windows","macos"]`. All other rows remain `["windows"]`.
+- `ai/hotkey_sync.py` extended with a macOS generation target: emits
+  `platforms/macos/hammerspoon/generated/bindings.lua` (binding metadata
+  only — id, key/trigger, contextLabel, label) for every row targeting
+  macOS. The Windows AHK generator is untouched.
+- Hand-authored `platforms/macos/hammerspoon/actions.lua`: one function per
+  Eclipse/ADT hotkey id, reimplementing the AHK behavior natively (not a
+  line-by-line port). Each function documents the AHK behavior it mirrors.
+- Hand-authored `platforms/macos/hammerspoon/hotstrings.lua`: a native
+  `hs.eventtap` keystroke watcher reproducing AHK's `:*:` (immediate) and
+  `::` (terminator-based) hotstring semantics for the 6 catalog entries.
+- Hand-authored `platforms/macos/hammerspoon/init.lua`: loads bindings,
+  actions, and hotstrings; binds the 5 Eclipse/ADT hotkeys via
+  `hs.hotkey.new` guarded by an `hs.application.watcher` that
+  enables/disables them based on Eclipse focus (mirrors AHK `#hotif
+  winactive(exeEclipse)`); starts the hotstring watcher globally.
+- `ai/health_check.py`: added `validate_macos_runtime()`, which checks that
+  every `dofile()` target referenced by `init.lua` exists. Returns no
+  issues if the macOS runtime hasn't been started (no Windows/macOS parity
+  requirement). Wired into `run()`, `build_summary()`, and the full JSON
+  output under `issues.macos_runtime`.
+- `ai/run_smoke.py`: added `run_smoke_macos()` and `--platform macos`, using
+  `luac -p` (parse-only syntax check) since `hs -c` blocks waiting for the
+  Hammerspoon app's IPC socket. Writes to `ai/run-result-macos.json`
+  (added to `.gitignore`, parallel to `ai/run-result.json`).
 
-**Hammerspoon**, confirmed installed and ready:
-- Lua scripting with full window/app introspection (`hs.window`, `hs.application`).
-- Native hotkey binding (`hs.hotkey.bind`) with app-context guards, equivalent to AHK `#hotif`.
-- Native text-expansion is not built in; hotstrings need `hs.eventtap` or a
-  dedicated expander (still an open question, see below).
+## Validation performed
 
-## Scope for this slice
+- `luac -p` (Lua 5.5, installed via `brew install lua`) on all 4 Lua files:
+  syntax OK.
+- `python ai/run_smoke.py --platform macos --pretty`: `outcome: exited_clean`,
+  0 errors across 4 Lua files.
+- `python ai/hotkey_sync.py --check`: 6 generated artifacts current (5 AHK +
+  1 Lua bindings file).
+- `python ai/health_check.py --pretty --summary`: `ai_readiness: 100`, 0
+  issues, `macos_runtime` issue list empty (all 3 `dofile()` targets in
+  `init.lua` resolve).
+- `python ai/review_check.py --pretty --summary`: 0 issues, 0 warnings,
+  `plan_state: active` correctly recognized.
+- `git diff --check`: clean.
 
-Only migrate entries already marked `portability=portable-intent` in
-`hotkeys.db`, with zero dependency on a Windows-only API. Confirmed apps
-mean the scope for the *next* catalog edit is broader than the previous
-draft, but this slice keeps the original two groups to stay small and provable:
+## Design constraint (why bindings.lua only carries metadata)
 
-1. **Hotstrings (6 entries, `file=global`, `type=hotstring`)**
-   - `hs_semicolons` (`;;` → `ñ`)
-   - `hs_sap_comment_plus` / `hs_sap_comment_minus` (`"+` / `"-`)
-   - `hs_sap_block_plus` / `hs_sap_block_minus` (`*+` / `*-`)
-   - `hs_sp` (`sp` → paste "summary in prompt")
+The `action` column in `hotkeys.db` holds raw AHK syntax
+(e.g. `services.sap.insertCommentLine()`). This cannot be mechanically
+transpiled to Lua, so the generator emits only binding metadata; behavior
+is hand-authored in `actions.lua`/`hotstrings.lua`, matched by `id`.
 
-2. **SAP Eclipse/ADT hotkeys (5 entries, `file=sap-eclipse`)**
-   - `eclipse_backtick`, `eclipse_f1`, `eclipse_f2`, `eclipse_ctrl_sh_b`,
-     `eclipse_ctrl_5`
-   - Now provable end-to-end on this machine: Eclipse + ADT plugins confirmed.
+## What is NOT yet verified (human-only)
 
-Deferred to a fast-follow slice (not blocking, now unblocked by app confirmation):
-- `snipaste_enter` reclassification + migration (Snipaste confirmed present).
-- SAP GUI hotkeys (SAP GUI for Java confirmed present; needs its own
-  focus-window API research since it is a Java app, not a native Cocoa app).
+- **Manual functional test inside real Eclipse/ADT and while typing
+  hotstrings.** `luac -p` only proves the Lua parses — it does not load
+  Hammerspoon's `hs.*` APIs or exercise real keystrokes.
+- **Eclipse keymap accuracy.** `actions.lua` assumes specific Cmd/Ctrl/Alt
+  shortcuts per action (documented inline per function) that may not match
+  this machine's actual Eclipse keymap — this was not verifiable from the
+  repo alone.
+- Loading `init.lua` inside the actual Hammerspoon app (e.g. via
+  `~/.hammerspoon/init.lua` requiring this file, or a symlink) and
+  confirming `hs.reload()` picks it up without console errors.
 
-Still out of scope for any near-term slice: launcher/productivity hotkeys
-(XYplorer has no macOS equivalent), window-group activation (`windowGroup`
-service is a Windows-specific concept with no direct Hammerspoon analog yet).
+## Deferred fast-follow (not blocking, unblocked by app confirmation)
 
-## Technical steps
+- Reclassify `snipaste_enter` to `portable-intent` and add a macOS binding +
+  action, now that Snipaste is confirmed installed on this machine.
+- SAP GUI for Java hotkeys — deferred because it is a Java/SWT app with a
+  different focus-window API than native Cocoa apps; needs its own research
+  pass before binding.
 
-1. Create `platforms/macos/hammerspoon/init.lua` as the entrypoint (mirrors
-   `keyflow.ahk`).
-2. Create `platforms/macos/hammerspoon/bootstrap.lua`: loads constants and a
-   minimal service registry (mirrors `bootstrap.ahk`).
-3. Add `"macos"` to the `platform` JSON array for the 11 candidate
-   `hotkeys.db` rows above (e.g. `["windows","macos"]`), so the same
-   human-owned catalog drives both runtimes without duplication.
-4. Extend `ai/hotkey_sync.py` with a second generation target: emit Lua
-   hotkey/hotstring bindings for rows where `platform` includes `"macos"`,
-   parallel to the existing AHK generation. Keep the AHK generator untouched.
-5. Extend `ai/health_check.py`:
-   - Validate the macOS include chain (`init.lua` → `bootstrap.lua`) the same
-     way the AHK include graph is validated.
-   - Do NOT require macOS/Windows parity — a hotkey existing only for one
-     platform is valid and expected.
-6. Add a macOS smoke check: `hs -c "print('ok')"`, recorded through a small
-   extension to `ai/run_smoke.py`.
-7. Fast-follow (separate cycle): reclassify `snipaste_enter` to
-   `portable-intent` and add it to the macOS-targeted rows once the first
-   slice is validated.
+## Non-goals (unchanged)
 
-## Open questions (only one remains)
-
-- Hotstring expansion: build a small Hammerspoon text-watcher via
-  `hs.eventtap`, or adopt a companion tool (e.g. Espanso) driven by the same
-  JSON catalogs (`autocorrect.json`, `quick-snippets.json`)? This decides
-  whether hotstrings live inside Hammerspoon or in a second local process.
-  **This is the only remaining blocking decision before step 4.**
-
-## Non-goals for this slice
-
-- No SAP session launch, no credential handling (already retired on Windows).
+- No SAP session launch, no credential handling.
 - No parity requirement between hotkey counts on Windows vs macOS.
-- No removal of any Windows runtime code — both platforms coexist under
-  `platforms/`.
-- No SAP GUI for Java automation yet (deferred to fast-follow).
-
-## Definition of done for this slice
-
-- `platforms/macos/hammerspoon/init.lua` loads without error under `hs -c`.
-- The 5 Eclipse/ADT hotkeys and 6 hotstrings work manually on this Mac with
-  Eclipse + ADT (human verification, app presence already confirmed).
-- `ai/health_check.py` validates the macOS include chain and stays at
-  `ai_readiness: 100` with both runtimes present.
-- `ai/hotkey_sync.py --check` passes for both AHK and Lua generated artifacts.
+- No removal of any Windows runtime code.
 
 ## Human-only pending work
 
-- Decide the hotstring-expansion approach (only remaining open question).
-- Manually verify the 5 Eclipse/ADT hotkeys and 6 hotstrings once implemented.
+1. Set up Hammerspoon to load `platforms/macos/hammerspoon/init.lua`
+   (symlink or `dofile()` from `~/.hammerspoon/init.lua`) and reload the
+   config.
+2. Open Eclipse/ADT and manually test each of the 5 hotkeys
+   (`` ` ``, F1, F2, Cmd+Shift+B, Cmd+5) against this machine's actual
+   Eclipse keymap; adjust `actions.lua` if any binding is wrong.
+3. Test the 6 hotstrings (`;;`, `"+`, `"-`, `*+`, `*-`, `sp `) in a plain
+   text field to confirm the `hs.eventtap` watcher fires correctly and does
+   not interfere with normal typing.
+4. Report back which of the 11 bindings work as-is vs. need adjustment.

@@ -43,7 +43,7 @@
       "ai/repo-map.json",
       "ai/health-check.summary.json"
     ],
-    "next_frontier": "macOS migration plan proposed in ai/current-plan.md: Hammerspoon-based first vertical slice (6 hotstrings + 5 SAP Eclipse/ADT hotkeys). Awaiting human decisions on hotstring-expansion approach and confirmed macOS app set before implementation starts."
+    "next_frontier": "macOS first vertical slice technically implemented (Hammerspoon: init.lua, actions.lua, hotstrings.lua, generated bindings.lua for 6 hotstrings + 5 SAP Eclipse/ADT hotkeys). All static validation passes. Pending human verification inside real Eclipse/ADT and with real keystrokes; see ai/current-plan.md."
   },
   "issues": {
     "include_missing": [],
@@ -55,6 +55,7 @@
     "governance": [],
     "local_only_contract": [],
     "hotkey_catalog": [],
+    "macos_runtime": [],
     "unclosed_hotif": [],
     "forbidden_references": []
   },

@@ -157,9 +157,10 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 ## Next evolution frontier
 
 - The Windows runtime reduction (72→22 hotkeys), hotkey-tracking removal, and dead-code cleanup are technically complete and stable at `ai_readiness: 100`.
-- A macOS implementation plan is now active: `ai/current-plan.md` proposes Hammerspoon as the native stack and defines a first vertical slice (6 hotstrings + 5 SAP Eclipse/ADT hotkeys, both already `portability=portable-intent` and free of Windows-only API dependencies).
-- The plan is `status: proposed` — it requires two human decisions before implementation starts: the hotstring-expansion approach (native Hammerspoon `hs.eventtap` vs. a companion tool) and confirmation of the installed macOS app set (SAP GUI for Java, Eclipse/ADT).
-- Human-only work also includes launching the refreshed Windows runtime once to confirm it starts cleanly without the removed tracker, and providing a Mac with Hammerspoon for manual verification of the first slice.
+- The macOS first vertical slice is technically implemented: `platforms/macos/hammerspoon/` now has `init.lua`, `actions.lua`, `hotstrings.lua`, and a generated `bindings.lua` covering the 11 catalog rows (6 hotstrings + 5 SAP Eclipse/ADT hotkeys) marked `platform=["windows","macos"]` in `hotkeys.db`.
+- `ai/hotkey_sync.py` now generates macOS Lua bindings alongside AHK artifacts; `ai/health_check.py` validates the macOS include chain via `validate_macos_runtime()`; `ai/run_smoke.py` supports `--platform macos` using `luac -p`.
+- `ai/current-plan.md` records `status: implemented` — all static validation passes (syntax, include chain, health/review checks), but the slice has not been exercised inside real Eclipse/ADT or with real keystrokes yet.
+- Human-only work: load `init.lua` into Hammerspoon, manually test the 5 Eclipse/ADT hotkeys and 6 hotstrings against this machine's real keymap, and report which bindings need adjustment. Also still pending: launching the refreshed Windows runtime once to confirm it starts cleanly without the removed tracker.
 
 ## Validation
 
