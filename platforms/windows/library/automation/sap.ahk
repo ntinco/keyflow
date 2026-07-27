@@ -1,18 +1,22 @@
 class SapService {
-  insertCommentLine() {
-    this._insertCommentLine()
+  ; symbol is the hotstring trigger's second character ("+" or "-"),
+  ; preserved in the inserted text so the user can see which trigger fired.
+  ; "+"/"-  -> single-line inline comment (one code line).
+  ; *+/*-   -> multi-line comment framing (a block of code lines).
+  insertCommentLine(symbol := "-") {
+    this._insertCommentLine(symbol)
   }
 
-  insertCommentBlock() {
-    this._insertCommentBlock()
+  insertCommentBlock(symbol := "-") {
+    this._insertCommentBlock(symbol)
   }
 
-  _insertCommentLine() {
-    utilPaste(this._buildCodeCommentLine())
+  _insertCommentLine(symbol) {
+    utilPaste(this._buildCodeCommentLine(symbol))
   }
 
-  _insertCommentBlock() {
-    utilPaste(this._buildCommentMarkup())
+  _insertCommentBlock(symbol) {
+    utilPaste(this._buildCommentMarkup(symbol))
   }
 
   _buildCodeSignature() {
@@ -22,15 +26,13 @@ class SapService {
     return commentUser " " constDayEs
   }
 
-  _buildCodeCommentLine() {
-    return Chr(34) " " this._buildCodeSignature()
+  _buildCodeCommentLine(symbol) {
+    return Chr(34) symbol this._buildCodeSignature()
   }
 
-  _buildCommentMarkup() {
-    signature := this._buildCodeSignature()
-    return "*---------------------------------------------------------------------*`r`n"
-      . "* " signature "`r`n"
-      . "*---------------------------------------------------------------------*"
+  _buildCommentMarkup(symbol) {
+    line := "*" symbol this._buildCodeSignature()
+    return line "`r`n" line
   }
 
   isTextInputActive(winTitle := "A") {

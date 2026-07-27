@@ -6,16 +6,16 @@
 utilPaste("ñ",,True)
 }
 :*:"+::{
-services.sap.insertCommentLine()
+services.sap.insertCommentLine("+")
 }
 :*:"-::{
-services.sap.insertCommentLine()
+services.sap.insertCommentLine("-")
 }
 :*:*+::{
-services.sap.insertCommentBlock()
+services.sap.insertCommentBlock("+")
 }
 :*:*-::{
-services.sap.insertCommentBlock()
+services.sap.insertCommentBlock("-")
 }
 ::sp::{
 utilPaste("summary in prompt",,true)

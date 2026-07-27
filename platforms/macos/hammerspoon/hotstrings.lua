@@ -34,25 +34,30 @@ local function buildCodeSignature()
   return user .. " " .. dateStr
 end
 
-local function buildCodeCommentLine()
-  return "\" " .. buildCodeSignature()
+-- symbol is the trigger's second character ("+" or "-"), preserved in the
+-- inserted text so the user can see which trigger fired. Mirrors
+-- platforms/windows/library/automation/sap.ahk _buildCodeCommentLine().
+-- "+"/"-  -> single-line inline comment (one code line).
+local function buildCodeCommentLine(symbol)
+  return "\"" .. symbol .. buildCodeSignature()
 end
 
-local function buildCommentMarkup()
-  local signature = buildCodeSignature()
-  return "*---------------------------------------------------------------------*\n"
-    .. "* " .. signature .. "\n"
-    .. "*---------------------------------------------------------------------*"
+-- *+/*-   -> multi-line comment framing (a block of code lines).
+-- Mirrors sap.ahk _buildCommentMarkup(): the same line repeated twice,
+-- separated by a line break.
+local function buildCommentMarkup(symbol)
+  local line = "*" .. symbol .. buildCodeSignature()
+  return line .. "\n" .. line
 end
 
 -- immediate = true  -> fires with no terminator (AHK ":*:" option)
 -- immediate = false -> fires on a following non-alnum terminator (AHK "::")
 local TRIGGERS = {
   {id = "hs_semicolons",        pattern = ";;", immediate = true,  replacement = function() return "ñ" end},
-  {id = "hs_sap_comment_plus",  pattern = "\"+", immediate = true, replacement = buildCodeCommentLine},
-  {id = "hs_sap_comment_minus", pattern = "\"-", immediate = true, replacement = buildCodeCommentLine},
-  {id = "hs_sap_block_plus",    pattern = "*+", immediate = true,  replacement = buildCommentMarkup},
-  {id = "hs_sap_block_minus",   pattern = "*-", immediate = true,  replacement = buildCommentMarkup},
+  {id = "hs_sap_comment_plus",  pattern = "\"+", immediate = true, replacement = function() return buildCodeCommentLine("+") end},
+  {id = "hs_sap_comment_minus", pattern = "\"-", immediate = true, replacement = function() return buildCodeCommentLine("-") end},
+  {id = "hs_sap_block_plus",    pattern = "*+", immediate = true,  replacement = function() return buildCommentMarkup("+") end},
+  {id = "hs_sap_block_minus",   pattern = "*-", immediate = true,  replacement = function() return buildCommentMarkup("-") end},
   {id = "hs_sp",                pattern = "sp", immediate = false, replacement = function() return "summary in prompt" end},
 }
 
