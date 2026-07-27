@@ -1223,7 +1223,11 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
     unused_assignments = scan_assignment_candidates(repo_root, token_counter)
     unused_groups = scan_group_candidates(repo_root, token_counter)
     forbidden_references = scan_forbidden_references(repo_root)
-    repo_map_contract_issues = validate_repo_map_contracts(repo_root, repo_map, startup_sections, registry) if repo_map else []
+    repo_map_contract_issues = (
+        validate_repo_map_contracts(repo_root, repo_map, startup_sections, registry)
+        if repo_map
+        else []
+    )
     guide_contract_issues = validate_guide_contracts(repo_root, repo_map, governance_result) if repo_map else []
     hotkey_counts = scan_hotkey_counts(hotkeys_dir, repo_root)
     unclosed_hotif = scan_unclosed_hotif(hotkeys_dir, repo_root)

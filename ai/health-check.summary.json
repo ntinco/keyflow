@@ -3,12 +3,9 @@
   "issue_count": 0,
   "ai_readiness": 100,
   "services": [
-    "everything",
     "hotkeyTracker",
     "hotstring",
     "launcher",
-    "memory",
-    "run",
     "sap",
     "snipaste",
     "windowGroup",

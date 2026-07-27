@@ -4,12 +4,9 @@
     "issue_count": 0,
     "ai_readiness": 100,
     "services": [
-      "everything",
       "hotkeyTracker",
       "hotstring",
       "launcher",
-      "memory",
-      "run",
       "sap",
       "snipaste",
       "windowGroup",
@@ -129,10 +126,6 @@
         ]
       },
       {
-        "file": "platforms/windows/library/automation/everything.ahk",
-        "includes": []
-      },
-      {
         "file": "platforms/windows/library/automation/hotkey-tracker.ahk",
         "includes": []
       },
@@ -142,14 +135,6 @@
       },
       {
         "file": "platforms/windows/library/automation/launcher.ahk",
-        "includes": []
-      },
-      {
-        "file": "platforms/windows/library/automation/memory.ahk",
-        "includes": []
-      },
-      {
-        "file": "platforms/windows/library/automation/run.ahk",
         "includes": []
       },
       {
@@ -187,23 +172,8 @@
             "exists": true
           },
           {
-            "include": "automation/memory.ahk",
-            "target": "platforms/windows/library/automation/memory.ahk",
-            "exists": true
-          },
-          {
             "include": "automation/hotkey-tracker.ahk",
             "target": "platforms/windows/library/automation/hotkey-tracker.ahk",
-            "exists": true
-          },
-          {
-            "include": "automation/run.ahk",
-            "target": "platforms/windows/library/automation/run.ahk",
-            "exists": true
-          },
-          {
-            "include": "automation/everything.ahk",
-            "target": "platforms/windows/library/automation/everything.ahk",
             "exists": true
           },
           {
@@ -252,17 +222,6 @@
       }
     ],
     "service_registry": [
-      {
-        "service": "everything",
-        "class": "EverythingService",
-        "class_file": "platforms/windows/library/automation/everything.ahk",
-        "referenced_methods": [
-          "incrementRunCount"
-        ],
-        "declared_methods": [
-          "incrementRunCount"
-        ]
-      },
       {
         "service": "hotkeyTracker",
         "class": "HotkeyTrackerService",
@@ -320,32 +279,10 @@
           "pasteSelectedFiles",
           "saveClipboardToSelectedFile",
           "_readSelectedFiles",
+          "_incrementRunCount",
           "_readSelectedFile",
           "_isPasteableTextFile",
           "_waitAfterPaste"
-        ]
-      },
-      {
-        "service": "memory",
-        "class": "MemoryService",
-        "class_file": "platforms/windows/library/automation/memory.ahk",
-        "referenced_methods": [
-          "getValue"
-        ],
-        "declared_methods": [
-          "getValue"
-        ]
-      },
-      {
-        "service": "run",
-        "class": "RunService",
-        "class_file": "platforms/windows/library/automation/run.ahk",
-        "referenced_methods": [
-          "runCommand"
-        ],
-        "declared_methods": [
-          "runCommand",
-          "_prepareHotkeyLaunch"
         ]
       },
       {
@@ -636,12 +573,6 @@
         ]
       },
       {
-        "file": "platforms/windows/library/automation/everything.ahk",
-        "calls": [
-          "run.runCommand"
-        ]
-      },
-      {
         "file": "platforms/windows/library/automation/hotstring.ahk",
         "calls": [
           "sap.isTextInputActive",
@@ -649,35 +580,21 @@
         ]
       },
       {
-        "file": "platforms/windows/library/automation/launcher.ahk",
-        "calls": [
-          "everything.incrementRunCount",
-          "run.runCommand"
-        ]
-      },
-      {
-        "file": "platforms/windows/library/automation/run.ahk",
-        "calls": [
-          "launcher.dismissLauncherUi"
-        ]
-      },
-      {
         "file": "platforms/windows/library/automation/sap.ahk",
         "calls": [
-          "memory.getValue",
           "windowGroup.activateGroup"
-        ]
-      },
-      {
-        "file": "platforms/windows/library/automation/snipaste.ahk",
-        "calls": [
-          "run.runCommand"
         ]
       },
       {
         "file": "platforms/windows/library/bootstrap.ahk",
         "calls": [
           "hotstring.set"
+        ]
+      },
+      {
+        "file": "platforms/windows/library/util.ahk",
+        "calls": [
+          "launcher.dismissLauncherUi"
         ]
       }
     ]
