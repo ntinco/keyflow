@@ -1,52 +1,60 @@
 # macOS migration — first vertical slice (Hammerspoon)
 
-Status: proposed
-Plan: not started
+Status: confirmed
+Plan: ready to implement
 
-## Goal
+## App confirmation (verified on this machine)
 
-Stand up a minimal, parallel macOS runtime using Hammerspoon that proves the
-architecture end-to-end (config loading, hotkey binding, app-context detection,
-key sending) without attempting full parity with the Windows AHK runtime.
+Verified via `mdls -name kMDItemCFBundleIdentifier` and filesystem inspection —
+no longer an open question:
 
-## Stack decision
+| App | Bundle ID | Notes |
+|---|---|---|
+| Hammerspoon | `org.hammerspoon.Hammerspoon` | Installed via Homebrew (`hs` CLI available at `/opt/homebrew/bin/hs`) |
+| Eclipse | `epp.package.committers` | ADT plugins confirmed present (`com.sap.adt.*` jars under `Contents/Eclipse/plugins`) |
+| SAP GUI for Java | `com.sap.platin` | At `/Applications/SAP Clients/SAPGUI/SAPGUI.app` |
+| Snipaste | `com.Snipaste` | Native macOS build, not a Windows-only tool as previously assumed |
 
-- **Hammerspoon** is the recommended native automation stack:
-  - Lua scripting with full window/app introspection (`hs.window`, `hs.application`).
-  - Native hotkey binding (`hs.hotkey.bind`) with app-context guards, equivalent to AHK `#hotif`.
-  - Native text-expansion is not built in; hotstrings need `hs.eventtap` or a
-    dedicated expander (see Open questions).
-  - No compiled binary to manage; config is plain Lua, reloadable at runtime.
-- Rejected alternatives: Karabiner-Elements (remap-only, no scripting for
-  compound workflows or app automation), Raycast (launcher-first, not a
-  general hotkey/automation runtime).
+This removes one of the two blocking open questions from the previous plan
+revision. Snipaste being present changes scope: it is not Windows-only here,
+so `snipaste_enter` (`~enter` in `hotkeys.db`, currently `portability=windows-only`)
+should be reclassified to `portable-intent` in a follow-up catalog edit —
+tracked as a fast-follow, not blocking this slice.
+
+## Stack decision (unchanged)
+
+**Hammerspoon**, confirmed installed and ready:
+- Lua scripting with full window/app introspection (`hs.window`, `hs.application`).
+- Native hotkey binding (`hs.hotkey.bind`) with app-context guards, equivalent to AHK `#hotif`.
+- Native text-expansion is not built in; hotstrings need `hs.eventtap` or a
+  dedicated expander (still an open question, see below).
 
 ## Scope for this slice
 
 Only migrate entries already marked `portability=portable-intent` in
-`hotkeys.db`, and only the ones with **zero dependency on a Windows-only API**
-(no `WinActivate`, `GroupAdd`, clipboard-file paste, etc.). Two candidate
-groups:
+`hotkeys.db`, with zero dependency on a Windows-only API. Confirmed apps
+mean the scope for the *next* catalog edit is broader than the previous
+draft, but this slice keeps the original two groups to stay small and provable:
 
 1. **Hotstrings (6 entries, `file=global`, `type=hotstring`)**
    - `hs_semicolons` (`;;` → `ñ`)
    - `hs_sap_comment_plus` / `hs_sap_comment_minus` (`"+` / `"-`)
    - `hs_sap_block_plus` / `hs_sap_block_minus` (`*+` / `*-`)
    - `hs_sp` (`sp` → paste "summary in prompt")
-   - These are pure text-expansion, no window-context dependency once SAP GUI
-     for Java is confirmed installed.
 
 2. **SAP Eclipse/ADT hotkeys (5 entries, `file=sap-eclipse`)**
    - `eclipse_backtick`, `eclipse_f1`, `eclipse_f2`, `eclipse_ctrl_sh_b`,
      `eclipse_ctrl_5`
-   - All are single-app-scoped key remaps or key-sends inside Eclipse/ADT.
-     Simplest real-world validation of app-context detection + `hs.eventtap.keyStrokes`.
+   - Now provable end-to-end on this machine: Eclipse + ADT plugins confirmed.
 
-Do **not** migrate in this slice: SAP GUI hotkeys (needs SAP GUI for Java
-confirmed + different focus-window API), launcher/productivity hotkeys
-(XYplorer has no macOS equivalent), Snipaste/global hotkeys (no equivalent
-app), window-group activation (`windowGroup` service is a Windows-specific
-concept with no direct Hammerspoon analog yet).
+Deferred to a fast-follow slice (not blocking, now unblocked by app confirmation):
+- `snipaste_enter` reclassification + migration (Snipaste confirmed present).
+- SAP GUI hotkeys (SAP GUI for Java confirmed present; needs its own
+  focus-window API research since it is a Java app, not a native Cocoa app).
+
+Still out of scope for any near-term slice: launcher/productivity hotkeys
+(XYplorer has no macOS equivalent), window-group activation (`windowGroup`
+service is a Windows-specific concept with no direct Hammerspoon analog yet).
 
 ## Technical steps
 
@@ -54,8 +62,8 @@ concept with no direct Hammerspoon analog yet).
    `keyflow.ahk`).
 2. Create `platforms/macos/hammerspoon/bootstrap.lua`: loads constants and a
    minimal service registry (mirrors `bootstrap.ahk`).
-3. Add a `platform` value `"macos"` to the 11 candidate hotkeys.db rows
-   above (multi-value JSON array like `["windows","macos"]`), so the same
+3. Add `"macos"` to the `platform` JSON array for the 11 candidate
+   `hotkeys.db` rows above (e.g. `["windows","macos"]`), so the same
    human-owned catalog drives both runtimes without duplication.
 4. Extend `ai/hotkey_sync.py` with a second generation target: emit Lua
    hotkey/hotstring bindings for rows where `platform` includes `"macos"`,
@@ -65,18 +73,19 @@ concept with no direct Hammerspoon analog yet).
      way the AHK include graph is validated.
    - Do NOT require macOS/Windows parity — a hotkey existing only for one
      platform is valid and expected.
-6. Add a macOS smoke check: `hs -c "print('ok')"` or an equivalent minimal
-   invocation, recorded through a small extension to `ai/run_smoke.py`.
+6. Add a macOS smoke check: `hs -c "print('ok')"`, recorded through a small
+   extension to `ai/run_smoke.py`.
+7. Fast-follow (separate cycle): reclassify `snipaste_enter` to
+   `portable-intent` and add it to the macOS-targeted rows once the first
+   slice is validated.
 
-## Open questions (human decision required before step 4)
+## Open questions (only one remains)
 
 - Hotstring expansion: build a small Hammerspoon text-watcher via
   `hs.eventtap`, or adopt a companion tool (e.g. Espanso) driven by the same
   JSON catalogs (`autocorrect.json`, `quick-snippets.json`)? This decides
   whether hotstrings live inside Hammerspoon or in a second local process.
-- Confirm SAP GUI for Java and Eclipse/ADT are the actual apps that will run
-  on the target Mac (vs. a VM/Citrix path, which would change the whole
-  automation model).
+  **This is the only remaining blocking decision before step 4.**
 
 ## Non-goals for this slice
 
@@ -84,18 +93,18 @@ concept with no direct Hammerspoon analog yet).
 - No parity requirement between hotkey counts on Windows vs macOS.
 - No removal of any Windows runtime code — both platforms coexist under
   `platforms/`.
+- No SAP GUI for Java automation yet (deferred to fast-follow).
 
 ## Definition of done for this slice
 
 - `platforms/macos/hammerspoon/init.lua` loads without error under `hs -c`.
-- The 5 Eclipse/ADT hotkeys and 6 hotstrings work manually on a real Mac with
-  SAP GUI for Java + Eclipse/ADT installed (human verification).
+- The 5 Eclipse/ADT hotkeys and 6 hotstrings work manually on this Mac with
+  Eclipse + ADT (human verification, app presence already confirmed).
 - `ai/health_check.py` validates the macOS include chain and stays at
   `ai_readiness: 100` with both runtimes present.
 - `ai/hotkey_sync.py --check` passes for both AHK and Lua generated artifacts.
 
 ## Human-only pending work
 
-- Decide the hotstring-expansion approach (open question above).
-- Confirm the installed macOS app set (SAP GUI for Java, Eclipse/ADT).
-- Provide a Mac with Hammerspoon installed for manual verification.
+- Decide the hotstring-expansion approach (only remaining open question).
+- Manually verify the 5 Eclipse/ADT hotkeys and 6 hotstrings once implemented.

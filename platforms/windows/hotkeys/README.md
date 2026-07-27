@@ -9,12 +9,12 @@ Active catalog: **22 hotkeys** and **6 hotstrings**.
 
 | Trigger | Context | Action | Implementation | Portability |
 |---|---|---|---|---|
-| `;;` | global | Type ñ | windows | portable-intent |
-| `"+` | global | SAP insert comment line (+) | windows | portable-intent |
-| `"-` | global | SAP insert comment line (-) | windows | portable-intent |
-| `*+` | global | SAP insert comment block (+) | windows | portable-intent |
-| `*-` | global | SAP insert comment block (-) | windows | portable-intent |
-| `sp` | global | Paste 'summary in prompt' | windows | portable-intent |
+| `;;` | global | Type ñ | windows, macos | portable-intent |
+| `"+` | global | SAP insert comment line (+) | windows, macos | portable-intent |
+| `"-` | global | SAP insert comment line (-) | windows, macos | portable-intent |
+| `*+` | global | SAP insert comment block (+) | windows, macos | portable-intent |
+| `*-` | global | SAP insert comment block (-) | windows, macos | portable-intent |
+| `sp` | global | Paste 'summary in prompt' | windows, macos | portable-intent |
 | `Alt+E` | global | Activate SAP workspace group | windows | windows-only |
 | `Alt+D` | global | Activate IDE group | windows | windows-only |
 | `Win+Esc` | global | Resize window height | windows | windows-only |
@@ -38,11 +38,11 @@ Active catalog: **22 hotkeys** and **6 hotstrings**.
 
 | Trigger | Context | Action | Implementation | Portability |
 |---|---|---|---|---|
-| `Backtick` | sap-eclipse | Prompt and open ABAP object | windows | portable-intent |
-| `F1` | sap-eclipse | Search ABAP object | windows | portable-intent |
-| `F2` | sap-eclipse | Rename | windows | portable-intent |
-| `Ctrl+Shift+B` | sap-eclipse | Focus Eclipse windows | windows | portable-intent |
-| `Ctrl+5` | sap-eclipse | Start quick debug | windows | portable-intent |
+| `Backtick` | sap-eclipse | Prompt and open ABAP object | windows, macos | portable-intent |
+| `F1` | sap-eclipse | Search ABAP object | windows, macos | portable-intent |
+| `F2` | sap-eclipse | Rename | windows, macos | portable-intent |
+| `Ctrl+Shift+B` | sap-eclipse | Focus Eclipse windows | windows, macos | portable-intent |
+| `Ctrl+5` | sap-eclipse | Start quick debug | windows, macos | portable-intent |
 
 ## Productivity workflows
 
