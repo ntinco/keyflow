@@ -117,7 +117,6 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 | SAP public facade + GUI/ADT automation | `platforms/windows/library/automation/sap.ahk` |
 | Service wiring + hotstring profiles | `platforms/windows/library/bootstrap.ahk` |
 | Free utility functions | `platforms/windows/library/util.ahk` |
-| Hotkey tracking infrastructure | `platforms/windows/hotkeys/hotkey-tracking.ahk` |
 | Hotkey triggers | `platforms/windows/hotkeys/` |
 | Human-managed hotkey catalog | `platforms/windows/data/hotkeys.db` |
 | Hotkey artifact generation and drift check | `ai/hotkey_sync.py` |
@@ -148,18 +147,18 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 - `ai/prompts/agent-prompts.md` is now included in `ai/repo-map.json` `read-order`, making it visible to agents on first read.
 - `ai/run_smoke.py` records runtime smoke execution into `ai/run-result.json` so agents can distinguish "guide layer healthy" from "runtime smoke actually ran without parse errors".
 - `hotkeys.db` is the only human-managed hotkey source; generated AHK and hotkey reference files are checked for drift by `ai/hotkey_sync.py --check` through `ai/health_check.py`.
-- The Windows runtime now exposes 7 services and 22 hotkeys; the human-managed catalog retains only the currently selected Windows, SAP GUI, SAP ADT, and launcher routes.
+- The Windows runtime now exposes 6 services and 22 hotkeys; the human-managed catalog retains only the currently selected Windows, SAP GUI, SAP ADT, and launcher routes.
 - Value resolution and shell-command execution are free utility functions; Everything run-count updates are private to `LauncherService`.
 - APIs, helpers, constants, and the microphone image retired with removed hotkeys have been deleted; every remaining public service method has a runtime consumer.
 - Credential-provider support, named SAP session launch, credential-window filling, and related portable-app startup wiring are retired for the current runtime.
 - `hotkeys.db` separates implementation `platform` from `portability`, so macOS candidates are explicit without pretending AHK actions are cross-platform.
-- Temporary hotkey tracking uses context-qualified keys for new events, preventing cross-application usage collisions.
+- Hotkey usage tracking (`HotkeyTrackerService`, `hotkey-tracking.ahk`, and the `track_fn`/`track_args` catalog columns) has been fully removed; it served its purpose during catalog reduction (72→22 hotkeys) and added more infrastructure than the remaining catalog justifies. The stale local `hotkey-usage.json` file (schema predating context-qualified tracking) is untouched but has no active writer.
 
 ## Next evolution frontier
 
-- The latest Windows catalog reduction and dead-code cleanup are technically complete; `ai/current-plan.md` records the validated outcome.
-- The stable runtime now contains 22 hotkeys, 6 hotstrings, 7 services, and no machine-detected orphaned classes or constants.
-- Human-only work is launching the refreshed runtime once on Windows, then using it normally so context-qualified tracking evidence can accumulate.
+- The latest Windows catalog reduction, hotkey-tracking removal, and dead-code cleanup are technically complete; `ai/current-plan.md` records the validated outcome.
+- The stable runtime now contains 22 hotkeys, 6 hotstrings, 6 services, and no machine-detected orphaned classes or constants.
+- Human-only work is launching the refreshed runtime once on Windows to confirm it starts cleanly without the removed tracker.
 - No additional technical frontier is currently selected; the macOS implementation plan is deferred until its native stack and first portable-intent slice are chosen.
 
 ## Validation

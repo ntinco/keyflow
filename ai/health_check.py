@@ -69,7 +69,6 @@ FORBIDDEN_SCAN_EXACT_PATHS = {
 KNOWN_DEAD_CLASSES = {"PasteService"}
 
 # Constants that are declared but have no known consumers.
-# hotkeyTrackerJsonFile: used indirectly by HotkeyTrackerService via the global assigned in constants-core.ahk.
 KNOWN_DEAD_CONSTANTS: tuple[str, ...] = ()
 CATALOG_REVIEW_FILE = "ai/catalog-review.json"
 HOTKEY_CATALOG_FILE = "platforms/windows/data/hotkeys.db"

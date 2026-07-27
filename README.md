@@ -15,8 +15,7 @@ This guide layer is intentionally dual-role: architect selects or reviews the fr
 platforms/windows/keyflow.ahk
   library/bootstrap.ahk
     library/config/constants-core.ahk
-    library/automation/ (7 services)
-  hotkeys/hotkey-tracking.ahk
+    library/automation/ (6 services)
   hotkeys/global.ahk
   hotkeys/sap-gui.ahk
   hotkeys/sap-eclipse.ahk
@@ -25,7 +24,7 @@ platforms/windows/keyflow.ahk
 
 Main service surface:
 
-`hotkeyTracker` `hotstring` `launcher` `sap` `snipaste` `windowGroup` `windows`
+`hotstring` `launcher` `sap` `snipaste` `windowGroup` `windows`
 
 ## Hotkey catalog
 
@@ -63,7 +62,7 @@ All machine-specific configuration is local-only. Use these versioned examples a
 
 Local-only files that must never be committed:
 
-`local-secrets.ini` · `local-paths.ini` · `local-startup.ini` · `memory-vars.ini` · `rom.ini` · `storage.db` · `hotkey-usage.json` · `ai/run-result.json`
+`local-secrets.ini` · `local-paths.ini` · `local-startup.ini` · `memory-vars.ini` · `rom.ini` · `storage.db` · `ai/run-result.json`
 
 ## Startup scripts
 
@@ -90,11 +89,11 @@ The preferred startup contract lives in `local-startup.ini`:
 - The `utils` global object is gone; utility behavior lives in free `util*()` functions.
 - Launcher and window-group flows now use clearer intent-first names instead of legacy helper wording.
 - The human hotkey catalog is `hotkeys.db`; generated AHK and Markdown drift is enforced by `ai/hotkey_sync.py --check` through the health check.
-- The Windows runtime is reduced to 22 hotkeys, 6 hotstrings, and 7 registered services; portable intent is cataloged separately from implementation platform.
+- The Windows runtime is reduced to 22 hotkeys, 6 hotstrings, and 6 registered services; portable intent is cataloged separately from implementation platform.
 - Value resolution and shell-command execution are free utility functions; Everything run-count updates belong privately to `LauncherService`.
 - Service APIs and assets retired with removed hotkeys have been deleted; the remaining public methods all have runtime consumers.
 - Credential-provider and named SAP session-launch support are currently retired.
-- Hotkey tracking remains temporary and records new usage by context instead of merging identical key combinations across applications.
+- Hotkey usage tracking has been fully removed after serving its purpose in catalog reduction; no service or catalog column instruments hotkeys anymore.
 - Catalog review state now lives in `ai/catalog-review.json`, and the current active catalog entries are marked `verified`.
 - AI governance contract now lives in `ai/governance.json` and centers on the architect/executor role model.
 - This is a summary; AGENTS.md Current Model is authoritative.
