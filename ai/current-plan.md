@@ -1,7 +1,7 @@
 # macOS migration — first vertical slice (Hammerspoon)
 
-Status: implemented
-Plan: technically complete; pending human verification
+Status: verified
+Plan: complete — 4 Eclipse/ADT hotkeys + 6 hotstrings confirmed working by the user on real hardware, after fixing 3 real-use bugs (path separator, hotstring self-retrigger, terminator-trigger off-by-one).
 
 ## App confirmation (verified on this machine)
 
@@ -171,18 +171,9 @@ already-passed-through characters, not just the pattern being matched.
 - No parity requirement between hotkey counts on Windows vs macOS.
 - No removal of any Windows runtime code.
 
-## Human-only pending work
+## Human verification result (2026-07-27)
 
-1. Hammerspoon is already wired to load `platforms/macos/hammerspoon/init.lua`
-   via `~/.hammerspoon/keyflow` symlink + `dofile()` in `~/.hammerspoon/init.lua`.
-   Reload the config (`hs -c "hs.reload()"` or menu bar → Reload Config) to
-   pick up the trailing-slash path fix and the `eclipse_ctrl_5` removal, and
-   confirm the console prints `keyflow: loaded 4 eclipse hotkey(s), hotstring
-   watcher active` with no errors.
-2. Open Eclipse/ADT and manually test each of the 4 hotkeys
-   (`` ` ``, F1, F2, Cmd+Shift+B) against this machine's actual Eclipse
-   keymap; adjust `actions.lua` if any binding is wrong.
-3. Test the 6 hotstrings (`;;`, `"+`, `"-`, `*+`, `*-`, `sp `) in a plain
-   text field to confirm the `hs.eventtap` watcher fires correctly and does
-   not interfere with normal typing.
-4. Report back which of the 10 bindings work as-is vs. need adjustment.
+All 10 bindings confirmed working by the user: 4 Eclipse/ADT hotkeys
+(backtick, F1, F2, Cmd+Shift+B) and 6 hotstrings (`;;`, `"+`, `"-`, `*+`,
+`*-`, `sp `). This closes the first vertical slice. No further technical
+work is pending on this slice.
