@@ -153,18 +153,8 @@
         "includes": []
       },
       {
-        "file": "platforms/windows/library/automation/sap-session.ahk",
-        "includes": []
-      },
-      {
         "file": "platforms/windows/library/automation/sap.ahk",
-        "includes": [
-          {
-            "include": "sap-session.ahk",
-            "target": "platforms/windows/library/automation/sap-session.ahk",
-            "exists": true
-          }
-        ]
+        "includes": []
       },
       {
         "file": "platforms/windows/library/automation/snipaste.ahk",
@@ -184,11 +174,6 @@
           {
             "include": "config/constants-core.ahk",
             "target": "platforms/windows/library/config/constants-core.ahk",
-            "exists": true
-          },
-          {
-            "include": "config/constants-secrets.ahk",
-            "target": "platforms/windows/library/config/constants-secrets.ahk",
             "exists": true
           },
           {
@@ -255,10 +240,6 @@
       },
       {
         "file": "platforms/windows/library/config/constants-core.ahk",
-        "includes": []
-      },
-      {
-        "file": "platforms/windows/library/config/constants-secrets.ahk",
         "includes": []
       },
       {
@@ -349,21 +330,10 @@
         "class": "MemoryService",
         "class_file": "platforms/windows/library/automation/memory.ahk",
         "referenced_methods": [
-          "getValue",
-          "resolveProviderValue",
-          "resolveSecretValue"
+          "getValue"
         ],
         "declared_methods": [
-          "getValue",
-          "resolveProviderValue",
-          "resolveSecretValue",
-          "_isKeepassReference",
-          "_resolveKeepassReference",
-          "_getKeepassProviderCommand",
-          "_runCommandForStdout",
-          "_quoteForCommandLine",
-          "_buildContextSuffix",
-          "_showRuntimeError"
+          "getValue"
         ]
       },
       {
@@ -388,7 +358,6 @@
           "insertCommentBlock",
           "insertCommentLine",
           "isTextInputActive",
-          "openNamedSession",
           "openSe09",
           "openSe16n",
           "openSe37",
@@ -401,7 +370,6 @@
           "startQuickDebug"
         ],
         "declared_methods": [
-          "__New",
           "insertCommentLine",
           "insertCommentBlock",
           "_insertCommentLine",
@@ -423,7 +391,6 @@
           "promptAndSearchAbapObject",
           "_runQuickDebug",
           "startQuickDebug",
-          "openNamedSession",
           "_normalizeTcodeForSap",
           "_submitTcodeButton",
           "_resolveOperationDelayMs"
@@ -678,7 +645,6 @@
         "file": "platforms/windows/library/automation/hotstring.ahk",
         "calls": [
           "sap.isTextInputActive",
-          "sap.openNamedSession",
           "sap.runTcode"
         ]
       },
@@ -693,15 +659,6 @@
         "file": "platforms/windows/library/automation/run.ahk",
         "calls": [
           "launcher.dismissLauncherUi"
-        ]
-      },
-      {
-        "file": "platforms/windows/library/automation/sap-session.ahk",
-        "calls": [
-          "launcher.dismissLauncherUi",
-          "memory.getValue",
-          "memory.resolveProviderValue",
-          "memory.resolveSecretValue"
         ]
       },
       {

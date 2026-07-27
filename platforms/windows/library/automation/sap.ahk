@@ -1,10 +1,4 @@
-#Include sap-session.ahk
-
 class SapService {
-  __New() {
-    this.session := SapSessionService()
-  }
-
   insertCommentLine() {
     this._insertCommentLine()
   }
@@ -58,12 +52,6 @@ class SapService {
     normalizedTcode := this._normalizeTcodeForSap(tcode)
     if !normalizedTcode
       return
-
-    if WinActive(exeEclipse)
-    {
-      this.session.openNamedSession(normalizedTcode)
-      return
-    }
 
     this._submitTcodeButton(normalizedTcode)
   }
@@ -122,10 +110,6 @@ class SapService {
 
   startQuickDebug() {
     this._runQuickDebug()
-  }
-
-  openNamedSession(inputValue) {
-    this.session.openNamedSession(inputValue)
   }
 
   _normalizeTcodeForSap(tcode) {

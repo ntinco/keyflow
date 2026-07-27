@@ -15,7 +15,6 @@ SetWorkingDir(A_ScriptDir "\..\..")
 #Include "..\..\library\json-service.ahk"
 #Include "..\..\library\util.ahk"
 #Include "..\..\library\config\constants-core.ahk"
-#Include "..\..\library\config\constants-secrets.ahk"
 
 #Include "..\..\library\automation\launcher.ahk"
 #Include "..\..\library\automation\memory.ahk"
@@ -23,7 +22,6 @@ SetWorkingDir(A_ScriptDir "\..\..")
 #Include "..\..\library\automation\sap.ahk"
 
 loadCoreConstants()
-loadSecretConstants()
 global services := sapGuiInitServices()
 
 sapGuiInitServices() {

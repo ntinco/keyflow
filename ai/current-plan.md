@@ -14,14 +14,16 @@ Plan: completed
 - Updated tracking to qualify new usage keys by context while preserving the existing local data file.
 - Regenerated the five AHK and Markdown artifacts from `hotkeys.db`.
 - Removed the retired SAP session/debug/navigation endpoints, generic app-launch chain, microphone toggle, target-title normalization, OneDrive assignment, and microphone image.
-- Removed the empty YMT post-launch callback chain while preserving named SAP sessions, SAP transaction hotstrings, and quick debug.
+- Removed the empty YMT post-launch callback chain while preserving SAP transaction hotstrings and quick debug.
+- Retired credential-provider support, named SAP session launch, credential-window filling, related examples/constants, and portable-app startup wiring.
+- Scoped SAP transaction hotstrings to SAP GUI/NWBC now that Eclipse no longer has a credential-backed session-launch path.
 
 ## Validation
 
 - `python ai/hotkey_sync.py --check`: passed with 5 current generated artifacts.
 - `python ai/health_check.py --pretty`: passed at 100/100 with no unused assignments, groups, classes, constants, or public service methods.
-- Include and service wiring did not change. A direct AutoHotkey smoke run remains a Windows-only verification because the current host cannot execute the bundled PE binary.
-- Final reviewer validation is required after guide closure.
+- Include and service wiring changed. A direct AutoHotkey smoke run remains a Windows-only verification because the current host cannot execute the bundled PE binary.
+- `python ai/review_check.py --pretty --summary`: passed with no issues or warnings after guide closure.
 
 ## Human-only pending work
 

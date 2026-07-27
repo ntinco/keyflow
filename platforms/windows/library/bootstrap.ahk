@@ -1,10 +1,8 @@
 ﻿#Requires AutoHotkey v2.0
 ; Load application constants before any service class runs.
 #Include config\constants-core.ahk
-#Include config\constants-secrets.ahk
 
 loadCoreConstants()
-loadSecretConstants()
 
 #Include json-service.ahk
 #Include util.ahk

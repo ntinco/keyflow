@@ -92,7 +92,6 @@ Use only one persistent plan location at a time.
 
 - Never touch local-only files unless the user explicitly asks: `local-secrets.ini`, `local-paths.ini`, `local-startup.ini`, `memory-vars.ini`, `rom.ini`, `storage.db`, `hotkey-usage.json`, `run-result.json`.
 - Never reintroduce retired env fallbacks, retired workspace names, or references to removed guide paths.
-- Never merge `sap-session.ahk` into `sap.ahk` or vice versa.
 - Never guess machine paths; use `*.example.*` only as shape references.
 - Never depend on Git metadata at runtime.
 - Never reintroduce a separate paste service without first proving it adds value over the existing launcher flow.
@@ -115,7 +114,6 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 
 | Concern | Owner |
 |---|---|
-| SAP session resolution + KeePass provider | `platforms/windows/library/automation/sap-session.ahk` |
 | SAP public facade + GUI/ADT automation | `platforms/windows/library/automation/sap.ahk` |
 | Service wiring + hotstring profiles | `platforms/windows/library/bootstrap.ahk` |
 | Free utility functions | `platforms/windows/library/util.ahk` |
@@ -134,7 +132,7 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 - `ai_readiness` is currently `100/100`.
 - One intentional global remains: `services` in `platforms/windows/keyflow.ahk`.
 - The guide layer is now leaner by role: policy in `AGENTS.md`, architecture in `README.md`, routing in `ai/repo-map.json`, objective state in `ai/health-check.summary.json`.
-- SAP ownership is now explicit by composition: `SapService` delegates session/login concerns to `SapSessionService` instead of inheriting them.
+- `SapService` now owns only automation inside active SAP GUI/NWBC and Eclipse/ADT contexts; credential-backed session launch is not part of the runtime.
 - `LauncherService` and `WindowGroupService` now use clearer intent/state naming; historical internal state fields were removed.
 - Catalog counts are stable and the current catalog-review entries are marked `verified`.
 - Catalog review contract lives in `ai/catalog-review.json`, and governance rules are now also represented in `ai/governance.json`.
@@ -151,6 +149,7 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 - `hotkeys.db` is the only human-managed hotkey source; generated AHK and hotkey reference files are checked for drift by `ai/hotkey_sync.py --check` through `ai/health_check.py`.
 - The Windows runtime now exposes 10 services and 22 hotkeys; the human-managed catalog retains only the currently selected Windows, SAP GUI, SAP ADT, and launcher routes.
 - APIs, helpers, constants, and the microphone image retired with removed hotkeys have been deleted; every remaining public service method has a runtime consumer.
+- Credential-provider support, named SAP session launch, credential-window filling, and related portable-app startup wiring are retired for the current runtime.
 - `hotkeys.db` separates implementation `platform` from `portability`, so macOS candidates are explicit without pretending AHK actions are cross-platform.
 - Temporary hotkey tracking uses context-qualified keys for new events, preventing cross-application usage collisions.
 

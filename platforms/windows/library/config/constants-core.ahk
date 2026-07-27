@@ -13,7 +13,6 @@ loadCoreBaseConstants() {
   runtimeEnvFile := runtimeEnvFilePath()
   EnvSet("YMT1", runtimeEnvValue(runtimeEnvFile, "YMT1", "ym.lnk||X|"))
   EnvSet("YSAP", runtimeEnvValue(runtimeEnvFile, "YSAP", "ym.lnk||X|"))
-  sapDefaultTcodeFallback := runtimeConfigValue(runtimeEnvFile, "sap-defaults", "defaultTcodeFallback", "smen")
   sapDelayPollMs := runtimeConfigValue(runtimeEnvFile, "sap-delays", "pollMs", "100")
 }
 
@@ -81,11 +80,6 @@ loadCoreApplicationConstants() {
   titleSnipaste := "Snipper - Snipaste"
   titleWhatsapp := "WhatsApp"
   titleWrite := "LibreOffice Writer"
-  titleSap000 := "000 SAP"
-  titleSapGui := "SAP GUI"
-  titleSystemEntry := "Entrada al sistema"
-  titleLogonDataEntry := "Entrada de datos logon"
-  titleEclipseTransport := "TMS_UI_IMPORT_TR_REQUEST"
 }
 
 appConfigValue(localConfigFile, key, defaultValue := "") {
@@ -125,5 +119,4 @@ loadCoreRuleConstants() {
   GroupAdd("group_sap_gui_windows", exeNwbc)
   GroupAdd("group_sap_runtime_windows", classSapGuiSession)
   GroupAdd("group_sap_runtime_windows", exeNwbc)
-  GroupAdd("group_sap_runtime_windows", "eclipse-workspace - DS")
 }

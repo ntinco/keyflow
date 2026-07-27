@@ -987,7 +987,6 @@ def scan_assignment_candidates(repo_root: Path, token_counter: Counter[str]) -> 
     candidates = []
     for rel_path in (
         "platforms/windows/library/config/constants-core.ahk",
-        "platforms/windows/library/config/constants-secrets.ahk",
     ):
         path = repo_root / rel_path
         for name in RE_ASSIGN.findall(read_text(path)):

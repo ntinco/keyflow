@@ -8,7 +8,7 @@ workspaceDrive := "i:"
 workspacePath := downloadsPath "\.sync\GitHub"
 aimpPortableLink := baseDrive "\.sync\links\AimpPortable.exe.lnk"
 dittoPortableLink := baseDrive "\.sync\links\DittoPortable.exe.lnk"
-portableLinksCsv := "\.sync\links\everything.exe.lnk;\.sync\links\flow.Launcher.exe.lnk;\.sync\links\keePassXCPortable.exe.lnk;\.sync\links\rbtray.exe.lnk;\.sync\links\ShareX.exe.lnk;\.sync\links\Snipaste.exe.lnk;\.sync\links\stretchly.exe.lnk;\.sync\links\workrave.exe.lnk;\.sync\links\tbaction.exe.lnk;\.sync\links\handy.exe.lnk;\.sync\links\cherry-studio.exe.lnk"
+portableLinksCsv := "\.sync\links\everything.exe.lnk;\.sync\links\flow.Launcher.exe.lnk;\.sync\links\rbtray.exe.lnk;\.sync\links\ShareX.exe.lnk;\.sync\links\Snipaste.exe.lnk;\.sync\links\stretchly.exe.lnk;\.sync\links\workrave.exe.lnk;\.sync\links\tbaction.exe.lnk;\.sync\links\handy.exe.lnk;\.sync\links\cherry-studio.exe.lnk"
 launchDelayMs := 5000
 ; -------------------------------------------------
 

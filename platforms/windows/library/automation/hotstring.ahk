@@ -16,7 +16,6 @@
     this._resetHotstringContext()
 
     applySapTcode(hotstringValue, *) => services.sap.runTcode(hotstringValue)
-    applySapSession(hotstringValue) => services.sap.openNamedSession(hotstringValue)
 
     _registerEntries(entries, mode) {
       for entry in entries {
@@ -28,8 +27,6 @@
         hotstringOptions := this._resolveHotstringOptions(mode, trigger, value, entry)
         if this._isSapInputMode(mode)
           hotstring(hotstringOptions . trigger, applySapTcode.Bind(value))
-        else if (mode = "sapSession")
-          hotstring(hotstringOptions . trigger, applySapSession)
         else
           hotstring(hotstringOptions . trigger, value)
       }
@@ -39,8 +36,6 @@
   _resolveHotstringOptions(mode, trigger := "", value := "", entry := "") {
     if this._isSapInputMode(mode)
       return ":X*b0:"
-    if (mode = "sapSession")
-      return ":*:"
     if (mode = "autocorrectImmediate")
       return ":*:"
     if (mode = "autocorrect" and entry is Map and entry.Has("immediate") and !entry["immediate"])

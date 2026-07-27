@@ -22,7 +22,6 @@
     "ai/run_smoke.py",
     "platforms/windows/keyflow.ahk",
     "platforms/windows/library/bootstrap.ahk",
-    "platforms/windows/library/automation/sap-session.ahk",
     "platforms/windows/library/automation/sap.ahk"
   ],
   "plan-location": {
@@ -58,16 +57,6 @@
     }
   ],
   "domains": [
-    {
-      "id": "sap-session",
-      "path": "platforms/windows/library/automation/sap-session.ahk",
-      "owns": [
-        "KeePass-backed SAP session lookup",
-        "entry field resolution",
-        "session launch command assembly",
-        "credential window filling"
-      ]
-    },
     {
       "id": "sap-automation",
       "path": "platforms/windows/library/automation/sap.ahk",
@@ -157,12 +146,8 @@
     "windowGroup",
     "windows"
   ],
-  "sap-session-entrypoints": [
-    "services.sap.openNamedSession(sessionName)"
-  ],
   "startup-config-sections": [
     "runtime-env",
-    "sap-defaults",
     "sap-delays"
   ],
   "local-only-files": [
@@ -179,6 +164,6 @@
   "standalone": [
     "platforms/windows/hotkeys/layouts/colemak-dh.ahk"
   ],
-  "current-focus": "Stable reduced Windows runtime with 22 hotkeys, 10 lean service surfaces, explicit portability classification, context-qualified usage tracking, and selected SAP/ADT workflows.",
+  "current-focus": "Stable reduced Windows runtime with 22 hotkeys, 10 lean service surfaces, no credential-provider dependency, explicit portability classification, context-qualified usage tracking, and selected SAP/ADT workflows.",
   "next-frontier": "No active frontier. Next technical plan deferred until a real frontier appears. Replace ai/current-plan.md when a new technical frontier is identified."
 }

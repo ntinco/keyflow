@@ -15,7 +15,6 @@ This guide layer is intentionally dual-role: architect selects or reviews the fr
 platforms/windows/keyflow.ahk
   library/bootstrap.ahk
     library/config/constants-core.ahk
-    library/config/constants-secrets.ahk
     library/automation/ (10 services)
   hotkeys/hotkey-tracking.ahk
   hotkeys/global.ahk
@@ -49,16 +48,9 @@ The catalog separates implementation from intent:
 
 ## SAP model
 
-- SAP secrets and session metadata come from KeePassXC through `keepassProviderCommand`.
-- Session names are business-first: `pluz dev`, `pluz qas`, `pluz prd`.
-- `platforms/windows/library/automation/sap-session.ahk` owns named-session lookup, entry resolution, launch command assembly, and credential filling.
-- `platforms/windows/library/automation/sap.ahk` is the public `services.sap` facade for SAP GUI and Eclipse automation plus the delegated named-session entrypoint.
-
-KeePass lookup flow:
-
-```text
-kp:sap-index/session/pluz dev  ->  kp:company/nttdata/cliente/pluz dev
-```
+- `platforms/windows/library/automation/sap.ahk` is the public `services.sap` facade for actions inside active SAP GUI/NWBC and Eclipse/ADT contexts.
+- Transaction hotstrings are scoped to SAP GUI/NWBC; they no longer launch credential-backed sessions from Eclipse.
+- `platforms/windows/tools/sap-gui/sap-gui-cli.bat` remains an optional local execution bridge. It does not store credentials or participate in the main runtime.
 
 ## Configuration contract
 
@@ -67,9 +59,7 @@ All machine-specific configuration is local-only. Use these versioned examples a
 | Example file | Purpose |
 |---|---|
 | `platforms/windows/data/local-paths.example.ini` | Machine paths and ABAP workspace hints |
-| `platforms/windows/data/local-startup.example.ini` | Runtime env, SAP defaults, UI config, startup launcher config |
-| `platforms/windows/data/local-secrets.example.ini` | Secrets and `keepassProviderCommand` |
-| `platforms/windows/data/sap-keepass-layout.example.md` | Expected KeePass entry layout |
+| `platforms/windows/data/local-startup.example.ini` | Runtime env, SAP delays, UI config, startup launcher config |
 
 Local-only files that must never be committed:
 
@@ -84,7 +74,6 @@ The preferred startup contract lives in `local-startup.ini`:
 - `[startup-host]`
 - `[startup-vmware]`
 - `[runtime-env]`
-- `[sap-defaults]`
 - `[sap-delays]`
 - `[ui]`
 
@@ -92,9 +81,8 @@ The preferred startup contract lives in `local-startup.ini`:
 
 1. Install AutoHotkey v2 on Windows.
 2. Copy each `*.example.*` file to its local counterpart when needed.
-3. Configure `keepassProviderCommand` using `platforms/windows/tools/keepass/kp-get.ps1` as the reference provider.
-4. Run `python ai/health_check.py --pretty --summary`.
-5. Launch `platforms/windows/keyflow.ahk`.
+3. Run `python ai/health_check.py --pretty --summary`.
+4. Launch `platforms/windows/keyflow.ahk`.
 
 ## Current model
 
@@ -104,6 +92,7 @@ The preferred startup contract lives in `local-startup.ini`:
 - The human hotkey catalog is `hotkeys.db`; generated AHK and Markdown drift is enforced by `ai/hotkey_sync.py --check` through the health check.
 - The Windows runtime is reduced to 22 hotkeys, 6 hotstrings, and 10 registered services; portable intent is cataloged separately from implementation platform.
 - Service APIs and assets retired with removed hotkeys have been deleted; the remaining public methods all have runtime consumers.
+- Credential-provider and named SAP session-launch support are currently retired.
 - Hotkey tracking remains temporary and records new usage by context instead of merging identical key combinations across applications.
 - Catalog review state now lives in `ai/catalog-review.json`, and the current active catalog entries are marked `verified`.
 - AI governance contract now lives in `ai/governance.json` and centers on the architect/executor role model.
