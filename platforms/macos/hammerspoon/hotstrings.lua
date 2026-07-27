@@ -42,22 +42,29 @@ local function buildCodeCommentLine(symbol)
   return "\"" .. symbol .. buildCodeSignature()
 end
 
--- *+/*-   -> multi-line comment framing (a block of code lines).
--- Mirrors sap.ahk _buildCommentMarkup(): the same line repeated twice,
--- separated by a line break.
+-- *+/*-   -> multi-line comment frame: opens with "{", closes with "}",
+-- cursor is left on the blank line in between to write the commented code
+-- block right away. Mirrors sap.ahk _buildCommentMarkup() + the trailing
+-- Send("{Up}") that repositions the cursor after pasting.
 local function buildCommentMarkup(symbol)
-  local line = "*" .. symbol .. buildCodeSignature()
-  return line .. "\n" .. line
+  local signature = buildCodeSignature()
+  local openLine = "*" .. symbol .. "{" .. signature
+  local closeLine = "*" .. symbol .. "}" .. signature
+  return openLine .. "\n\n" .. closeLine
 end
 
--- immediate = true  -> fires with no terminator (AHK ":*:" option)
--- immediate = false -> fires on a following non-alnum terminator (AHK "::")
+-- immediate = true    -> fires with no terminator (AHK ":*:" option)
+-- immediate = false   -> fires on a following non-alnum terminator (AHK "::")
+-- moveCursorUpAfter    -> for block-frame triggers, reposition the cursor
+--                         from the closing line to the blank line left
+--                         between the opening and closing frame lines
+--                         (mirrors sap.ahk's trailing Send("{Up}")).
 local TRIGGERS = {
   {id = "hs_semicolons",        pattern = ";;", immediate = true,  replacement = function() return "ñ" end},
   {id = "hs_sap_comment_plus",  pattern = "\"+", immediate = true, replacement = function() return buildCodeCommentLine("+") end},
   {id = "hs_sap_comment_minus", pattern = "\"-", immediate = true, replacement = function() return buildCodeCommentLine("-") end},
-  {id = "hs_sap_block_plus",    pattern = "*+", immediate = true,  replacement = function() return buildCommentMarkup("+") end},
-  {id = "hs_sap_block_minus",   pattern = "*-", immediate = true,  replacement = function() return buildCommentMarkup("-") end},
+  {id = "hs_sap_block_plus",    pattern = "*+", immediate = true,  replacement = function() return buildCommentMarkup("+") end, moveCursorUpAfter = true},
+  {id = "hs_sap_block_minus",   pattern = "*-", immediate = true,  replacement = function() return buildCommentMarkup("-") end, moveCursorUpAfter = true},
   {id = "hs_sp",                pattern = "sp", immediate = false, replacement = function() return "summary in prompt" end},
 }
 
@@ -89,6 +96,12 @@ local function fireTrigger(trigger)
     hs.eventtap.keyStroke({}, "delete")
   end
   pasteText(trigger.replacement())
+  if trigger.moveCursorUpAfter then
+    -- Delay slightly so the cursor move happens after the paste lands.
+    hs.timer.doAfter(0.05, function()
+      hs.eventtap.keyStroke({}, "up")
+    end)
+  end
   buffer = ""
 end
 
