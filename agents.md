@@ -65,10 +65,11 @@ Claim discipline:
 
 Guide discipline:
 
-- Replace stale status text; do not append history.
+- Replace stale status text; do not append history. `Current model` describes invariants of the present state, not a changelog of what changed.
 - If one guide file changes meaningfully, review the others in the same cycle.
 - Keep policy in `AGENTS.md`, not in `README.md` or `repo-map.json`.
 - Keep routing in `ai/repo-map.json`, not in `README.md`.
+- Objective counts (services, hotkeys, profile sizes) live in `ai/health-check.summary.json`; do not duplicate them as prose here — reference the file instead.
 
 Handoff rule:
 
@@ -95,6 +96,8 @@ Use only one persistent plan location at a time.
 - Never guess machine paths; use `*.example.*` only as shape references.
 - Never depend on Git metadata at runtime.
 - Never reintroduce a separate paste service without first proving it adds value over the existing launcher flow.
+- Never reintroduce a separate credential-provider or session-launch dependency without first proving it adds value over the current manual flow.
+- Never reintroduce hotkey usage tracking (service, free functions, or catalog columns) without a new justification.
 - Never leave dead routes in `ai/repo-map.json`.
 
 ## Naming contract
@@ -117,54 +120,35 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 | SAP public facade + GUI/ADT automation | `platforms/windows/library/automation/sap.ahk` |
 | Service wiring + hotstring profiles | `platforms/windows/library/bootstrap.ahk` |
 | Free utility functions | `platforms/windows/library/util.ahk` |
-| Hotkey triggers | `platforms/windows/hotkeys/` |
-| Human-managed hotkey catalog | `platforms/shared/data/hotkeys.db` |
+| Hotkey triggers (Windows) | `platforms/windows/hotkeys/` |
+| macOS runtime (Hammerspoon) | `platforms/macos/hammerspoon/` |
+| Human-managed hotkey catalog (shared) | `platforms/shared/data/hotkeys.db` |
 | Hotkey artifact generation and drift check | `ai/hotkey_sync.py` |
 | Startup launchers | `platforms/windows/tools/startup/` |
-| Versioned catalogs | `platforms/windows/data/*.json` |
+| Windows-only versioned catalogs | `platforms/windows/data/*.json` |
 | Catalog review state | `ai/catalog-review.json` |
 | Governance contract | `ai/governance.json` |
 | AI tooling and navigation | `ai/` |
 
 ## Current model
 
-- `ai_readiness` is currently `100/100`.
-- One intentional global remains: `services` in `platforms/windows/keyflow.ahk`.
-- The guide layer is now leaner by role: policy in `AGENTS.md`, architecture in `README.md`, routing in `ai/repo-map.json`, objective state in `ai/health-check.summary.json`.
-- `SapService` now owns only automation inside active SAP GUI/NWBC and Eclipse/ADT contexts; credential-backed session launch is not part of the runtime.
-- `LauncherService` and `WindowGroupService` now use clearer intent/state naming; historical internal state fields were removed.
-- Catalog counts are stable and the current catalog-review entries are marked `verified`.
-- Catalog review contract lives in `ai/catalog-review.json`, and governance rules are now also represented in `ai/governance.json`.
-- The runtime-local artifact contract is now fully normalized: `hotkey-usage.json` is consistently classified across `.gitignore`, `AGENTS.md`, `README.md`, `ai/repo-map.json`, and `ai/health_check.py`.
-- `ai/health_check.py` now enforces runtime-local boundary consistency via `validate_local_only_contract()`.
-- `ai/health_check.py` enforces that `ai/repo-map.json` `runtime-api` matches the actual bootstrap service registry.
-- `ai/health_check.py` and `ai/review_check.py` now make role-governance drift machine-visible by enforcing required guide sections, phrases, frontier state, and reviewer handoff commands.
-- `ai/review_check.py` is the reviewer-oriented audit for cycle closure, guide alignment, and architect/executor handoff quality.
-- `ai/review_check.py` now distinguishes stale generated artifacts (`stale_summary` with regeneration command) from real contract failures, eliminating reviewer false positives caused by un-regenerated summaries.
-- `ai/health_check.py` owns the enforced baseline for required role sections and phrases; `ai/governance.json` mirrors that baseline as the machine-readable contract and must match it.
-- `ai/review_check.py` reads required phrases from `ai/governance.json` for reviewer audits, using fallback constants only if governance is unavailable or malformed.
-- `ai/governance.json` now declares `required_current_model_phrases`; `ai/review_check.py` reads this list for reviewer audits, and `ai/health_check.py` validates the governance value against `REQUIRED_CURRENT_MODEL_PHRASES`.
-- `ai/prompts/agent-prompts.md` is now included in `ai/repo-map.json` `read-order`, making it visible to agents on first read.
-- `ai/run_smoke.py` records runtime smoke execution into `ai/run-result.json` so agents can distinguish "guide layer healthy" from "runtime smoke actually ran without parse errors".
-- `platforms/shared/data/hotkeys.db` is the only human-managed hotkey source, shared across both platform runtimes; generated AHK, Markdown, and Lua binding files are checked for drift by `ai/hotkey_sync.py --check` through `ai/health_check.py`.
-- The Windows runtime now exposes 6 services and 22 hotkeys; the human-managed catalog retains only the currently selected Windows, SAP GUI, SAP ADT, and launcher routes.
-- Value resolution and shell-command execution are free utility functions; Everything run-count updates are private to `LauncherService`.
-- APIs, helpers, constants, and the microphone image retired with removed hotkeys have been deleted; every remaining public service method has a runtime consumer.
-- Credential-provider support, named SAP session launch, credential-window filling, and related portable-app startup wiring are retired for the current runtime.
-- `hotkeys.db` separates implementation `platform` from `portability`, so macOS candidates are explicit without pretending AHK actions are cross-platform.
-- Hotkey usage tracking (`HotkeyTrackerService`, `hotkey-tracking.ahk`, and the `track_fn`/`track_args` catalog columns) has been fully removed; it served its purpose during catalog reduction (72→22 hotkeys) and added more infrastructure than the remaining catalog justifies. The stale local `hotkey-usage.json` file (schema predating context-qualified tracking) is untouched but has no active writer.
+- `ai_readiness` is `100/100`; see `ai/health-check.summary.json` for objective counts (services, hotkeys, profiles) instead of duplicating them here.
+- One intentional global: `services` in `platforms/windows/keyflow.ahk`.
+- `SapService` owns automation only inside active SAP GUI/NWBC and Eclipse/ADT contexts; no credential-backed session launch, no named session storage.
+- `platforms/shared/data/hotkeys.db` is the single human-managed hotkey source for both the Windows AHK runtime and the macOS Hammerspoon runtime. Its `platform` array separates implementation from `portability` intent; generated artifacts (AHK, Markdown, Lua bindings) are checked for drift via `ai/hotkey_sync.py --check` inside `ai/health_check.py`.
+- No hotkey usage tracking exists in the runtime; it was removed after serving its purpose during catalog reduction and is not to be reintroduced without a new justification.
+- `ai/health_check.py` validates: the AHK/macOS include chains, the service registry against `services.*` call sites, catalog/governance/guide contracts, and runtime-local file boundaries via `validate_local_only_contract()`.
+- `ai/review_check.py` is the reviewer-oriented audit for cycle closure, guide alignment, and architect/executor handoff quality; run it after any guide, plan, or governance change.
 
 ## Next evolution frontier
 
-- The Windows runtime reduction (72→22 hotkeys), hotkey-tracking removal, and dead-code cleanup are technically complete and stable at `ai_readiness: 100`.
-- The macOS first vertical slice is technically implemented: `platforms/macos/hammerspoon/` now has `init.lua`, `actions.lua`, `hotstrings.lua`, and a generated `bindings.lua` covering 10 catalog rows (6 hotstrings + 4 SAP Eclipse/ADT hotkeys) marked `platform=["windows","macos"]` in `platforms/shared/data/hotkeys.db`.
-- `ai/hotkey_sync.py` now generates macOS Lua bindings alongside AHK artifacts; `ai/health_check.py` validates the macOS include chain via `validate_macos_runtime()`; `ai/run_smoke.py` supports `--platform macos` using `luac -p`.
-- `ai/current-plan.md` records `status: implemented` — all static validation passes (syntax, include chain, health/review checks), but the slice has not been exercised inside real Eclipse/ADT or with real keystrokes yet.
-- Human-only work: load `init.lua` into Hammerspoon, manually test the 4 Eclipse/ADT hotkeys and 6 hotstrings against this machine's real keymap, and report which bindings need adjustment. Also still pending: launching the refreshed Windows runtime once to confirm it starts cleanly without the removed tracker.
+- macOS first vertical slice is implemented and statically validated (Hammerspoon: `platforms/macos/hammerspoon/`, 10 shared catalog rows). Details and outstanding manual-verification steps live in `ai/current-plan.md`.
+- Human-only pending: load the Hammerspoon config, manually test the Eclipse/ADT hotkeys and hotstrings against this machine's real keymap, and launch the Windows runtime once to confirm a clean start.
+- No further technical frontier is selected beyond finishing verification of the current plan.
 
 ## Validation
 
-- Code changes: verify the include chain from `platforms/windows/keyflow.ahk` through `bootstrap.ahk`.
-- Service or hotkey changes: inspect the related JSON or INI contract first.
+- Code changes: verify the include chain from `platforms/windows/keyflow.ahk` through `bootstrap.ahk` (Windows) or `platforms/macos/hammerspoon/init.lua` (macOS).
+- Service or hotkey changes: inspect the related JSON/DB contract first.
 - Guide changes: keep `AGENTS.md`, `README.md`, `ai/repo-map.json`, and `ai/health-check.summary.json` aligned.
 - Never validate by writing to local secret files or runtime databases.

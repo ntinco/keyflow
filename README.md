@@ -1,6 +1,6 @@
 # keyflow
 
-Private Windows automation workspace built on AutoHotkey v2. This repo is optimized for fast AI maintenance, not for public packaging.
+Private Windows automation workspace built on AutoHotkey v2, with a first macOS Hammerspoon slice. Optimized for fast AI maintenance, not for public packaging.
 
 ## AI operating guide
 
@@ -20,36 +20,39 @@ platforms/windows/keyflow.ahk
   hotkeys/sap-gui.ahk
   hotkeys/sap-eclipse.ahk
   hotkeys/domains/productivity.ahk
+
+platforms/macos/hammerspoon/
+  init.lua                    (entrypoint)
+  actions.lua                 (hand-authored hotkey behavior)
+  hotstrings.lua              (hs.eventtap watcher)
+  generated/bindings.lua      (generated from the shared catalog)
 ```
 
-Main service surface:
-
-`hotstring` `launcher` `sap` `snipaste` `windowGroup` `windows`
+Windows service surface: `hotstring` `launcher` `sap` `snipaste` `windowGroup` `windows`
 
 ## Hotkey catalog
 
-`platforms/shared/data/hotkeys.db` is the only human-managed source of hotkey definitions, shared by both the Windows AHK runtime and the macOS Hammerspoon runtime. Humans may edit it with a SQLite editor. The AHK trigger modules, `platforms/windows/hotkeys/README.md`, and `platforms/macos/hammerspoon/generated/bindings.lua` are generated AI-maintenance artifacts.
+`platforms/shared/data/hotkeys.db` is the only human-managed source of hotkey definitions, shared by the Windows AHK runtime and the macOS Hammerspoon runtime. Humans edit it with a SQLite editor. The AHK trigger modules, `platforms/windows/hotkeys/README.md`, and `platforms/macos/hammerspoon/generated/bindings.lua` are generated AI-maintenance artifacts.
 
 After changing the database:
 
-```powershell
+```bash
 python ai/hotkey_sync.py --sync
 python ai/hotkey_sync.py --check
 ```
 
-Generic application remaps belong in each application's native keymap. Keyflow keeps compound workflows, SAP/ADT business actions, and Windows automations that still provide meaningful leverage.
-
 The catalog separates implementation from intent:
 
-- `platform` identifies where the current action is implemented. Every current AHK action is `windows`.
+- `platform` identifies which runtime(s) currently implement the action (`windows`, `macos`, or both).
 - `portability=portable-intent` marks behavior worth evaluating for a native macOS binding.
 - `portability=windows-only` marks behavior tied to Windows applications or APIs.
 
+The `action` column holds raw AHK syntax and is not transpiled; macOS behavior for `platform=macos` rows is hand-authored in `platforms/macos/hammerspoon/actions.lua` and `hotstrings.lua`, matched by row `id`.
+
 ## SAP model
 
-- `platforms/windows/library/automation/sap.ahk` is the public `services.sap` facade for actions inside active SAP GUI/NWBC and Eclipse/ADT contexts.
-- Transaction hotstrings are scoped to SAP GUI/NWBC; they no longer launch credential-backed sessions from Eclipse.
-- `platforms/windows/tools/sap-gui/sap-gui-cli.bat` remains an optional local execution bridge. It does not store credentials or participate in the main runtime.
+- `platforms/windows/library/automation/sap.ahk` is the public `services.sap` facade for actions inside active SAP GUI/NWBC and Eclipse/ADT contexts. No credential storage or session launch is part of the runtime.
+- `platforms/windows/tools/sap-gui/sap-gui-cli.bat` is an optional local execution bridge; it does not participate in the main runtime.
 
 ## Configuration contract
 
@@ -62,38 +65,26 @@ All machine-specific configuration is local-only. Use these versioned examples a
 
 Local-only files that must never be committed:
 
-`local-secrets.ini` · `local-paths.ini` · `local-startup.ini` · `memory-vars.ini` · `rom.ini` · `storage.db` · `ai/run-result.json`
+`local-secrets.ini` · `local-paths.ini` · `local-startup.ini` · `memory-vars.ini` · `rom.ini` · `storage.db` · `ai/run-result.json` · `ai/run-result-macos.json`
 
-## Startup scripts
+## Onboarding — Windows
 
-`platforms/windows/tools/startup/host-startup.ahk` and `vmware-startup.ahk` are secondary launchers. They prepare a local machine context and then launch `platforms/windows/keyflow.ahk`.
-
-The preferred startup contract lives in `local-startup.ini`:
-
-- `[startup-host]`
-- `[startup-vmware]`
-- `[runtime-env]`
-- `[sap-delays]`
-- `[ui]`
-
-## Onboarding
-
-1. Install AutoHotkey v2 on Windows.
+1. Install AutoHotkey v2.
 2. Copy each `*.example.*` file to its local counterpart when needed.
 3. Run `python ai/health_check.py --pretty --summary`.
 4. Launch `platforms/windows/keyflow.ahk`.
 
+## Onboarding — macOS
+
+1. Install Hammerspoon.
+2. Symlink the repo into Hammerspoon's config dir, e.g. `ln -s <repo>/platforms/macos/hammerspoon ~/.hammerspoon/keyflow`.
+3. In `~/.hammerspoon/init.lua`, add: `dofile(hs.configdir .. "/keyflow/init.lua")`.
+4. Reload Hammerspoon and check the console for `keyflow: loaded ... eclipse hotkey(s), hotstring watcher active`.
+
 ## Current model
 
-- One intentional global remains: `services` in `platforms/windows/keyflow.ahk`.
-- The `utils` global object is gone; utility behavior lives in free `util*()` functions.
-- Launcher and window-group flows now use clearer intent-first names instead of legacy helper wording.
-- The human hotkey catalog is `platforms/shared/data/hotkeys.db`, shared by both platform runtimes; generated AHK, Markdown, and Lua binding drift is enforced by `ai/hotkey_sync.py --check` through the health check.
-- The Windows runtime is reduced to 22 hotkeys, 6 hotstrings, and 6 registered services; portable intent is cataloged separately from implementation platform.
-- Value resolution and shell-command execution are free utility functions; Everything run-count updates belong privately to `LauncherService`.
-- Service APIs and assets retired with removed hotkeys have been deleted; the remaining public methods all have runtime consumers.
-- Credential-provider and named SAP session-launch support are currently retired.
-- Hotkey usage tracking has been fully removed after serving its purpose in catalog reduction; no service or catalog column instruments hotkeys anymore.
-- Catalog review state now lives in `ai/catalog-review.json`, and the current active catalog entries are marked `verified`.
-- AI governance contract now lives in `ai/governance.json` and centers on the architect/executor role model.
-- This is a summary; AGENTS.md Current Model is authoritative.
+This is a summary; `AGENTS.md` → `Current model` is authoritative for governance-enforced detail.
+
+- Objective counts (services, hotkeys, profiles) live in `ai/health-check.summary.json`.
+- The macOS slice covers a subset of the catalog (Eclipse/ADT hotkeys + simple hotstrings); it does not aim for parity with the Windows runtime.
+- No credential-provider, session-launch, or hotkey-usage-tracking dependency exists in either runtime.
