@@ -5,7 +5,6 @@
 
 return {
   {id = "eclipse_backtick", type = "hotkey", key = "`", contextLabel = "sap-eclipse", label = "Prompt and open ABAP object"},
-  {id = "eclipse_ctrl_sh_b", type = "hotkey", key = "^+b", contextLabel = "sap-eclipse", label = "Focus Eclipse windows"},
   {id = "eclipse_f1", type = "hotkey", key = "f1", contextLabel = "sap-eclipse", label = "Search ABAP object"},
   {id = "eclipse_f2", type = "hotkey", key = "f2", contextLabel = "sap-eclipse", label = "Rename"},
   {id = "hs_sap_block_minus", type = "hotstring", key = "*-", contextLabel = "", label = "SAP insert comment block (-)"},

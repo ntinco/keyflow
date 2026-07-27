@@ -142,7 +142,7 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 
 ## Next evolution frontier
 
-- macOS first vertical slice (Hammerspoon: `platforms/macos/hammerspoon/`, 4 Eclipse/ADT hotkeys + 6 hotstrings) is implemented and human-verified working on real hardware. Three real-use bugs were found and fixed during verification; details and the generalized lessons live in `ai/current-plan.md`.
+- macOS first vertical slice (Hammerspoon: `platforms/macos/hammerspoon/`, 3 Eclipse/ADT hotkeys + 6 hotstrings) is implemented and human-verified working on real hardware. Three real-use bugs were found and fixed during verification; details and the generalized lessons live in `ai/current-plan.md`.
 - No technical work is pending on the verified slice. A next macOS slice (candidates noted in `ai/current-plan.md`: `snipaste_enter`, or SAP GUI for Java hotkeys) requires a new architect decision before implementation starts.
 - Human-only pending: launch the Windows runtime once to confirm a clean start after the earlier tracker removal.
 

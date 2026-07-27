@@ -1,5 +1,5 @@
 -- Hammerspoon entrypoint. Mirrors platforms/windows/keyflow.ahk.
--- Scope: first vertical slice (see ai/current-plan.md) — 4 Eclipse/ADT
+-- Scope: first vertical slice (see ai/current-plan.md) — 3 Eclipse/ADT
 -- hotkeys (active only while Eclipse is frontmost) + 6 global hotstrings.
 
 local scriptDir = hs.configdir .. "/keyflow/"

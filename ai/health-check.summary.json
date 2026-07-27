@@ -30,7 +30,7 @@
   "hotkey_counts": {
     "platforms/windows/hotkeys/domains/productivity.ahk": 4,
     "platforms/windows/hotkeys/global.ahk": 6,
-    "platforms/windows/hotkeys/sap-eclipse.ahk": 4,
+    "platforms/windows/hotkeys/sap-eclipse.ahk": 3,
     "platforms/windows/hotkeys/sap-gui.ahk": 7
   },
   "dead_class_candidates": [],
@@ -42,5 +42,5 @@
     "ai/repo-map.json",
     "ai/health-check.summary.json"
   ],
-  "next_frontier": "macOS first vertical slice (Hammerspoon: platforms/macos/hammerspoon/, 4 Eclipse/ADT hotkeys + 6 hotstrings) is implemented and human-verified working on real hardware. No technical work is pending on this slice. A next macOS slice (candidates: snipaste_enter, or SAP GUI for Java hotkeys) requires a new architect decision; see ai/current-plan.md."
+  "next_frontier": "macOS first vertical slice (Hammerspoon: platforms/macos/hammerspoon/, 3 Eclipse/ADT hotkeys + 6 hotstrings) is implemented and human-verified working on real hardware. No technical work is pending on this slice. A next macOS slice (candidates: snipaste_enter, or SAP GUI for Java hotkeys) requires a new architect decision; see ai/current-plan.md."
 }

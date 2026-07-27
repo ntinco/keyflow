@@ -1,7 +1,7 @@
 # macOS migration — first vertical slice (Hammerspoon)
 
 Status: verified
-Plan: complete — 4 Eclipse/ADT hotkeys + 6 hotstrings confirmed working by the user on real hardware, after fixing 3 real-use bugs (path separator, hotstring self-retrigger, terminator-trigger off-by-one).
+Plan: complete — 3 Eclipse/ADT hotkeys + 6 hotstrings confirmed working by the user on real hardware, after fixing 3 real-use bugs (path separator, hotstring self-retrigger, terminator-trigger off-by-one). `eclipse_ctrl_sh_b` was later removed from the catalog by the user (human decision), bringing the count from 4 to 3.
 
 ## App confirmation (verified on this machine)
 
@@ -26,7 +26,7 @@ remain under `platforms/windows/data/` since they have no macOS consumer yet.
 ## Outcome
 
 - `hotkeys.db` (now at `platforms/shared/data/hotkeys.db`): 10 rows (6
-  hotstrings + 4 SAP Eclipse/ADT hotkeys) carry `platform=["windows","macos"]`.
+  hotstrings + 3 SAP Eclipse/ADT hotkeys) carry `platform=["windows","macos"]`.
   All other rows remain `["windows"]`. (`eclipse_ctrl_5` was manually removed
   from the catalog by the user during this cycle — human decision, not a
   migration artifact.)
@@ -175,5 +175,10 @@ already-passed-through characters, not just the pattern being matched.
 
 All 10 bindings confirmed working by the user: 4 Eclipse/ADT hotkeys
 (backtick, F1, F2, Cmd+Shift+B) and 6 hotstrings (`;;`, `"+`, `"-`, `*+`,
-`*-`, `sp `). This closes the first vertical slice. No further technical
-work is pending on this slice.
+`*-`, `sp `). This closes the first vertical slice.
+
+`eclipse_ctrl_sh_b` (Cmd+Shift+B) was subsequently removed from
+`hotkeys.db` by the user — a human catalog decision, not a technical
+regression. Catalog now stands at 3 Eclipse/ADT hotkeys + 6 hotstrings = 9
+bindings. `actions.lua` and `init.lua` comments updated to match; no
+orphaned code remains after regenerating artifacts.

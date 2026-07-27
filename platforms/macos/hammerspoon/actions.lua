@@ -21,12 +21,4 @@ Actions.eclipse_f2 = function()
   hs.eventtap.keyStroke({"alt", "shift"}, "r")
 end
 
--- Mirrors focusEclipseWindows(); no windowGroup equivalent on macOS yet.
-Actions.eclipse_ctrl_sh_b = function()
-  local app = hs.application.get("org.eclipse.platform") or hs.application.get("Eclipse")
-  if app then
-    app:activate()
-  end
-end
-
 return Actions

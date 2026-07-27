@@ -13,7 +13,4 @@ services.sap.promptAndSearchAbapObject()
 f2::{
 Send("!+r")
 }
-^+b::{
-services.sap.focusEclipseWindows()
-}
 #hotif
