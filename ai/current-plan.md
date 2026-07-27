@@ -106,6 +106,33 @@ checks cannot catch path-construction bugs) and lesson recorded here: **the
 static `luac -p` smoke check validates syntax only; it cannot substitute for
 loading the config inside Hammerspoon at least once.**
 
+## Second real-use bug found and fixed (2026-07-27): hotstring self-retrigger
+
+Human testing surfaced a functional bug that neither `luac -p` nor the
+first fix could catch: typing `*+` or `*-` produced fractally nested comment
+blocks (`*---... *--- NTP 27.07.26 ---* ---*`, repeating).
+
+Root cause: `hotstrings.lua` originally typed the replacement text with
+`hs.eventtap.keyStrokes(text)`, which synthesizes one `keyDown` event per
+character. The same module's `hs.eventtap.new` watcher listens to **all**
+`keyDown` events, including its own synthetic ones. The SAP comment-block
+replacement text contains its own `*---...---*` separator lines — which
+contain the literal trigger pattern `*-`. So typing the replacement
+re-triggered the same hotstring recursively, mid-paste.
+
+Fix: replaced `hs.eventtap.keyStrokes()` with a clipboard-based paste
+(`hs.pasteboard.setContents()` + a single `Cmd+V` `hs.eventtap.keyStroke()`),
+mirroring AHK's own `utilPaste()` clipboard-save/restore approach. A single
+paste keystroke cannot self-retrigger because it only synthesizes one
+`keyDown` event, not one per character.
+
+**Lesson generalized:** any Hammerspoon module that both *listens to*
+keyboard events and *synthesizes* keyboard events must guarantee its
+synthetic output cannot re-enter its own listener. Typing character-by-character
+is unsafe whenever the typed content can contain a trigger substring;
+single-keystroke actions (paste, or a dedicated non-observed input method)
+are safe. This applies to any future hotstring/expansion work on macOS.
+
 ## Deferred fast-follow (not blocking, unblocked by app confirmation)
 
 - Reclassify `snipaste_enter` to `portable-intent` and add a macOS binding +
