@@ -27,19 +27,4 @@ _taskbarHeight() {
     WinGetPos(, &y1, , &h, "ahk_class Shell_TrayWnd")
     return (y1 = A_ScreenHeight - h) ? h : 0
 }
-
-  microphoneToggle(){
-    CoordMode "Pixel"
-    microphoneImage := A_ScriptDir "\\assets\\images\\microphone-icon.png"
-    if not FileExist(microphoneImage)
-      return
-
-    if not ImageSearch(&FoundX, &FoundY, 0, 0, A_Screenwidth, A_Screenheight, microphoneImage)
-      return
-
-    Send("#!k")
-    KeyWait "\"
-    send("#!k")
-  }
-
 }

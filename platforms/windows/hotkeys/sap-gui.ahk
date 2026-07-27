@@ -3,53 +3,7 @@
 ; Regenerate: python ai/hotkey_sync.py --sync
 ; SAP GUI triggers only; implementation lives in library/automation/sap.ahk.
 
-#hotif winactive("Logon for Project")
-f1::{
-trackSapGuiHotkeyUsage("f1", "sap-gui-project-session")
-services.sap.reopenSessionFromProjectWindow()
-}
-#hotif services.sap.isTextInputActive("ahk_group group_sap_gui_windows")
-$enter::{
-trackSapGuiHotkeyUsage("$enter", "sap-gui-ymt-input")
-services.sap.runTcodeFromFocusedInput()
-}
 #hotif winactive("ahk_group group_sap_gui_windows")
-!left::{
-trackSapGuiHotkeyUsage("!left", "sap-gui-session")
-Send("+{f6}")
-}
-!right::{
-trackSapGuiHotkeyUsage("!right", "sap-gui-session")
-Send("+{f7}")
-}
-!up::{
-trackSapGuiHotkeyUsage("!up", "sap-gui-session")
-Send("^!{up}")
-}
-!down::{
-trackSapGuiHotkeyUsage("!down", "sap-gui-session")
-Send("^!{down}")
-}
-!+down::{
-trackSapGuiHotkeyUsage("!+down", "sap-gui-session")
-Send("^d")
-}
-^g::{
-trackSapGuiHotkeyUsage("^g", "sap-gui-session")
-Send("^o")
-}
-^+w::{
-trackSapGuiHotkeyUsage("^+w", "sap-gui-session")
-services.sap.exitSession()
-}
-^+k::{
-trackSapGuiHotkeyUsage("^+k", "sap-gui-session")
-Send("^+l")
-}
-^d::{
-trackSapGuiHotkeyUsage("^d", "sap-gui-session")
-services.sap.toggleDebugMode()
-}
 ^b::{
 trackSapGuiHotkeyUsage("^b", "sap-gui-session")
 services.sap.focusGuiWindows()

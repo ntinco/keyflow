@@ -32,7 +32,6 @@ runtimeConfigValue(configFile, section, key, defaultValue := "") {
 
 loadCorePathConstants() {
   global
-  pathOneDrive := EnvGet("onedrive")
   SplitPath(A_LineFile, , &pathScript)
   SplitPath(pathScript, , &pathScript)
   SplitPath(pathScript, , &pathScript)

@@ -1,20 +1,4 @@
 class SapSessionService {
-  __New(afterLaunchHandler := "") {
-    this._afterLaunchHandler := afterLaunchHandler
-  }
-
-  openPluzDevSession() {
-    this._openPinnedSession("pluz dev")
-  }
-
-  openPluzQasSession() {
-    this._openPinnedSession("pluz qas")
-  }
-
-  openPluzPrdSession() {
-    this._openPinnedSession("pluz prd")
-  }
-
   openNamedSession(inputValue) {
     services.launcher.dismissLauncherUi()
     inputValue := services.memory.getValue(inputValue)
@@ -34,14 +18,9 @@ class SapSessionService {
 
     this._runLaunchCommand(sessionConfig)
     this._handleMultipleSessionPopup(sessionConfig["sendEnter"])
-    this._afterSapLaunch(sessionConfig)
 
     if utilIsExit()
       Exit()
-  }
-
-  _openPinnedSession(sessionName) {
-    this.openNamedSession(sessionName)
   }
 
   _resolveSessionConfig(inputValue) {
@@ -66,19 +45,6 @@ class SapSessionService {
         return "Verificar configuracion KeePass de " originalInput " campo " fieldName
     }
     return ""
-  }
-
-  reopenSessionFromProjectWindow() {
-    Send("1")
-    Sleep(10)
-    text := ControlGetText("Edit4")
-    if !text
-      text := ControlGetText("Edit3")
-    loginParts := StrSplit(text, " ")
-    if !loginParts.Has(6) or !loginParts.Has(7)
-      return
-    Send("{backspace}")
-    this.openNamedSession(loginParts[6] A_Space loginParts[7])
   }
 
   _buildLaunchCommand(sessionConfig) {
@@ -263,10 +229,5 @@ class SapSessionService {
 
   _showRuntimeError(message) {
     MsgBox(message)
-  }
-
-  _afterSapLaunch(sessionConfig) {
-    if this._afterLaunchHandler
-      this._afterLaunchHandler.Call(sessionConfig)
   }
 }

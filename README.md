@@ -51,8 +51,8 @@ The catalog separates implementation from intent:
 
 - SAP secrets and session metadata come from KeePassXC through `keepassProviderCommand`.
 - Session names are business-first: `pluz dev`, `pluz qas`, `pluz prd`.
-- `platforms/windows/library/automation/sap-session.ahk` owns session lookup, entry resolution, launch command assembly, credential filling, and relaunch from project-window context.
-- `platforms/windows/library/automation/sap.ahk` is the public `services.sap` facade for SAP GUI and Eclipse automation plus delegated session entrypoints.
+- `platforms/windows/library/automation/sap-session.ahk` owns named-session lookup, entry resolution, launch command assembly, and credential filling.
+- `platforms/windows/library/automation/sap.ahk` is the public `services.sap` facade for SAP GUI and Eclipse automation plus the delegated named-session entrypoint.
 
 KeePass lookup flow:
 
@@ -102,7 +102,8 @@ The preferred startup contract lives in `local-startup.ini`:
 - The `utils` global object is gone; utility behavior lives in free `util*()` functions.
 - Launcher and window-group flows now use clearer intent-first names instead of legacy helper wording.
 - The human hotkey catalog is `hotkeys.db`; generated AHK and Markdown drift is enforced by `ai/hotkey_sync.py --check` through the health check.
-- The Windows runtime is reduced to 54 hotkeys, 6 hotstrings, and 10 registered services; portable intent is cataloged separately from implementation platform.
+- The Windows runtime is reduced to 22 hotkeys, 6 hotstrings, and 10 registered services; portable intent is cataloged separately from implementation platform.
+- Service APIs and assets retired with removed hotkeys have been deleted; the remaining public methods all have runtime consumers.
 - Hotkey tracking remains temporary and records new usage by context instead of merging identical key combinations across applications.
 - Catalog review state now lives in `ai/catalog-review.json`, and the current active catalog entries are marked `verified`.
 - AI governance contract now lives in `ai/governance.json` and centers on the architect/executor role model.

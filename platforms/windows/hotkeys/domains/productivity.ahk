@@ -20,10 +20,4 @@ services.launcher.saveClipboardToSelectedFile()
 trackDomainsHotkeyUsage("!p", "launcher")
 services.launcher.openSelectedMedia()
 }
-#hotif winactive(exeXyplorer)
-f5::{
-trackDomainsHotkeyUsage("f5", "xyplorer")
-Send("{f5}")
-Send("^+{f4}")
-}
 #hotif

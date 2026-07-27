@@ -28,29 +28,9 @@ services.windowGroup.activateGroup(appActivationTargets,"apps_sap_workspace")
 trackHotkeyEvent("!d", "hotkeys/global.ahk", "global")
 services.windowGroup.activateGroup(appActivationTargets,"apps_ide")
 }
-#f1::{
-trackHotkeyEvent("#f1", "hotkeys/global.ahk", "global")
-services.sap.openPluzDevSession()
-}
-#f2::{
-trackHotkeyEvent("#f2", "hotkeys/global.ahk", "global")
-services.sap.openPluzQasSession()
-}
-#f3::{
-trackHotkeyEvent("#f3", "hotkeys/global.ahk", "global")
-services.sap.openPluzPrdSession()
-}
 #esc::{
 trackHotkeyEvent("#esc", "hotkeys/global.ahk", "global")
 services.windows.resizeHeight()
-}
-#e::{
-trackHotkeyEvent("#e", "hotkeys/global.ahk", "global")
-services.run.openApp(exeXyplorer)
-}
-~\::{
-trackHotkeyEvent("~\", "hotkeys/global.ahk", "global")
-services.windows.microphoneToggle()
 }
 xbutton2::{
 trackHotkeyEvent("xbutton2", "hotkeys/global.ahk", "global")

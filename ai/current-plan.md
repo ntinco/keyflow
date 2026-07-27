@@ -1,31 +1,32 @@
-# Windows reduction and portability plan
+# Windows catalog reduction and cleanup outcome
 
 Status: completed
 Plan: completed
 
 ## Outcome
 
-- Reduced the active catalog from 72 to 54 hotkeys while preserving 6 hotstrings and the full SAP/ADT trigger set.
+- Reduced the active catalog to 22 hotkeys while preserving 6 hotstrings.
 - Reduced the service registry from 13 to 10 services.
-- Removed editor, Office, communication, video, task-tracker, and low-use global routes.
+- Retained the user-selected global, SAP GUI, SAP ADT, and launcher routes.
 - Removed `DynamicService`, `VideoService`, and `WhatsappService` plus stale constants, groups, configuration, and public methods.
-- Replaced the generic dynamic action engine with the explicit two-step XYplorer action stored in `hotkeys.db`.
-- Added catalog `portability`: 43 entries are `portable-intent` and 17 are `windows-only`; every current implementation platform is `windows`.
+- Removed the retired XYplorer action from the active catalog.
+- Catalog `portability` now classifies 20 active entries as `portable-intent` and 8 as `windows-only`; every current implementation platform is `windows`.
 - Updated tracking to qualify new usage keys by context while preserving the existing local data file.
-- Updated the main runtime and standalone SAP GUI runtime wiring.
+- Regenerated the five AHK and Markdown artifacts from `hotkeys.db`.
+- Removed the retired SAP session/debug/navigation endpoints, generic app-launch chain, microphone toggle, target-title normalization, OneDrive assignment, and microphone image.
+- Removed the empty YMT post-launch callback chain while preserving named SAP sessions, SAP transaction hotstrings, and quick debug.
 
 ## Validation
 
 - `python ai/hotkey_sync.py --check`: passed with 5 current generated artifacts.
 - `python ai/health_check.py --pretty`: passed at 100/100 with no unused assignments, groups, classes, constants, or public service methods.
-- `python ai/run_smoke.py --pretty`: launched the main runtime with no immediate parse errors.
-- Standalone `sap-gui-runtime.ahk`: exited with code 0 under `/ErrorStdOut=CP65001`.
+- Include and service wiring did not change. A direct AutoHotkey smoke run remains a Windows-only verification because the current host cannot execute the bundled PE binary.
 - Final reviewer validation is required after guide closure.
 
 ## Human-only pending work
 
-- Use Windows normally so context-qualified tracking evidence accumulates before choosing native macOS bindings.
+- Launch the refreshed runtime once on Windows, then use it normally so context-qualified tracking evidence accumulates before choosing native macOS bindings.
 
 ## Next plan decision
 
-No further Windows reduction is currently justified. A macOS implementation plan is deferred until the user is ready to select the native automation stack and first portable-intent slice.
+No additional technical frontier is currently selected. A macOS implementation plan is deferred until the user is ready to select the native automation stack and first portable-intent slice.

@@ -65,8 +65,7 @@
         "KeePass-backed SAP session lookup",
         "entry field resolution",
         "session launch command assembly",
-        "credential window filling",
-        "session relaunch from project-window context"
+        "credential window filling"
       ]
     },
     {
@@ -159,9 +158,6 @@
     "windows"
   ],
   "sap-session-entrypoints": [
-    "services.sap.openPluzDevSession()",
-    "services.sap.openPluzQasSession()",
-    "services.sap.openPluzPrdSession()",
     "services.sap.openNamedSession(sessionName)"
   ],
   "startup-config-sections": [
@@ -183,6 +179,6 @@
   "standalone": [
     "platforms/windows/hotkeys/layouts/colemak-dh.ahk"
   ],
-  "current-focus": "Stable reduced Windows runtime with 54 hotkeys, 10 services, explicit portability classification, context-qualified usage tracking, and preserved SAP/ADT workflows.",
+  "current-focus": "Stable reduced Windows runtime with 22 hotkeys, 10 lean service surfaces, explicit portability classification, context-qualified usage tracking, and selected SAP/ADT workflows.",
   "next-frontier": "No active frontier. Next technical plan deferred until a real frontier appears. Replace ai/current-plan.md when a new technical frontier is identified."
 }

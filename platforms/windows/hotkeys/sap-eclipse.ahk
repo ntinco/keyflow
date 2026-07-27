@@ -4,53 +4,17 @@
 ; SAP ADT/Eclipse triggers only; implementation lives in library/automation/sap.ahk.
 
 #hotif winactive(exeEclipse)
-!pgdn::{
-trackSapEclipseHotkeyUsage("!pgdn")
-Send("^pgdn")
-}
-!pgup::{
-trackSapEclipseHotkeyUsage("!pgup")
-Send("^pgup")
-}
-!+down::{
-trackSapEclipseHotkeyUsage("!+down")
-Send("^!down")
-}
-^g::{
-trackSapEclipseHotkeyUsage("^g")
-Send("^1")
-}
 `::{
 trackSapEclipseHotkeyUsage("``")
 services.sap.promptAndOpenAbapObject()
-}
-^/::{
-trackSapEclipseHotkeyUsage("^/")
-Send("^7")
-}
-^+k::{
-trackSapEclipseHotkeyUsage("^+k")
-Send("^d")
 }
 f1::{
 trackSapEclipseHotkeyUsage("f1")
 services.sap.promptAndSearchAbapObject()
 }
-!f1::{
-trackSapEclipseHotkeyUsage("!f1")
-Send("^+a")
-}
 f2::{
 trackSapEclipseHotkeyUsage("f2")
 Send("!+r")
-}
-+f2::{
-trackSapEclipseHotkeyUsage("+f2")
-Send("{f2}")
-}
-^n::{
-trackSapEclipseHotkeyUsage("^n")
-Send("!{f8}")
 }
 ^+b::{
 trackSapEclipseHotkeyUsage("^+b")
@@ -59,30 +23,5 @@ services.sap.focusEclipseWindows()
 ^5::{
 trackSapEclipseHotkeyUsage("^5")
 services.sap.startQuickDebug()
-}
-!j::{
-trackSapEclipseHotkeyUsage("!j")
-Send("{down}")
-}
-!k::{
-trackSapEclipseHotkeyUsage("!k")
-Send("{up}")
-}
-!i::{
-trackSapEclipseHotkeyUsage("!i")
-Send("^!i")
-}
-^s::{
-trackSapEclipseHotkeyUsage("^s")
-services.sap.saveCodeArtifact()
-}
-#hotif winactive("- DATABASE TABLE")
-!up::{
-trackSapEclipseHotkeyUsage("!up", "sap-eclipse-database-table")
-Send("!{up}")
-}
-!down::{
-trackSapEclipseHotkeyUsage("!down", "sap-eclipse-database-table")
-Send("!{down}")
 }
 #hotif

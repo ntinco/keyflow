@@ -33,10 +33,10 @@
       "exists": true
     },
     "hotkey_counts": {
-      "platforms/windows/hotkeys/domains/productivity.ahk": 5,
-      "platforms/windows/hotkeys/global.ahk": 11,
-      "platforms/windows/hotkeys/sap-eclipse.ahk": 20,
-      "platforms/windows/hotkeys/sap-gui.ahk": 18
+      "platforms/windows/hotkeys/domains/productivity.ahk": 4,
+      "platforms/windows/hotkeys/global.ahk": 6,
+      "platforms/windows/hotkeys/sap-eclipse.ahk": 5,
+      "platforms/windows/hotkeys/sap-gui.ahk": 7
     },
     "dead_class_candidates": [],
     "dead_constant_candidates": [],
@@ -351,15 +351,12 @@
         "referenced_methods": [
           "getValue",
           "resolveProviderValue",
-          "resolveSecretValue",
-          "resolveTargetTitle"
+          "resolveSecretValue"
         ],
         "declared_methods": [
           "getValue",
           "resolveProviderValue",
           "resolveSecretValue",
-          "resolveTargetTitle",
-          "_normalizeTargetAndTitle",
           "_isKeepassReference",
           "_resolveKeepassReference",
           "_getKeepassProviderCommand",
@@ -374,19 +371,11 @@
         "class": "RunService",
         "class_file": "platforms/windows/library/automation/run.ahk",
         "referenced_methods": [
-          "openApp",
           "runCommand"
         ],
         "declared_methods": [
-          "_open",
           "runCommand",
-          "openApp",
-          "_run",
-          "_prepareHotkeyLaunch",
-          "_firstAppItem",
-          "_normalizeAppTarget",
-          "_activateIfExists",
-          "_activateOrRunTarget"
+          "_prepareHotkeyLaunch"
         ]
       },
       {
@@ -394,16 +383,12 @@
         "class": "SapService",
         "class_file": "platforms/windows/library/automation/sap.ahk",
         "referenced_methods": [
-          "exitSession",
           "focusEclipseWindows",
           "focusGuiWindows",
           "insertCommentBlock",
           "insertCommentLine",
           "isTextInputActive",
           "openNamedSession",
-          "openPluzDevSession",
-          "openPluzPrdSession",
-          "openPluzQasSession",
           "openSe09",
           "openSe16n",
           "openSe37",
@@ -412,16 +397,11 @@
           "openWorkbenchOptions",
           "promptAndOpenAbapObject",
           "promptAndSearchAbapObject",
-          "reopenSessionFromProjectWindow",
           "runTcode",
-          "runTcodeFromFocusedInput",
-          "saveCodeArtifact",
-          "startQuickDebug",
-          "toggleDebugMode"
+          "startQuickDebug"
         ],
         "declared_methods": [
           "__New",
-          "_afterSapLaunch",
           "insertCommentLine",
           "insertCommentBlock",
           "_insertCommentLine",
@@ -429,37 +409,24 @@
           "_buildCodeSignature",
           "_buildCodeCommentLine",
           "_buildCommentMarkup",
-          "reopenSessionFromProjectWindow",
           "isTextInputActive",
-          "runTcodeFromFocusedInput",
           "runTcode",
-          "toggleDebugMode",
-          "_runDebugToggleCommand",
-          "exitSession",
-          "_runExitCommand",
           "openWorkbenchOptions",
           "openSe16n",
           "openSe37",
           "openSe38",
           "openSe09",
           "openSe80",
-          "saveCodeArtifact",
           "focusGuiWindows",
           "focusEclipseWindows",
           "promptAndOpenAbapObject",
           "promptAndSearchAbapObject",
           "_runQuickDebug",
           "startQuickDebug",
-          "openPluzDevSession",
-          "openPluzQasSession",
-          "openPluzPrdSession",
           "openNamedSession",
-          "_runTcodePostAction",
           "_normalizeTcodeForSap",
           "_submitTcodeButton",
-          "_resolveOperationDelayMs",
-          "_syncYmtProgramFromLocal",
-          "_readActiveInputValue"
+          "_resolveOperationDelayMs"
         ]
       },
       {
@@ -505,14 +472,12 @@
         "class": "WindowsService",
         "class_file": "platforms/windows/library/automation/windows.ahk",
         "referenced_methods": [
-          "microphoneToggle",
           "resizeHeight"
         ],
         "declared_methods": [
           "resizeHeight",
           "_winSizes",
-          "_taskbarHeight",
-          "microphoneToggle"
+          "_taskbarHeight"
         ]
       }
     ],
@@ -668,16 +633,11 @@
       {
         "file": "platforms/windows/hotkeys/global.ahk",
         "calls": [
-          "run.openApp",
           "sap.insertCommentBlock",
           "sap.insertCommentLine",
-          "sap.openPluzDevSession",
-          "sap.openPluzPrdSession",
-          "sap.openPluzQasSession",
           "snipaste.copyPaste",
           "snipaste.ctrlC",
           "windowGroup.activateGroup",
-          "windows.microphoneToggle",
           "windows.resizeHeight"
         ]
       },
@@ -693,25 +653,19 @@
           "sap.focusEclipseWindows",
           "sap.promptAndOpenAbapObject",
           "sap.promptAndSearchAbapObject",
-          "sap.saveCodeArtifact",
           "sap.startQuickDebug"
         ]
       },
       {
         "file": "platforms/windows/hotkeys/sap-gui.ahk",
         "calls": [
-          "sap.exitSession",
           "sap.focusGuiWindows",
-          "sap.isTextInputActive",
           "sap.openSe09",
           "sap.openSe16n",
           "sap.openSe37",
           "sap.openSe38",
           "sap.openSe80",
-          "sap.openWorkbenchOptions",
-          "sap.reopenSessionFromProjectWindow",
-          "sap.runTcodeFromFocusedInput",
-          "sap.toggleDebugMode"
+          "sap.openWorkbenchOptions"
         ]
       },
       {
@@ -738,8 +692,7 @@
       {
         "file": "platforms/windows/library/automation/run.ahk",
         "calls": [
-          "launcher.dismissLauncherUi",
-          "memory.resolveTargetTitle"
+          "launcher.dismissLauncherUi"
         ]
       },
       {

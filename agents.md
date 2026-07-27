@@ -149,16 +149,17 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 - `ai/prompts/agent-prompts.md` is now included in `ai/repo-map.json` `read-order`, making it visible to agents on first read.
 - `ai/run_smoke.py` records runtime smoke execution into `ai/run-result.json` so agents can distinguish "guide layer healthy" from "runtime smoke actually ran without parse errors".
 - `hotkeys.db` is the only human-managed hotkey source; generated AHK and hotkey reference files are checked for drift by `ai/hotkey_sync.py --check` through `ai/health_check.py`.
-- The Windows runtime now exposes 10 services and 54 hotkeys; generic editor, Office, communication, video, and low-use global routes have been retired.
+- The Windows runtime now exposes 10 services and 22 hotkeys; the human-managed catalog retains only the currently selected Windows, SAP GUI, SAP ADT, and launcher routes.
+- APIs, helpers, constants, and the microphone image retired with removed hotkeys have been deleted; every remaining public service method has a runtime consumer.
 - `hotkeys.db` separates implementation `platform` from `portability`, so macOS candidates are explicit without pretending AHK actions are cross-platform.
 - Temporary hotkey tracking uses context-qualified keys for new events, preventing cross-application usage collisions.
 
 ## Next evolution frontier
 
-- The Windows reduction and portability-classification cycle is technically complete; `ai/current-plan.md` records the validated outcome.
-- The stable runtime now contains 54 hotkeys, 6 hotstrings, 10 services, and no machine-detected orphaned code.
-- Human-only work is normal Windows usage so context-qualified tracking evidence can accumulate.
-- No further Windows reduction is currently justified; the macOS implementation plan is deferred until its native stack and first portable-intent slice are selected.
+- The latest Windows catalog reduction and dead-code cleanup are technically complete; `ai/current-plan.md` records the validated outcome.
+- The stable runtime now contains 22 hotkeys, 6 hotstrings, 10 services, and no machine-detected orphaned classes or constants.
+- Human-only work is launching the refreshed runtime once on Windows, then using it normally so context-qualified tracking evidence can accumulate.
+- No additional technical frontier is currently selected; the macOS implementation plan is deferred until its native stack and first portable-intent slice are chosen.
 
 ## Validation
 

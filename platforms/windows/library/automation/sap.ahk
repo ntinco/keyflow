@@ -2,14 +2,7 @@
 
 class SapService {
   __New() {
-    this.session := SapSessionService(ObjBindMethod(this, "_afterSapLaunch"))
-  }
-
-  _afterSapLaunch(sessionConfig) {
-    if !(sessionConfig is Map)
-      return
-    if (sessionConfig["sapTcode"] = "YMT.")
-      this._syncYmtProgramFromLocal(sessionConfig["sapTcode"])
+    this.session := SapSessionService()
   }
 
   insertCommentLine() {
@@ -46,10 +39,6 @@ class SapService {
       . "*---------------------------------------------------------------------*"
   }
 
-  reopenSessionFromProjectWindow() {
-    this.session.reopenSessionFromProjectWindow()
-  }
-
   isTextInputActive(winTitle := "A") {
     if !WinActive(winTitle)
       return false
@@ -65,13 +54,6 @@ class SapService {
     return InStr(focusedControl, "edit") || InStr(focusedControl, "richedit")
   }
 
-  runTcodeFromFocusedInput() {
-    tcode := this._readActiveInputValue()
-    if !tcode
-      return
-    this.runTcode(tcode)
-  }
-
   runTcode(tcode) {
     normalizedTcode := this._normalizeTcodeForSap(tcode)
     if !normalizedTcode
@@ -84,23 +66,6 @@ class SapService {
     }
 
     this._submitTcodeButton(normalizedTcode)
-    this._runTcodePostAction(normalizedTcode)
-  }
-
-  toggleDebugMode() {
-    this._runDebugToggleCommand()
-  }
-
-  _runDebugToggleCommand() {
-    this._submitTcodeButton("/h")
-  }
-
-  exitSession() {
-    this._runExitCommand()
-  }
-
-  _runExitCommand() {
-    this._submitTcodeButton("/nex")
   }
 
   openWorkbenchOptions() {
@@ -127,10 +92,6 @@ class SapService {
     this.runTcode("se80")
   }
 
-  saveCodeArtifact() {
-    Send("^s")
-  }
-
   focusGuiWindows() {
     if !(services.HasOwnProp("windowGroup"))
       return
@@ -154,7 +115,7 @@ class SapService {
   }
 
   _runQuickDebug() {
-    this.saveCodeArtifact()
+    Send("^s")
     Sleep(this._resolveOperationDelayMs())
     Send("^+{f2}")
   }
@@ -163,25 +124,8 @@ class SapService {
     this._runQuickDebug()
   }
 
-  openPluzDevSession() {
-    this.session.openPluzDevSession()
-  }
-
-  openPluzQasSession() {
-    this.session.openPluzQasSession()
-  }
-
-  openPluzPrdSession() {
-    this.session.openPluzPrdSession()
-  }
-
   openNamedSession(inputValue) {
     this.session.openNamedSession(inputValue)
-  }
-
-  _runTcodePostAction(normalizedTcode) {
-    if (StrUpper(normalizedTcode) = "YMT")
-      this._syncYmtProgramFromLocal(normalizedTcode)
   }
 
   _normalizeTcodeForSap(tcode) {
@@ -211,25 +155,4 @@ class SapService {
     return 100
   }
 
-  _syncYmtProgramFromLocal(*) {
-    ; Reserved hook for future YMT sync logic. Keep login flow independent from file sync details.
-  }
-
-  _readActiveInputValue() {
-    savedClipboard := ClipboardAll()
-    try {
-      A_Clipboard := ""
-      Send("^a")
-      Sleep(50)
-      Send("^c")
-      ClipWait(0.5)
-      return Trim(A_Clipboard)
-    }
-    catch {
-      return ""
-    }
-    finally {
-      A_Clipboard := savedClipboard
-    }
-  }
 }

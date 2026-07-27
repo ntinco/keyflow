@@ -32,10 +32,10 @@
     "exists": true
   },
   "hotkey_counts": {
-    "platforms/windows/hotkeys/domains/productivity.ahk": 5,
-    "platforms/windows/hotkeys/global.ahk": 11,
-    "platforms/windows/hotkeys/sap-eclipse.ahk": 20,
-    "platforms/windows/hotkeys/sap-gui.ahk": 18
+    "platforms/windows/hotkeys/domains/productivity.ahk": 4,
+    "platforms/windows/hotkeys/global.ahk": 6,
+    "platforms/windows/hotkeys/sap-eclipse.ahk": 5,
+    "platforms/windows/hotkeys/sap-gui.ahk": 7
   },
   "dead_class_candidates": [],
   "dead_constant_candidates": [],
