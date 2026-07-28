@@ -1,6 +1,5 @@
 -- Hand-authored actions matched by hotkeys.db id. Not line-by-line AHK
--- ports; see platforms/windows/library/automation/sap.ahk for the source
--- behavior and ai/current-plan.md for design rationale.
+-- ports; see platforms/windows/library/automation/sap.ahk for source behavior.
 
 local Actions = {}
 
@@ -22,13 +21,29 @@ Actions.eclipse_f2 = function()
 end
 
 -- SAP GUI tcode runner. Cmd+Option+O = native "Target Command Field" (SAP
--- GUI for Java Edit menu); mirrors AHK runTcode()'s "select all + paste +
--- enter" but using the app's own field-targeting shortcut instead of
--- Ctrl+A. Verified live via hs.axuielement against a real DS4 session.
+-- GUI for Java Edit menu). Clipboard paste (not char-by-char typing) is
+-- required: SAP GUI needs time to move focus after Cmd+Option+O, and a
+-- single Cmd+V keystroke is immune to that timing.
+local function pasteText(text)
+  local savedClipboard = hs.pasteboard.getContents()
+  hs.pasteboard.setContents(text)
+  hs.eventtap.keyStroke({"cmd"}, "v")
+  hs.timer.doAfter(0.2, function()
+    if savedClipboard then
+      hs.pasteboard.setContents(savedClipboard)
+    else
+      hs.pasteboard.clearContents()
+    end
+  end)
+end
+
 local function runTcode(tcode)
   hs.eventtap.keyStroke({"cmd", "alt"}, "o")
-  hs.timer.usleep(100000)
-  hs.eventtap.keyStrokes("/n" .. tcode)
+  hs.timer.usleep(300000)
+  hs.eventtap.keyStroke({"cmd"}, "a")
+  hs.timer.usleep(50000)
+  pasteText("/n" .. tcode)
+  hs.timer.usleep(250000)
   hs.eventtap.keyStroke({}, "return")
 end
 

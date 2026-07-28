@@ -1,7 +1,4 @@
 -- Hammerspoon entrypoint. Mirrors platforms/windows/keyflow.ahk.
--- Scope: see ai/current-plan.md — 3 Eclipse/ADT hotkeys (active while
--- Eclipse is frontmost), 6 SAP GUI hotkeys (active while SAPGUI is
--- frontmost), 6 global hotstrings.
 
 local scriptDir = hs.configdir .. "/keyflow/"
 if not hs.fs.attributes(hs.configdir .. "/keyflow") then

@@ -66,6 +66,7 @@ Claim discipline:
 Guide discipline:
 
 - Replace stale status text; do not append history. `Current model` describes invariants of the present state, not a changelog of what changed.
+- This applies to `ai/current-plan.md` too: it holds current implementation state and pending actions, never a narrated history of bugs found/fixed (that belongs in git commit messages and one-line code comments, not prose).
 - If one guide file changes meaningfully, review the others in the same cycle.
 - Keep policy in `AGENTS.md`, not in `README.md` or `repo-map.json`.
 - Keep routing in `ai/repo-map.json`, not in `README.md`.
@@ -142,8 +143,7 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 
 ## Next evolution frontier
 
-- macOS first vertical slice (Hammerspoon: `platforms/macos/hammerspoon/`, 3 Eclipse/ADT hotkeys + 6 hotstrings) is implemented and human-verified working on real hardware. Three real-use bugs were found and fixed during verification; details and the generalized lessons live in `ai/current-plan.md`.
-- A second macOS slice (6 SAP GUI hotkeys, via the native "Target Command Field" shortcut discovered through live `hs.axuielement` inspection) is implemented and statically validated but not yet human-verified inside a live SAP GUI session; see `ai/current-plan.md`.
+- macOS: 3 Eclipse/ADT hotkeys + 6 hotstrings are human-verified. 6 SAP GUI hotkeys are implemented and statically validated, pending human verification. Current state and pending actions: `ai/current-plan.md`.
 - Human-only pending: test the 6 SAP GUI hotkeys against a real DS4 session, and launch the Windows runtime once to confirm a clean start after the earlier tracker removal.
 
 ## Validation

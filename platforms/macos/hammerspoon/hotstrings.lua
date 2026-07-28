@@ -1,5 +1,4 @@
 -- hs.eventtap hotstring watcher. Source: platforms/shared/data/hotkeys.db
--- See ai/current-plan.md for full bug history/rationale on this file.
 
 local Hotstrings = {}
 
@@ -38,7 +37,9 @@ local function isTerminator(char)
   return char:match("%s") ~= nil or char:match("%p") ~= nil
 end
 
--- Must paste via clipboard, not keyStrokes() — self-retrigger bug, see ai/current-plan.md.
+-- Must paste via clipboard: keyStrokes() would fire one keyDown per char,
+-- which this same watcher observes, causing self-retrigger on patterns
+-- that appear inside the pasted text (e.g. "*-" inside a comment block).
 local function pasteText(text)
   local savedClipboard = hs.pasteboard.getContents()
   hs.pasteboard.setContents(text)
@@ -65,7 +66,8 @@ local function fireTrigger(trigger)
   buffer = ""
 end
 
--- Deletes pattern+1 chars (trigger + already-typed terminator) — off-by-one bug, see ai/current-plan.md.
+-- Deletes pattern+1 chars: the terminator char is already on screen
+-- (event was let through) by the time this callback runs.
 local function fireTerminatedTrigger(trigger, terminatorChar)
   for _ = 1, #trigger.pattern + 1 do
     hs.eventtap.keyStroke({}, "delete")
