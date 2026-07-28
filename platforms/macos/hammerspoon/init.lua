@@ -1,5 +1,13 @@
 -- Hammerspoon entrypoint. Mirrors platforms/windows/keyflow.ahk.
 
+-- _G survives a config reload within the same Hammerspoon process; local
+-- hotkey objects from the previous load do not get deleted automatically
+-- and would otherwise keep firing globally alongside the new ones.
+if _G.keyflowHotkeys then
+  for _, hotkey in ipairs(_G.keyflowHotkeys) do hotkey:delete() end
+end
+_G.keyflowHotkeys = {}
+
 local scriptDir = hs.configdir .. "/keyflow/"
 if not hs.fs.attributes(hs.configdir .. "/keyflow") then
   scriptDir = debug.getinfo and debug.getinfo(1, "S").source:match("@(.*/)") or "./"
@@ -40,7 +48,9 @@ for _, binding in ipairs(bindings) do
     local action = Actions[binding.id]
     if action then
       local mods, key = parseAhkKey(binding.key)
-      table.insert(hotkeysByApp[binding.contextLabel], hs.hotkey.new(mods, key, action))
+      local hotkey = hs.hotkey.new(mods, key, action)
+      table.insert(hotkeysByApp[binding.contextLabel], hotkey)
+      table.insert(_G.keyflowHotkeys, hotkey)
       loadedCount = loadedCount + 1
     else
       hs.printf("keyflow: no action registered for binding id '%s'", binding.id)
@@ -61,15 +71,18 @@ end
 
 syncHotkeysForFrontApp()
 
-hs.application.watcher.new(function(_, eventType)
+-- Must be kept in a local: an unreferenced hs.timer/hs.watcher object is
+-- eligible for GC and silently stops firing once collected.
+local appWatcher = hs.application.watcher.new(function(_, eventType)
   if eventType == hs.application.watcher.activated
       or eventType == hs.application.watcher.deactivated then
     syncHotkeysForFrontApp()
   end
-end):start()
+end)
+appWatcher:start()
 
--- Failsafe: watcher events can be missed; this bounds any desync to 1s.
-hs.timer.new(1, syncHotkeysForFrontApp):start()
+local syncTimer = hs.timer.new(1, syncHotkeysForFrontApp)
+syncTimer:start()
 
 Hotstrings.start()
 
