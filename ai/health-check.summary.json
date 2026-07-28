@@ -42,5 +42,5 @@
     "ai/repo-map.json",
     "ai/health-check.summary.json"
   ],
-  "next_frontier": "macOS: the Eclipse/ADT, hotstring, and SAP GUI slice is implemented; application-context isolation requires human re-verification. Current state and pending actions: ai/current-plan.md."
+  "next_frontier": "macOS: the Raycast launcher slice is implemented alongside Eclipse/ADT, hotstrings, and SAP GUI; runtime acceptance is pending. Current state and pending actions: ai/current-plan.md."
 }

@@ -182,6 +182,6 @@
   "standalone": [
     "platforms/windows/hotkeys/layouts/colemak-dh.ahk"
   ],
-  "current-focus": "Stable reduced Windows runtime with 22 hotkeys, 6 focused service surfaces, free utility helpers for value and command resolution, no credential-provider dependency, no hotkey usage tracking, explicit portability classification, and selected SAP/ADT workflows.",
-  "next-frontier": "macOS: the Eclipse/ADT, hotstring, and SAP GUI slice is implemented; application-context isolation requires human re-verification. Current state and pending actions: ai/current-plan.md."
+  "current-focus": "AI-maintained dual-runtime automation with machine-validated governance, a shared hotkey catalog, a reduced Windows surface, and incremental Hammerspoon slices without credential or usage-tracking dependencies.",
+  "next-frontier": "macOS: the Raycast launcher slice is implemented alongside Eclipse/ADT, hotstrings, and SAP GUI; runtime acceptance is pending. Current state and pending actions: ai/current-plan.md."
 }

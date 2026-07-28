@@ -142,13 +142,14 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 - `SapService` owns automation only inside active SAP GUI/NWBC and Eclipse/ADT contexts; no credential-backed session launch, no named session storage.
 - `platforms/shared/data/hotkeys.db` is the single human-managed hotkey source for both the Windows AHK runtime and the macOS Hammerspoon runtime. Its `platform` array separates implementation from `portability` intent; generated artifacts (AHK, Markdown, Lua bindings) are checked for drift via `ai/hotkey_sync.py --check` inside `ai/health_check.py`.
 - No hotkey usage tracking exists in the runtime; it was removed after serving its purpose during catalog reduction and is not to be reintroduced without a new justification.
-- `ai/health_check.py` validates: the AHK/macOS include chains, the service registry against `services.*` call sites, catalog/governance/guide contracts, and runtime-local file boundaries via `validate_local_only_contract()`.
+- `ai/governance.json` declares AI as the primary code maintainer and bounds the human role to intent, explicitly human-owned contracts, and runtime acceptance.
+- `ai/health_check.py` validates: the AHK/macOS include chains, macOS binding ownership and non-blocking dispatch, the service registry against `services.*` call sites, catalog/governance/guide contracts, and runtime-local file boundaries via `validate_local_only_contract()`.
 - `ai/review_check.py` is the reviewer-oriented audit for cycle closure, guide alignment, and architect/executor handoff quality; run it after any guide, plan, or governance change.
 
 ## Next evolution frontier
 
-- macOS: the Eclipse/ADT, hotstring, and SAP GUI slice is implemented; application-context isolation requires human re-verification. Current state and pending actions: `ai/current-plan.md`.
-- Human-only pending: re-verify macOS application-context switching and launch the Windows runtime once to confirm a clean start.
+- macOS: the Raycast launcher slice is implemented alongside Eclipse/ADT, hotstrings, and SAP GUI; runtime acceptance is pending. Current state and pending actions: `ai/current-plan.md`.
+- Human-only pending: verify Raycast actions and macOS application-context switching, then launch the Windows runtime once to confirm a clean start.
 
 ## Validation
 

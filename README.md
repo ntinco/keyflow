@@ -86,5 +86,5 @@ Local-only files that must never be committed:
 This is a summary; `AGENTS.md` → `Current model` is authoritative for governance-enforced detail.
 
 - Objective counts (services, hotkeys, profiles) live in `ai/health-check.summary.json`.
-- The macOS slice covers a subset of the catalog. Contextual hotkeys are active only in their target application, and delayed SAP steps stop when SAP GUI loses focus.
+- The macOS slice covers SAP GUI, Eclipse/ADT, hotstrings, and Raycast launcher workflows. Contextual hotkeys are active only in their target application, and delayed SAP steps stop when SAP GUI loses focus.
 - No credential-provider, session-launch, or hotkey-usage-tracking dependency exists in either runtime.
