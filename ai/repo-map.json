@@ -176,5 +176,5 @@
     "platforms/windows/hotkeys/layouts/colemak-dh.ahk"
   ],
   "current-focus": "Stable reduced Windows runtime with 22 hotkeys, 6 focused service surfaces, free utility helpers for value and command resolution, no credential-provider dependency, no hotkey usage tracking, explicit portability classification, and selected SAP/ADT workflows.",
-  "next-frontier": "macOS first slice (3 Eclipse/ADT hotkeys + 6 hotstrings) is human-verified. A second slice (6 SAP GUI hotkeys via native Cmd+Option+O Target Command Field) is implemented and statically validated, pending human verification inside a live SAP GUI session; see ai/current-plan.md."
+  "next-frontier": "macOS: 3 Eclipse/ADT hotkeys + 6 hotstrings + 6 SAP GUI hotkeys are human-verified. Current state and pending actions: ai/current-plan.md."
 }

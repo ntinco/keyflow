@@ -21,9 +21,10 @@ Actions.eclipse_f2 = function()
 end
 
 -- SAP GUI tcode runner. Cmd+Option+O = native "Target Command Field" (SAP
--- GUI for Java Edit menu). Clipboard paste (not char-by-char typing) is
--- required: SAP GUI needs time to move focus after Cmd+Option+O, and a
--- single Cmd+V keystroke is immune to that timing.
+-- GUI for Java Edit menu). win:focus() is required before the shortcut —
+-- app:activate() alone left AX focus on the nav tree, not the app's
+-- window, so Cmd+Option+O had no effect. Clipboard paste (not char-by-char
+-- typing) avoids per-character focus-timing issues in the command field.
 local function pasteText(text)
   local savedClipboard = hs.pasteboard.getContents()
   hs.pasteboard.setContents(text)
@@ -38,6 +39,12 @@ local function pasteText(text)
 end
 
 local function runTcode(tcode)
+  local app = hs.application.get("SAPGUI")
+  if app then
+    local win = app:mainWindow()
+    if win then win:focus() end
+  end
+  hs.timer.usleep(100000)
   hs.eventtap.keyStroke({"cmd", "alt"}, "o")
   hs.timer.usleep(300000)
   hs.eventtap.keyStroke({"cmd"}, "a")

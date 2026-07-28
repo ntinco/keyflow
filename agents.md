@@ -143,8 +143,8 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 
 ## Next evolution frontier
 
-- macOS: 3 Eclipse/ADT hotkeys + 6 hotstrings are human-verified. 6 SAP GUI hotkeys are implemented and statically validated, pending human verification. Current state and pending actions: `ai/current-plan.md`.
-- Human-only pending: test the 6 SAP GUI hotkeys against a real DS4 session, and launch the Windows runtime once to confirm a clean start after the earlier tracker removal.
+- macOS: 3 Eclipse/ADT hotkeys + 6 hotstrings + 6 SAP GUI hotkeys are human-verified. Current state and pending actions: `ai/current-plan.md`.
+- Human-only pending: launch the Windows runtime once to confirm a clean start after the earlier tracker removal.
 
 ## Validation
 
