@@ -1,13 +1,5 @@
 -- Hammerspoon entrypoint. Mirrors platforms/windows/keyflow.ahk.
 
--- _G survives a config reload within the same Hammerspoon process; local
--- hotkey objects from the previous load do not get deleted automatically
--- and would otherwise keep firing globally alongside the new ones.
-if _G.keyflowHotkeys then
-  for _, hotkey in ipairs(_G.keyflowHotkeys) do hotkey:delete() end
-end
-_G.keyflowHotkeys = {}
-
 local scriptDir = hs.configdir .. "/keyflow/"
 if not hs.fs.attributes(hs.configdir .. "/keyflow") then
   scriptDir = debug.getinfo and debug.getinfo(1, "S").source:match("@(.*/)") or "./"
@@ -42,15 +34,18 @@ for contextLabel in pairs(CONTEXT_APP_NAMES) do
   hotkeysByApp[contextLabel] = {}
 end
 
+-- hs.hotkey keeps a stack per key combo across reloads: disable() on the
+-- current top hotkey "unshadows" and re-enables whatever was below it.
+-- deleteAll() empties that stack for each combo before we (re)create ours,
+-- so no orphan from a previous load can ever get unshadowed again.
 local loadedCount = 0
 for _, binding in ipairs(bindings) do
   if binding.type == "hotkey" and CONTEXT_APP_NAMES[binding.contextLabel] then
     local action = Actions[binding.id]
     if action then
       local mods, key = parseAhkKey(binding.key)
-      local hotkey = hs.hotkey.new(mods, key, action)
-      table.insert(hotkeysByApp[binding.contextLabel], hotkey)
-      table.insert(_G.keyflowHotkeys, hotkey)
+      hs.hotkey.deleteAll(mods, key)
+      table.insert(hotkeysByApp[binding.contextLabel], hs.hotkey.new(mods, key, action))
       loadedCount = loadedCount + 1
     else
       hs.printf("keyflow: no action registered for binding id '%s'", binding.id)
