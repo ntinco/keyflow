@@ -11,7 +11,6 @@ local bindings = dofile(scriptDir .. "generated/bindings.lua")
 local Actions = dofile(scriptDir .. "actions.lua")
 local Hotstrings = dofile(scriptDir .. "hotstrings.lua")
 
--- AHK modifier notation -> Hammerspoon. Verify against real Eclipse keymap.
 local function parseAhkKey(ahkKey)
   local mods = {}
   local key = ahkKey
@@ -23,12 +22,13 @@ local function parseAhkKey(ahkKey)
   return mods, key
 end
 
--- contextLabel -> frontmost app name, mirrors AHK #hotif winactive(...).
 local CONTEXT_APP_NAMES = {
   ["sap-eclipse"] = "Eclipse",
   ["sap-gui-session"] = "SAPGUI",
 }
 
+-- disable(), not a global bind: some of these keys (Option+number) type
+-- special characters in other apps and must pass through when inactive.
 local hotkeysByApp = {}
 for contextLabel in pairs(CONTEXT_APP_NAMES) do
   hotkeysByApp[contextLabel] = {}
@@ -48,11 +48,9 @@ for _, binding in ipairs(bindings) do
   end
 end
 
--- Deterministic sync: on every focus change, enable hotkeys only for the
--- context whose app is actually frontmost, disable all others. This does
--- not depend on paired activated/deactivated events (a missed deactivated
--- event would otherwise leave a hotkey enabled globally forever).
-local function syncHotkeysForFrontApp(frontAppName)
+local function syncHotkeysForFrontApp()
+  local front = hs.application.frontmostApplication()
+  local frontAppName = front and front:name()
   for contextLabel, watchedAppName in pairs(CONTEXT_APP_NAMES) do
     local isFront = frontAppName == watchedAppName
     for _, hotkey in ipairs(hotkeysByApp[contextLabel]) do
@@ -61,16 +59,17 @@ local function syncHotkeysForFrontApp(frontAppName)
   end
 end
 
-syncHotkeysForFrontApp(hs.application.frontmostApplication() and hs.application.frontmostApplication():name())
+syncHotkeysForFrontApp()
 
-local appWatcher = hs.application.watcher.new(function(appName, eventType)
-  if eventType == hs.application.watcher.activated then
-    syncHotkeysForFrontApp(appName)
-  elseif eventType == hs.application.watcher.deactivated then
-    syncHotkeysForFrontApp(hs.application.frontmostApplication() and hs.application.frontmostApplication():name())
+hs.application.watcher.new(function(_, eventType)
+  if eventType == hs.application.watcher.activated
+      or eventType == hs.application.watcher.deactivated then
+    syncHotkeysForFrontApp()
   end
-end)
-appWatcher:start()
+end):start()
+
+-- Failsafe: watcher events can be missed; this bounds any desync to 1s.
+hs.timer.new(1, syncHotkeysForFrontApp):start()
 
 Hotstrings.start()
 

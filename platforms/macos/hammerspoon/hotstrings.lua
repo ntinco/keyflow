@@ -7,12 +7,10 @@ local function buildCodeSignature()
   return user .. " " .. os.date("%d.%m.%y")
 end
 
--- "+"/"-  single-line comment.
 local function buildCodeCommentLine(symbol)
   return "\"" .. symbol .. buildCodeSignature()
 end
 
--- *+/*-  block frame {..}, blank line between open/close (cursor lands there).
 local function buildCommentMarkup(symbol)
   local signature = buildCodeSignature()
   local openLine = "*" .. symbol .. "{" .. signature
@@ -20,7 +18,6 @@ local function buildCommentMarkup(symbol)
   return openLine .. "\n\n" .. closeLine
 end
 
--- moveCursorUpAfter: reposition cursor to the blank frame line after paste.
 local TRIGGERS = {
   {id = "hs_semicolons",        pattern = ";;", immediate = true,  replacement = function() return "ñ" end},
   {id = "hs_sap_comment_plus",  pattern = "\"+", immediate = true, replacement = function() return buildCodeCommentLine("+") end},

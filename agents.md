@@ -67,6 +67,7 @@ Guide discipline:
 
 - Replace stale status text; do not append history. `Current model` describes invariants of the present state, not a changelog of what changed.
 - This applies to `ai/current-plan.md` too: it holds current implementation state and pending actions, never a narrated history of bugs found/fixed (that belongs in git commit messages and one-line code comments, not prose).
+- Code comments: only write a comment when the code cannot explain itself — a non-obvious constraint, a rejected alternative, a trap someone would otherwise repeat. Never restate what a function/variable name already says.
 - If one guide file changes meaningfully, review the others in the same cycle.
 - Keep policy in `AGENTS.md`, not in `README.md` or `repo-map.json`.
 - Keep routing in `ai/repo-map.json`, not in `README.md`.
