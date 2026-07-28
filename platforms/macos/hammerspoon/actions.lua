@@ -3,18 +3,31 @@
 
 local Actions = {}
 
+local function isFrontApp(appName)
+  local front = hs.application.frontmostApplication()
+  return front and front:name() == appName
+end
+
 Actions.eclipse_backtick = function()
+  if not isFrontApp("Eclipse") then return end
   hs.eventtap.keyStroke({"cmd", "shift"}, "a")
-  hs.timer.usleep(150000)
-  hs.eventtap.keyStrokes("zpm*")
+  hs.timer.doAfter(0.15, function()
+    if isFrontApp("Eclipse") then
+      hs.eventtap.keyStrokes("zpm*")
+    end
+  end)
 end
 
 Actions.eclipse_f1 = function()
-  hs.eventtap.keyStroke({"cmd"}, "o")
+  if isFrontApp("Eclipse") then
+    hs.eventtap.keyStroke({"cmd"}, "o")
+  end
 end
 
 Actions.eclipse_f2 = function()
-  hs.eventtap.keyStroke({"alt", "shift"}, "r")
+  if isFrontApp("Eclipse") then
+    hs.eventtap.keyStroke({"alt", "shift"}, "r")
+  end
 end
 
 local function pasteText(text)
@@ -30,22 +43,32 @@ local function pasteText(text)
   end)
 end
 
--- win:focus() is required: app:activate() alone leaves AX focus on the
--- nav tree, so Cmd+Option+O ("Target Command Field") has no effect.
+local sapRunToken = 0
+
+local function scheduleSapStep(token, delaySeconds, action)
+  hs.timer.doAfter(delaySeconds, function()
+    if token == sapRunToken and isFrontApp("SAPGUI") then
+      action()
+    end
+  end)
+end
+
 local function runTcode(tcode)
-  local app = hs.application.get("SAPGUI")
-  if app then
-    local win = app:mainWindow()
-    if win then win:focus() end
-  end
-  hs.timer.usleep(100000)
+  if not isFrontApp("SAPGUI") then return end
+
+  sapRunToken = sapRunToken + 1
+  local token = sapRunToken
+
   hs.eventtap.keyStroke({"cmd", "alt"}, "o")
-  hs.timer.usleep(300000)
-  hs.eventtap.keyStroke({"cmd"}, "a")
-  hs.timer.usleep(50000)
-  pasteText("/n" .. tcode)
-  hs.timer.usleep(250000)
-  hs.eventtap.keyStroke({}, "return")
+  scheduleSapStep(token, 0.3, function()
+    hs.eventtap.keyStroke({"cmd"}, "a")
+    scheduleSapStep(token, 0.05, function()
+      pasteText("/n" .. tcode)
+      scheduleSapStep(token, 0.25, function()
+        hs.eventtap.keyStroke({}, "return")
+      end)
+    end)
+  end)
 end
 
 Actions.sap_gui_alt_5 = function() runTcode("ed") end

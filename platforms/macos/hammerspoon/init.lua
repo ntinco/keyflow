@@ -27,17 +27,11 @@ local CONTEXT_APP_NAMES = {
   ["sap-gui-session"] = "SAPGUI",
 }
 
--- disable(), not a global bind: some of these keys (Option+number) type
--- special characters in other apps and must pass through when inactive.
 local hotkeysByApp = {}
 for contextLabel in pairs(CONTEXT_APP_NAMES) do
   hotkeysByApp[contextLabel] = {}
 end
 
--- hs.hotkey keeps a stack per key combo across reloads: disable() on the
--- current top hotkey "unshadows" and re-enables whatever was below it.
--- deleteAll() empties that stack for each combo before we (re)create ours,
--- so no orphan from a previous load can ever get unshadowed again.
 local loadedCount = 0
 for _, binding in ipairs(bindings) do
   if binding.type == "hotkey" and CONTEXT_APP_NAMES[binding.contextLabel] then
@@ -45,39 +39,60 @@ for _, binding in ipairs(bindings) do
     if action then
       local mods, key = parseAhkKey(binding.key)
       hs.hotkey.deleteAll(mods, key)
-      table.insert(hotkeysByApp[binding.contextLabel], hs.hotkey.new(mods, key, action))
-      loadedCount = loadedCount + 1
+      local hotkey = hs.hotkey.new(mods, key, action)
+      if hotkey then
+        table.insert(hotkeysByApp[binding.contextLabel], hotkey)
+        loadedCount = loadedCount + 1
+      end
     else
       hs.printf("keyflow: no action registered for binding id '%s'", binding.id)
     end
   end
 end
 
-local function syncHotkeysForFrontApp()
+local activeContextLabel
+
+local function frontAppContext()
   local front = hs.application.frontmostApplication()
   local frontAppName = front and front:name()
   for contextLabel, watchedAppName in pairs(CONTEXT_APP_NAMES) do
-    local isFront = frontAppName == watchedAppName
-    for _, hotkey in ipairs(hotkeysByApp[contextLabel]) do
-      if isFront then hotkey:enable() else hotkey:disable() end
+    if frontAppName == watchedAppName then
+      return contextLabel
     end
   end
+  return nil
+end
+
+local function syncHotkeysForFrontApp()
+  local nextContextLabel = frontAppContext()
+  if nextContextLabel == activeContextLabel then
+    return
+  end
+
+  if activeContextLabel then
+    for _, hotkey in ipairs(hotkeysByApp[activeContextLabel]) do
+      hotkey:disable()
+    end
+  end
+
+  if nextContextLabel then
+    for _, hotkey in ipairs(hotkeysByApp[nextContextLabel]) do
+      hotkey:enable()
+    end
+  end
+
+  activeContextLabel = nextContextLabel
 end
 
 syncHotkeysForFrontApp()
 
--- Must be kept in a local: an unreferenced hs.timer/hs.watcher object is
--- eligible for GC and silently stops firing once collected.
 local appWatcher = hs.application.watcher.new(function(_, eventType)
   if eventType == hs.application.watcher.activated
       or eventType == hs.application.watcher.deactivated then
-    syncHotkeysForFrontApp()
+    hs.timer.doAfter(0, syncHotkeysForFrontApp)
   end
 end)
 appWatcher:start()
-
-local syncTimer = hs.timer.new(1, syncHotkeysForFrontApp)
-syncTimer:start()
 
 Hotstrings.start()
 
