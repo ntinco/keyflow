@@ -52,7 +52,6 @@ The `action` column holds raw AHK syntax and is not transpiled; macOS behavior f
 ## SAP model
 
 - `platforms/windows/library/automation/sap.ahk` is the public `services.sap` facade for actions inside active SAP GUI/NWBC and Eclipse/ADT contexts. No credential storage or session launch is part of the runtime.
-- `platforms/windows/tools/sap-gui/sap-gui-cli.bat` is an optional local execution bridge; it does not participate in the main runtime.
 
 ## Configuration contract
 
