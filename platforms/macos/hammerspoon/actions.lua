@@ -45,6 +45,10 @@ end
 
 local sapRunToken = 0
 
+function Actions.cancelSapRun()
+  sapRunToken = sapRunToken + 1
+end
+
 local function scheduleSapStep(token, delaySeconds, action)
   hs.timer.doAfter(delaySeconds, function()
     if token == sapRunToken and isFrontApp("SAPGUI") then
@@ -56,7 +60,7 @@ end
 local function runTcode(tcode)
   if not isFrontApp("SAPGUI") then return end
 
-  sapRunToken = sapRunToken + 1
+  Actions.cancelSapRun()
   local token = sapRunToken
 
   hs.eventtap.keyStroke({"cmd", "alt"}, "o")

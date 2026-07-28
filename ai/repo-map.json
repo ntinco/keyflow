@@ -22,7 +22,9 @@
     "ai/run_smoke.py",
     "platforms/windows/keyflow.ahk",
     "platforms/windows/library/bootstrap.ahk",
-    "platforms/windows/library/automation/sap.ahk"
+    "platforms/windows/library/automation/sap.ahk",
+    "platforms/macos/hammerspoon/init.lua",
+    "platforms/macos/hammerspoon/actions.lua"
   ],
   "plan-location": {
     "default": "AGENTS.md -> Next evolution frontier",
@@ -54,6 +56,11 @@
       "id": "review-check",
       "path": "ai/review_check.py",
       "role": "Reviewer-oriented audit for cycle closure, guide alignment, and handoff quality."
+    },
+    {
+      "id": "macos-runtime",
+      "path": "platforms/macos/hammerspoon/init.lua",
+      "role": "Hammerspoon entrypoint for application-scoped hotkeys and hotstrings."
     }
   ],
   "domains": [
@@ -176,5 +183,5 @@
     "platforms/windows/hotkeys/layouts/colemak-dh.ahk"
   ],
   "current-focus": "Stable reduced Windows runtime with 22 hotkeys, 6 focused service surfaces, free utility helpers for value and command resolution, no credential-provider dependency, no hotkey usage tracking, explicit portability classification, and selected SAP/ADT workflows.",
-  "next-frontier": "macOS: 3 Eclipse/ADT hotkeys + 6 hotstrings + 6 SAP GUI hotkeys are human-verified. Current state and pending actions: ai/current-plan.md."
+  "next-frontier": "macOS: the Eclipse/ADT, hotstring, and SAP GUI slice is implemented; application-context isolation requires human re-verification. Current state and pending actions: ai/current-plan.md."
 }

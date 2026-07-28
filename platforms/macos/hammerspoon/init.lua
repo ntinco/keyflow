@@ -86,7 +86,11 @@ end
 
 syncHotkeysForFrontApp()
 
-local appWatcher = hs.application.watcher.new(function(_, eventType)
+local appWatcher = hs.application.watcher.new(function(appName, eventType)
+  if eventType == hs.application.watcher.deactivated
+      and appName == CONTEXT_APP_NAMES["sap-gui-session"] then
+    Actions.cancelSapRun()
+  end
   if eventType == hs.application.watcher.activated
       or eventType == hs.application.watcher.deactivated then
     hs.timer.doAfter(0, syncHotkeysForFrontApp)

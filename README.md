@@ -23,7 +23,7 @@ platforms/windows/keyflow.ahk
 
 platforms/macos/hammerspoon/
   init.lua                    (entrypoint)
-  actions.lua                 (hand-authored hotkey behavior)
+  actions.lua                 (non-blocking, hand-authored hotkey behavior)
   hotstrings.lua              (hs.eventtap watcher)
   generated/bindings.lua      (generated from the shared catalog)
 ```
@@ -79,12 +79,12 @@ Local-only files that must never be committed:
 1. Install Hammerspoon.
 2. Symlink the repo into Hammerspoon's config dir, e.g. `ln -s <repo>/platforms/macos/hammerspoon ~/.hammerspoon/keyflow`.
 3. In `~/.hammerspoon/init.lua`, add: `dofile(hs.configdir .. "/keyflow/init.lua")`.
-4. Reload Hammerspoon and check the console for `keyflow: loaded ... eclipse hotkey(s), hotstring watcher active`.
+4. Reload Hammerspoon and check the console for `keyflow: loaded ... app-scoped hotkey(s), hotstring watcher active`.
 
 ## Current model
 
 This is a summary; `AGENTS.md` → `Current model` is authoritative for governance-enforced detail.
 
 - Objective counts (services, hotkeys, profiles) live in `ai/health-check.summary.json`.
-- The macOS slice covers a subset of the catalog (Eclipse/ADT hotkeys + simple hotstrings); it does not aim for parity with the Windows runtime.
+- The macOS slice covers a subset of the catalog. Contextual hotkeys are active only in their target application, and delayed SAP steps stop when SAP GUI loses focus.
 - No credential-provider, session-launch, or hotkey-usage-tracking dependency exists in either runtime.
