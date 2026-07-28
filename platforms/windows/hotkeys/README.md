@@ -27,12 +27,12 @@ Active catalog: **20 hotkeys** and **6 hotstrings**.
 | Trigger | Context | Action | Implementation | Portability |
 |---|---|---|---|---|
 | `Ctrl+B` | sap-gui-session | Focus SAP GUI windows | windows | windows-only |
-| `Alt+5` | sap-gui-session | Workbench options | windows | portable-intent |
-| `Alt+6` | sap-gui-session | SE16N table browser | windows | portable-intent |
-| `Alt+7` | sap-gui-session | SE37 function modules | windows | portable-intent |
-| `Alt+8` | sap-gui-session | SE38 ABAP editor | windows | portable-intent |
-| `Alt+9` | sap-gui-session | SE09 transport organizer | windows | portable-intent |
-| `Alt+0` | sap-gui-session | SE80 object navigator | windows | portable-intent |
+| `Alt+5` | sap-gui-session | Workbench options | windows, macos | portable-intent |
+| `Alt+6` | sap-gui-session | SE16N table browser | windows, macos | portable-intent |
+| `Alt+7` | sap-gui-session | SE37 function modules | windows, macos | portable-intent |
+| `Alt+8` | sap-gui-session | SE38 ABAP editor | windows, macos | portable-intent |
+| `Alt+9` | sap-gui-session | SE09 transport organizer | windows, macos | portable-intent |
+| `Alt+0` | sap-gui-session | SE80 object navigator | windows, macos | portable-intent |
 
 ## SAP Eclipse / ADT
 

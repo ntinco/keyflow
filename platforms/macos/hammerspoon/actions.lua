@@ -21,4 +21,22 @@ Actions.eclipse_f2 = function()
   hs.eventtap.keyStroke({"alt", "shift"}, "r")
 end
 
+-- SAP GUI tcode runner. Cmd+Option+O = native "Target Command Field" (SAP
+-- GUI for Java Edit menu); mirrors AHK runTcode()'s "select all + paste +
+-- enter" but using the app's own field-targeting shortcut instead of
+-- Ctrl+A. Verified live via hs.axuielement against a real DS4 session.
+local function runTcode(tcode)
+  hs.eventtap.keyStroke({"cmd", "alt"}, "o")
+  hs.timer.usleep(100000)
+  hs.eventtap.keyStrokes("/n" .. tcode)
+  hs.eventtap.keyStroke({}, "return")
+end
+
+Actions.sap_gui_alt_5 = function() runTcode("ed") end
+Actions.sap_gui_alt_6 = function() runTcode("se16n") end
+Actions.sap_gui_alt_7 = function() runTcode("se37") end
+Actions.sap_gui_alt_8 = function() runTcode("se38") end
+Actions.sap_gui_alt_9 = function() runTcode("se09") end
+Actions.sap_gui_alt_0 = function() runTcode("se80") end
+
 return Actions

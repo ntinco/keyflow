@@ -1,7 +1,7 @@
 # macOS migration — first vertical slice (Hammerspoon)
 
-Status: verified
-Plan: complete — 3 Eclipse/ADT hotkeys + 6 hotstrings confirmed working by the user on real hardware, after fixing 3 real-use bugs (path separator, hotstring self-retrigger, terminator-trigger off-by-one). `eclipse_ctrl_sh_b` was later removed from the catalog by the user (human decision), bringing the count from 4 to 3.
+Status: in progress
+Plan: first slice verified (3 Eclipse/ADT hotkeys + 6 hotstrings). Second slice (6 SAP GUI hotkeys) implemented, statically validated, pending human verification.
 
 ## App confirmation (verified on this machine)
 
@@ -157,13 +157,10 @@ already let through (not intercepted), the on-screen state includes that
 character. Any "undo the trigger" deletion logic must account for
 already-passed-through characters, not just the pattern being matched.
 
-## Deferred fast-follow (not blocking, unblocked by app confirmation)
+## Deferred fast-follow
 
 - Reclassify `snipaste_enter` to `portable-intent` and add a macOS binding +
   action, now that Snipaste is confirmed installed on this machine.
-- SAP GUI for Java hotkeys — deferred because it is a Java/SWT app with a
-  different focus-window API than native Cocoa apps; needs its own research
-  pass before binding.
 
 ## Non-goals (unchanged)
 
@@ -182,3 +179,37 @@ All 10 bindings confirmed working by the user: 4 Eclipse/ADT hotkeys
 regression. Catalog now stands at 3 Eclipse/ADT hotkeys + 6 hotstrings = 9
 bindings. `actions.lua` and `init.lua` comments updated to match; no
 orphaned code remains after regenerating artifacts.
+
+## Second slice: SAP GUI for Java hotkeys (2026-07-27)
+
+Live investigation with `hs.ipc` temporarily enabled (added, tested,
+removed — restored `init.lua` to its exact prior state, validated via
+`git diff --check`) on a real DS4 session:
+
+- `hs.application.get("SAPGUI")` detects the app like any native Cocoa app
+  (bundle ID `com.sap.platin`); no special handling needed for the
+  embedded-JRE packaging.
+- SAP GUI for Java's own Edit menu exposes **Cmd+Option+O = "Target
+  Command Field"** — a native shortcut equivalent to AHK's `runTcode()`
+  (which simulates Ctrl+A + paste + Enter). Confirmed via `hs.axuielement`
+  dump: a unique `AXTextField desc=[command field]` exists inside an
+  `AXToolbar`, reachable by that shortcut.
+
+Implemented: 6 SAP GUI hotkeys (`sap_gui_alt_5` through `sap_gui_alt_0` →
+Workbench options, SE16N, SE37, SE38, SE09, SE80) marked
+`platform=["windows","macos"]` in `hotkeys.db`. `actions.lua` adds a
+`runTcode(tcode)` helper: `Cmd+Option+O` → type `/n<TCODE>` → `Enter`.
+`init.lua`'s per-app hotkey/watcher logic was generalized from a
+single-app (Eclipse) loop to a `CONTEXT_APP_NAMES` table so both
+`sap-eclipse` and `sap-gui-session` contexts share the same enable/disable
+watcher code.
+
+`sap_gui_ctrl_b` (Focus SAP GUI windows) stays out of scope — it depends
+on `WindowGroupService`, the same Windows-specific concept already
+excluded for Eclipse's `eclipse_ctrl_sh_b`.
+
+Not yet verified: this design has not been exercised inside a live SAP
+GUI session with real keystrokes — the Cmd+Option+O shortcut and AX tree
+were confirmed to exist, but the end-to-end `runTcode()` flow (typing a
+tcode and pressing Enter) needs human verification, same as the first
+slice required before it was trusted.

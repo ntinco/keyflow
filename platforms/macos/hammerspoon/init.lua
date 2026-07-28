@@ -1,6 +1,7 @@
 -- Hammerspoon entrypoint. Mirrors platforms/windows/keyflow.ahk.
--- Scope: first vertical slice (see ai/current-plan.md) — 3 Eclipse/ADT
--- hotkeys (active only while Eclipse is frontmost) + 6 global hotstrings.
+-- Scope: see ai/current-plan.md — 3 Eclipse/ADT hotkeys (active while
+-- Eclipse is frontmost), 6 SAP GUI hotkeys (active while SAPGUI is
+-- frontmost), 6 global hotstrings.
 
 local scriptDir = hs.configdir .. "/keyflow/"
 if not hs.fs.attributes(hs.configdir .. "/keyflow") then
@@ -25,41 +26,45 @@ local function parseAhkKey(ahkKey)
   return mods, key
 end
 
-local ECLIPSE_CONTEXT_LABEL = "sap-eclipse"
-local eclipseHotkeys = {}
+-- contextLabel -> frontmost app name, mirrors AHK #hotif winactive(...).
+local CONTEXT_APP_NAMES = {
+  ["sap-eclipse"] = "Eclipse",
+  ["sap-gui-session"] = "SAPGUI",
+}
 
+local hotkeysByApp = {}
+for contextLabel in pairs(CONTEXT_APP_NAMES) do
+  hotkeysByApp[contextLabel] = {}
+end
+
+local loadedCount = 0
 for _, binding in ipairs(bindings) do
-  if binding.type == "hotkey" and binding.contextLabel == ECLIPSE_CONTEXT_LABEL then
+  if binding.type == "hotkey" and CONTEXT_APP_NAMES[binding.contextLabel] then
     local action = Actions[binding.id]
     if action then
       local mods, key = parseAhkKey(binding.key)
-      table.insert(eclipseHotkeys, hs.hotkey.new(mods, key, action))
+      table.insert(hotkeysByApp[binding.contextLabel], hs.hotkey.new(mods, key, action))
+      loadedCount = loadedCount + 1
     else
       hs.printf("keyflow: no action registered for binding id '%s'", binding.id)
     end
   end
 end
 
--- Mirrors AHK #hotif winactive(exeEclipse).
-local eclipseWatcher = hs.application.watcher.new(function(appName, eventType, app)
-  if appName ~= "Eclipse" then
-    return
-  end
-  if eventType == hs.application.watcher.activated then
-    for _, hotkey in ipairs(eclipseHotkeys) do
-      hotkey:enable()
-    end
-  elseif eventType == hs.application.watcher.deactivated then
-    for _, hotkey in ipairs(eclipseHotkeys) do
-      hotkey:disable()
+local appWatcher = hs.application.watcher.new(function(appName, eventType)
+  for contextLabel, watchedAppName in pairs(CONTEXT_APP_NAMES) do
+    if appName == watchedAppName then
+      local hotkeys = hotkeysByApp[contextLabel]
+      if eventType == hs.application.watcher.activated then
+        for _, hotkey in ipairs(hotkeys) do hotkey:enable() end
+      elseif eventType == hs.application.watcher.deactivated then
+        for _, hotkey in ipairs(hotkeys) do hotkey:disable() end
+      end
     end
   end
 end)
-eclipseWatcher:start()
+appWatcher:start()
 
 Hotstrings.start()
 
-hs.printf(
-  "keyflow: loaded %d eclipse hotkey(s), hotstring watcher active",
-  #eclipseHotkeys
-)
+hs.printf("keyflow: loaded %d app-scoped hotkey(s), hotstring watcher active", loadedCount)

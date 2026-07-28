@@ -13,4 +13,10 @@ return {
   {id = "hs_sap_comment_plus", type = "hotstring", key = "\"+", contextLabel = "", label = "SAP insert comment line (+)"},
   {id = "hs_semicolons", type = "hotstring", key = ";;", contextLabel = "", label = "Type ñ"},
   {id = "hs_sp", type = "hotstring", key = "sp", contextLabel = "", label = "Paste 'summary in prompt'"},
+  {id = "sap_gui_alt_0", type = "hotkey", key = "!0", contextLabel = "sap-gui-session", label = "SE80 object navigator"},
+  {id = "sap_gui_alt_5", type = "hotkey", key = "!5", contextLabel = "sap-gui-session", label = "Workbench options"},
+  {id = "sap_gui_alt_6", type = "hotkey", key = "!6", contextLabel = "sap-gui-session", label = "SE16N table browser"},
+  {id = "sap_gui_alt_7", type = "hotkey", key = "!7", contextLabel = "sap-gui-session", label = "SE37 function modules"},
+  {id = "sap_gui_alt_8", type = "hotkey", key = "!8", contextLabel = "sap-gui-session", label = "SE38 ABAP editor"},
+  {id = "sap_gui_alt_9", type = "hotkey", key = "!9", contextLabel = "sap-gui-session", label = "SE09 transport organizer"},
 }

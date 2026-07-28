@@ -143,8 +143,8 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 ## Next evolution frontier
 
 - macOS first vertical slice (Hammerspoon: `platforms/macos/hammerspoon/`, 3 Eclipse/ADT hotkeys + 6 hotstrings) is implemented and human-verified working on real hardware. Three real-use bugs were found and fixed during verification; details and the generalized lessons live in `ai/current-plan.md`.
-- No technical work is pending on the verified slice. A next macOS slice (candidates noted in `ai/current-plan.md`: `snipaste_enter`, or SAP GUI for Java hotkeys) requires a new architect decision before implementation starts.
-- Human-only pending: launch the Windows runtime once to confirm a clean start after the earlier tracker removal.
+- A second macOS slice (6 SAP GUI hotkeys, via the native "Target Command Field" shortcut discovered through live `hs.axuielement` inspection) is implemented and statically validated but not yet human-verified inside a live SAP GUI session; see `ai/current-plan.md`.
+- Human-only pending: test the 6 SAP GUI hotkeys against a real DS4 session, and launch the Windows runtime once to confirm a clean start after the earlier tracker removal.
 
 ## Validation
 

@@ -42,5 +42,5 @@
     "ai/repo-map.json",
     "ai/health-check.summary.json"
   ],
-  "next_frontier": "macOS first vertical slice (Hammerspoon: platforms/macos/hammerspoon/, 3 Eclipse/ADT hotkeys + 6 hotstrings) is implemented and human-verified working on real hardware. No technical work is pending on this slice. A next macOS slice (candidates: snipaste_enter, or SAP GUI for Java hotkeys) requires a new architect decision; see ai/current-plan.md."
+  "next_frontier": "macOS first slice (3 Eclipse/ADT hotkeys + 6 hotstrings) is human-verified. A second slice (6 SAP GUI hotkeys via native Cmd+Option+O Target Command Field) is implemented and statically validated, pending human verification inside a live SAP GUI session; see ai/current-plan.md."
 }

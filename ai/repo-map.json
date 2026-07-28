@@ -176,5 +176,5 @@
     "platforms/windows/hotkeys/layouts/colemak-dh.ahk"
   ],
   "current-focus": "Stable reduced Windows runtime with 22 hotkeys, 6 focused service surfaces, free utility helpers for value and command resolution, no credential-provider dependency, no hotkey usage tracking, explicit portability classification, and selected SAP/ADT workflows.",
-  "next-frontier": "macOS first vertical slice (Hammerspoon: platforms/macos/hammerspoon/, 3 Eclipse/ADT hotkeys + 6 hotstrings) is implemented and human-verified working on real hardware. No technical work is pending on this slice. A next macOS slice (candidates: snipaste_enter, or SAP GUI for Java hotkeys) requires a new architect decision; see ai/current-plan.md."
+  "next-frontier": "macOS first slice (3 Eclipse/ADT hotkeys + 6 hotstrings) is human-verified. A second slice (6 SAP GUI hotkeys via native Cmd+Option+O Target Command Field) is implemented and statically validated, pending human verification inside a live SAP GUI session; see ai/current-plan.md."
 }
