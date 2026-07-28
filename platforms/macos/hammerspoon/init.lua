@@ -48,16 +48,26 @@ for _, binding in ipairs(bindings) do
   end
 end
 
-local appWatcher = hs.application.watcher.new(function(appName, eventType)
+-- Deterministic sync: on every focus change, enable hotkeys only for the
+-- context whose app is actually frontmost, disable all others. This does
+-- not depend on paired activated/deactivated events (a missed deactivated
+-- event would otherwise leave a hotkey enabled globally forever).
+local function syncHotkeysForFrontApp(frontAppName)
   for contextLabel, watchedAppName in pairs(CONTEXT_APP_NAMES) do
-    if appName == watchedAppName then
-      local hotkeys = hotkeysByApp[contextLabel]
-      if eventType == hs.application.watcher.activated then
-        for _, hotkey in ipairs(hotkeys) do hotkey:enable() end
-      elseif eventType == hs.application.watcher.deactivated then
-        for _, hotkey in ipairs(hotkeys) do hotkey:disable() end
-      end
+    local isFront = frontAppName == watchedAppName
+    for _, hotkey in ipairs(hotkeysByApp[contextLabel]) do
+      if isFront then hotkey:enable() else hotkey:disable() end
     end
+  end
+end
+
+syncHotkeysForFrontApp(hs.application.frontmostApplication() and hs.application.frontmostApplication():name())
+
+local appWatcher = hs.application.watcher.new(function(appName, eventType)
+  if eventType == hs.application.watcher.activated then
+    syncHotkeysForFrontApp(appName)
+  elseif eventType == hs.application.watcher.deactivated then
+    syncHotkeysForFrontApp(hs.application.frontmostApplication() and hs.application.frontmostApplication():name())
   end
 end)
 appWatcher:start()
