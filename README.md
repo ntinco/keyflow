@@ -61,7 +61,7 @@ All machine-specific configuration is local-only. Use these versioned examples a
 | Example file | Purpose |
 |---|---|
 | `platforms/windows/data/local-paths.example.ini` | Machine paths and ABAP workspace hints |
-| `platforms/windows/data/local-startup.example.ini` | Runtime env, SAP delays, UI config, startup launcher config |
+| `platforms/windows/data/local-startup.example.ini` | Runtime environment and SAP delays |
 
 Local-only files that must never be committed:
 

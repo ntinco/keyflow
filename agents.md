@@ -18,6 +18,7 @@ Roles are fixed:
 - `AGENTS.md`: workflow, rules, handoff, plan policy
 - `README.md`: architecture and onboarding
 - `ai/governance.json`: machine-readable governance contract
+- `ai/current-plan.md`: active frontier, current implementation state, and pending actions
 
 ## Repo identity
 
@@ -41,8 +42,8 @@ This repository is permanently operated as a dual-role AI-first repo.
 6. Run `python ai/health_check.py --pretty --output ai/health-check.json --output-summary ai/health-check.summary.json`.
 7. If runtime wiring changed, smoke-test with `platforms/windows/tools/exe/AutoHotkey64.exe /ErrorStdOut=CP65001 platforms/windows/keyflow.ahk` and record the result with `python ai/run_smoke.py`.
 8. If you changed guides, plan state, or cycle status, rerun `python ai/review_check.py --pretty --summary`.
-9. Close the cycle by updating the guide layer if routing, behavior, constraints, or next frontier changed.
-10. In the final handoff, state which actions are still human-only and whether a new technical plan should be created now or deferred.
+9. Update `ai/current-plan.md` when implementation state or pending actions changed. Edit other guide files only when their owned contract changed.
+10. In the final handoff, state which actions are still human-only and whether the current plan remains active, complete, or deferred.
 
 If step 2 or 5 returns `ok: false`, fix the reported issues before doing anything else.
 
@@ -71,7 +72,7 @@ Guide discipline:
 - Replace stale status text; do not append history. `Current model` describes invariants of the present state, not a changelog of what changed.
 - This applies to `ai/current-plan.md` too: it holds current implementation state and pending actions, never a narrated history of bugs found/fixed (that belongs in git commit messages and one-line code comments, not prose).
 - Code comments: only write a comment when the code cannot explain itself — a non-obvious constraint, a rejected alternative, a trap someone would otherwise repeat. Never restate what a function/variable name already says.
-- If one guide file changes meaningfully, review the others in the same cycle.
+- Review each guide owner affected by the change; do not edit unrelated guides merely to keep duplicated status aligned.
 - Keep policy in `AGENTS.md`, not in `README.md` or `repo-map.json`.
 - Keep routing in `ai/repo-map.json`, not in `README.md`.
 - Objective counts (services, hotkeys, profile sizes) live in `ai/health-check.summary.json`; do not duplicate them as prose here — reference the file instead.
@@ -80,19 +81,19 @@ Handoff rule:
 
 - Leave the repo so either role can resume safely from code plus guide files only.
 - If technical execution is complete, say so explicitly and separate human-only pending work from technical pending work.
-- If a next technical frontier is already clear, replace `ai/current-plan.md` with the new plan in the same cycle.
-- If only human-only work remains, do not invent a new technical plan just to fill the file; say that plan creation is deferred until a real technical frontier appears.
+- If a next technical frontier is already clear, replace `ai/current-plan.md` in the same cycle.
+- If only human-only work remains, keep those actions in `ai/current-plan.md`; use `Status: deferred` only when no execution or verification is currently actionable.
 - Never collapse the repo narrative into an unstructured single-role workflow. Preserve explicit architect/executor handoff wording even when the repo is temporarily stable.
 
 ## Plan policy
 
-Use only one persistent plan location at a time.
+Use one persistent plan location.
 
-- Default: keep the active frontier in `AGENTS.md` under `Next evolution frontier`.
-- If a detailed multi-step plan must survive across turns or agents, store it in `ai/current-plan.md`.
+- `ai/current-plan.md` is the sole source for frontier, implementation state, and pending actions.
+- `AGENTS.md` only points to the plan and must not repeat its status.
 - Do not create root-level `plan*.md`, `next.md`, or duplicate plan files.
-- When the plan is completed or superseded, fold the outcome back into `AGENTS.md` and delete or fully replace `ai/current-plan.md`.
-- A completed plan must leave behind two things: a short human-action list in `AGENTS.md` and a clear decision about whether the next technical plan is ready now or deferred.
+- Keep `ai/current-plan.md` present with one status: `in progress`, `complete`, or `deferred`.
+- When superseded, replace its contents instead of appending history.
 
 ## Hard rules
 
@@ -129,7 +130,6 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 | macOS runtime (Hammerspoon) | `platforms/macos/hammerspoon/` |
 | Human-managed hotkey catalog (shared) | `platforms/shared/data/hotkeys.db` |
 | Hotkey artifact generation and drift check | `ai/hotkey_sync.py` |
-| Startup launchers | `platforms/windows/tools/startup/` |
 | Windows-only versioned catalogs | `platforms/windows/data/*.json` |
 | Catalog review state | `ai/catalog-review.json` |
 | Governance contract | `ai/governance.json` |
@@ -137,19 +137,17 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 
 ## Current model
 
-- `ai_readiness` is `100/100`; see `ai/health-check.summary.json` for objective counts (services, hotkeys, profiles) instead of duplicating them here.
 - One intentional global: `services` in `platforms/windows/keyflow.ahk`.
 - `SapService` owns automation only inside active SAP GUI/NWBC and Eclipse/ADT contexts; no credential-backed session launch, no named session storage.
 - `platforms/shared/data/hotkeys.db` is the single human-managed hotkey source for both the Windows AHK runtime and the macOS Hammerspoon runtime. Its `platform` array separates implementation from `portability` intent; generated artifacts (AHK, Markdown, Lua bindings) are checked for drift via `ai/hotkey_sync.py --check` inside `ai/health_check.py`.
 - No hotkey usage tracking exists in the runtime; it was removed after serving its purpose during catalog reduction and is not to be reintroduced without a new justification.
 - `ai/governance.json` declares AI as the primary code maintainer and bounds the human role to intent, explicitly human-owned contracts, and runtime acceptance.
-- `ai/health_check.py` validates: the AHK/macOS include chains, macOS binding ownership and non-blocking dispatch, the service registry against `services.*` call sites, catalog/governance/guide contracts, and runtime-local file boundaries via `validate_local_only_contract()`.
+- `ai/health_check.py` validates the AHK/macOS include chains, macOS binding ownership and non-blocking dispatch, service calls, catalogs, governance, routing, and runtime-local boundaries.
 - `ai/review_check.py` is the reviewer-oriented audit for cycle closure, guide alignment, and architect/executor handoff quality; run it after any guide, plan, or governance change.
 
 ## Next evolution frontier
 
-- macOS: the Raycast launcher slice is implemented alongside Eclipse/ADT, hotstrings, and SAP GUI; runtime acceptance is pending. Current state and pending actions: `ai/current-plan.md`.
-- Human-only pending: verify Raycast actions and macOS application-context switching, then launch the Windows runtime once to confirm a clean start.
+- Active plan and pending actions: `ai/current-plan.md`.
 
 ## Validation
 

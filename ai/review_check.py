@@ -8,16 +8,6 @@ import sys
 from pathlib import Path
 
 
-NO_ACTIVE_FRONTIER = (
-    "No active frontier. Next technical plan deferred until a real frontier appears. "
-    "Replace ai/current-plan.md when a new technical frontier is identified."
-)
-
-REGENERATE_COMMAND = (
-    "python ai/health_check.py --pretty "
-    "--output ai/health-check.json --output-summary ai/health-check.summary.json"
-)
-
 # Fallback phrases used only when governance.json is unavailable or malformed.
 _FALLBACK_ROLE_PHRASES = (
     "This repository is permanently operated as a dual-role AI-first repo.",
@@ -25,12 +15,6 @@ _FALLBACK_ROLE_PHRASES = (
     "Write for the next handoff, not for your own memory.",
     "AI is the primary code maintainer.",
 )
-
-# Fallback current-model phrases used only when governance.json is unavailable or malformed.
-_FALLBACK_CURRENT_MODEL_PHRASES = (
-    "validate_local_only_contract()",
-)
-
 
 def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8-sig")
@@ -50,35 +34,19 @@ def find_section(text: str, heading: str) -> str:
 
 
 def detect_plan_state(plan_text: str) -> str:
-    lowered = plan_text.lower()
-    if "status: complete" in lowered or "plan: completed" in lowered:
-        return "completed"
-    if "deferred" in lowered and "no new technical frontier" in lowered:
-        return "deferred"
-    return "active"
-
-
-def is_stale_summary(summary_frontier: str, repo_map_frontier: str, plan_state: str) -> bool:
-    """Return True when the mismatch looks like a stale generated artifact rather than
-    a real contract disagreement.  The heuristic: the repo-map (authoritative) has an
-    active frontier while the summary (generated) still reflects the previous closed
-    state, or vice-versa.  Either way the fix is to regenerate, not to edit guides.
-    """
-    if summary_frontier == repo_map_frontier:
-        return False
-    # If one side is the known no-frontier sentinel and the other is not, the artifact
-    # was simply not regenerated after the frontier changed.
-    if summary_frontier == NO_ACTIVE_FRONTIER or repo_map_frontier == NO_ACTIVE_FRONTIER:
-        return True
-    # Both are non-empty and different — also a staleness signal (frontier text changed).
-    if summary_frontier and repo_map_frontier:
-        return True
-    return False
+    match = re.search(r"^Status:\s*(.+?)\s*$", plan_text, re.MULTILINE | re.IGNORECASE)
+    if not match:
+        return "invalid"
+    status = match.group(1).lower()
+    return {
+        "in progress": "active",
+        "complete": "complete",
+        "deferred": "deferred",
+    }.get(status, "invalid")
 
 
 def build_review(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
     summary_path = repo_root / "ai/health-check.summary.json"
-    repo_map_path = repo_root / "ai/repo-map.json"
     agents_path = repo_root / "AGENTS.md"
     readme_path = repo_root / "README.md"
     current_plan_path = repo_root / "ai/current-plan.md"
@@ -86,7 +54,6 @@ def build_review(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]
     gitignore_path = repo_root / ".gitignore"
 
     summary = read_json(summary_path)
-    repo_map = read_json(repo_map_path)
     governance = read_json(governance_path)
     agents_text = read_text(agents_path)
     readme_text = read_text(readme_path)
@@ -95,14 +62,9 @@ def build_review(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]
 
     # Load role contract requirements from governance.
     required_role_phrases: list[str] = governance.get("required_role_phrases") or list(_FALLBACK_ROLE_PHRASES)
-    required_current_model_phrases: list[str] = governance.get("required_current_model_phrases") or list(_FALLBACK_CURRENT_MODEL_PHRASES)
-
     agents_frontier = find_section(agents_text, "Next evolution frontier")
-    agents_model = find_section(agents_text, "Current model")
     readme_guide = find_section(readme_text, "AI operating guide")
     plan_state = detect_plan_state(plan_text)
-    summary_frontier = summary.get("next_frontier", "")
-    repo_map_frontier = repo_map.get("next-frontier", "")
     pycache_dir = repo_root / "ai/__pycache__"
 
     issues: list[dict[str, str]] = []
@@ -123,37 +85,14 @@ def build_review(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]
             }
         )
 
-    frontier_aligned = summary_frontier == repo_map_frontier
-    add_check("frontier-alignment", frontier_aligned, "summary next_frontier matches repo-map next-frontier")
-    if not frontier_aligned:
-        if is_stale_summary(summary_frontier, repo_map_frontier, plan_state):
-            issues.append(
-                {
-                    "type": "stale_summary",
-                    "file": "ai/health-check.summary.json",
-                    "message": (
-                        "ai/health-check.summary.json is stale relative to ai/repo-map.json. "
-                        f"Regenerate with: {REGENERATE_COMMAND}"
-                    ),
-                }
-            )
-        else:
-            issues.append(
-                {
-                    "type": "frontier_mismatch",
-                    "file": "ai/repo-map.json",
-                    "message": "ai/health-check.summary.json and ai/repo-map.json disagree about the next frontier.",
-                }
-            )
-
     agents_mentions_plan = "ai/current-plan.md" in agents_frontier
-    add_check("agents-plan-reference", agents_mentions_plan, "AGENTS next frontier section references ai/current-plan.md when needed")
-    if not agents_mentions_plan and summary_frontier != NO_ACTIVE_FRONTIER:
+    add_check("agents-plan-reference", agents_mentions_plan, "AGENTS next frontier section points to current-plan.md")
+    if not agents_mentions_plan:
         issues.append(
             {
                 "type": "agents_frontier_missing_plan_reference",
                 "file": "AGENTS.md",
-                "message": "AGENTS next frontier should point to ai/current-plan.md while a technical frontier is active.",
+                "message": "AGENTS next frontier must point to ai/current-plan.md without duplicating plan state.",
             }
         )
 
@@ -179,15 +118,16 @@ def build_review(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]
             }
         )
 
-    governance_cycle_outputs = governance.get("required_cycle_outputs", [])
-    governance_ok = isinstance(governance_cycle_outputs, list) and "AGENTS.md" in governance_cycle_outputs
-    add_check("governance-cycle-outputs", governance_ok, "governance required cycle outputs are present")
+    cycle_outputs = governance.get("cycle_outputs", {})
+    always_outputs = cycle_outputs.get("always", []) if isinstance(cycle_outputs, dict) else []
+    governance_ok = always_outputs == ["ai/health-check.json", "ai/health-check.summary.json"]
+    add_check("governance-cycle-outputs", governance_ok, "only generated health artifacts are mandatory every cycle")
     if not governance_ok:
         issues.append(
             {
                 "type": "governance_cycle_outputs_invalid",
                 "file": "ai/governance.json",
-                "message": "governance required_cycle_outputs is not in the expected shape.",
+                "message": "governance cycle_outputs must keep policy and routing files conditional.",
             }
         )
 
@@ -268,51 +208,14 @@ def build_review(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]
             }
         )
 
-    if summary_frontier == NO_ACTIVE_FRONTIER:
-        plan_closed = plan_state in {"completed", "deferred"}
-        agents_deferred = "deferred" in agents_frontier.lower() or "no new technical frontier" in agents_frontier.lower()
-        add_check("closed-cycle-plan-state", plan_closed, f"current plan state is {plan_state}")
-        add_check("closed-cycle-agents", agents_deferred, "AGENTS expresses that the next technical plan is deferred")
-        if not plan_closed:
-            issues.append(
-                {
-                    "type": "closed_cycle_plan_not_closed",
-                    "file": "ai/current-plan.md",
-                    "message": "Summary says no active frontier, but ai/current-plan.md still looks active.",
-                }
-            )
-        if not agents_deferred:
-            issues.append(
-                {
-                    "type": "closed_cycle_agents_not_deferred",
-                    "file": "AGENTS.md",
-                    "message": "Summary says no active frontier, but AGENTS does not clearly defer the next technical plan.",
-                }
-            )
-    else:
-        plan_active = plan_state == "active"
-        add_check("active-cycle-plan-state", plan_active, f"current plan state is {plan_state}")
-        if not plan_active:
-            issues.append(
-                {
-                    "type": "active_frontier_plan_not_active",
-                    "file": "ai/current-plan.md",
-                    "message": "A technical frontier is active, but ai/current-plan.md does not look active.",
-                }
-            )
-
-    missing_model_phrases = [phrase for phrase in required_current_model_phrases if phrase not in agents_model]
-    add_check(
-        "agents-current-model-detail",
-        len(missing_model_phrases) == 0,
-        "AGENTS current model records all required governance-enforced detail phrases",
-    )
-    for phrase in missing_model_phrases:
-        warnings.append(
+    valid_plan_state = plan_state in {"active", "complete", "deferred"}
+    add_check("plan-state", valid_plan_state, f"current plan state is {plan_state}")
+    if not valid_plan_state:
+        issues.append(
             {
-                "type": "agents_current_model_missing_detail",
-                "file": "AGENTS.md",
-                "message": f"AGENTS current model is missing required detail phrase: {phrase}",
+                "type": "plan_state_invalid",
+                "file": "ai/current-plan.md",
+                "message": "Current plan must declare Status: in progress, complete, or deferred.",
             }
         )
 
@@ -333,10 +236,7 @@ def build_review(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]
         "warning_count": len(warnings),
         "plan_state": plan_state,
         "health_ok": health_ok,
-        "frontier": {
-            "summary": summary_frontier,
-            "repo_map": repo_map_frontier,
-        },
+        "plan": "ai/current-plan.md",
         "reviewer_commands": {
             "health": "python ai/health_check.py --pretty --summary",
             "review": "python ai/review_check.py --pretty --summary",

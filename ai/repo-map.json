@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "purpose": "Navigation map for rapid dual-role AI maintenance of keyflow.",
   "guide-files": {
     "summary": "ai/health-check.summary.json",
@@ -11,25 +11,11 @@
     "ai/health-check.summary.json",
     "ai/repo-map.json",
     "AGENTS.md",
-    "README.md",
-    "ai/current-plan.md",
-    "ai/governance.json",
-    "ai/prompts/agent-prompts.md",
-    "ai/prompts/executor-prompt.md",
-    "ai/prompts/architect-prompt.md",
-    "ai/prompts/planner-prompt.md",
-    "ai/catalog-review.json",
-    "ai/run_smoke.py",
-    "platforms/windows/keyflow.ahk",
-    "platforms/windows/library/bootstrap.ahk",
-    "platforms/windows/library/automation/sap.ahk",
-    "platforms/macos/hammerspoon/init.lua",
-    "platforms/macos/hammerspoon/actions.lua"
+    "ai/current-plan.md"
   ],
   "plan-location": {
-    "default": "AGENTS.md -> Next evolution frontier",
-    "detailed": "ai/current-plan.md",
-    "rule": "Use at most one persistent detailed plan file at a time. Do not create root-level plan files."
+    "path": "ai/current-plan.md",
+    "rule": "Sole persistent frontier and pending-action state."
   },
   "entrypoints": [
     {
@@ -41,11 +27,6 @@
       "id": "bootstrap",
       "path": "platforms/windows/library/bootstrap.ahk",
       "role": "Loads constants, free util functions, services, and hotstring profiles."
-    },
-    {
-      "id": "startup-host",
-      "path": "platforms/windows/tools/startup/host-startup.ahk",
-      "role": "Optional host launcher."
     },
     {
       "id": "health-check",
@@ -117,13 +98,6 @@
       ]
     },
     {
-      "id": "startup",
-      "path": "platforms/windows/tools/startup/",
-      "owns": [
-        "secondary launchers for host and VMware contexts"
-      ]
-    },
-    {
       "id": "ai-tooling",
       "path": "ai/",
       "owns": [
@@ -181,7 +155,5 @@
   ],
   "standalone": [
     "platforms/windows/hotkeys/layouts/colemak-dh.ahk"
-  ],
-  "current-focus": "AI-maintained dual-runtime automation with machine-validated governance, a shared hotkey catalog, a reduced Windows surface, and incremental Hammerspoon slices without credential or usage-tracking dependencies.",
-  "next-frontier": "macOS: the Raycast launcher slice is implemented alongside Eclipse/ADT, hotstrings, and SAP GUI; runtime acceptance is pending. Current state and pending actions: ai/current-plan.md."
+  ]
 }

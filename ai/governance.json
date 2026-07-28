@@ -1,17 +1,24 @@
 {
-  "version": 2,
+  "version": 3,
   "guide_authority": [
     "ai/health-check.summary.json",
     "ai/repo-map.json",
     "AGENTS.md",
     "README.md"
   ],
-  "required_cycle_outputs": [
-    "ai/health-check.summary.json",
-    "ai/repo-map.json",
-    "AGENTS.md"
-  ],
-  "detailed_plan_path": "ai/current-plan.md",
+  "cycle_outputs": {
+    "always": [
+      "ai/health-check.json",
+      "ai/health-check.summary.json"
+    ],
+    "conditional": {
+      "plan state": "ai/current-plan.md",
+      "routing": "ai/repo-map.json",
+      "policy": "AGENTS.md",
+      "architecture": "README.md"
+    }
+  },
+  "plan_path": "ai/current-plan.md",
   "human_owned_contracts": [
     "ai/catalog-review.json",
     "platforms/shared/data/hotkeys.db"
@@ -48,11 +55,13 @@
     "Write for the next handoff, not for your own memory.",
     "AI is the primary code maintainer."
   ],
-  "required_current_model_phrases": [
-    "validate_local_only_contract()"
-  ],
-  "frontier_policy": {
-    "when_human_only_work_remains": "Do not invent a new technical plan. Keep the human frontier explicit.",
-    "when_new_technical_work_is_clear": "Replace ai/current-plan.md in the same cycle."
+  "plan_policy": {
+    "single_source": "ai/current-plan.md",
+    "agents_reference_only": true,
+    "allowed_status": [
+      "in progress",
+      "complete",
+      "deferred"
+    ]
   }
 }

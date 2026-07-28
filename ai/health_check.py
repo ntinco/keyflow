@@ -85,9 +85,6 @@ REQUIRED_ROLE_PHRASES = (
     "Write for the next handoff, not for your own memory.",
     "AI is the primary code maintainer.",
 )
-REQUIRED_CURRENT_MODEL_PHRASES = (
-    "validate_local_only_contract()",
-)
 EXPECTED_MAINTENANCE_MODEL = {
     "primary_code_maintainer": "ai",
     "human_role": [
@@ -102,6 +99,23 @@ EXPECTED_MAINTENANCE_MODEL = {
         "minimal code surface",
     ],
     "code_audience": "ai-maintenance-first",
+}
+EXPECTED_CYCLE_OUTPUTS = {
+    "always": [
+        "ai/health-check.json",
+        "ai/health-check.summary.json",
+    ],
+    "conditional": {
+        "plan state": "ai/current-plan.md",
+        "routing": "ai/repo-map.json",
+        "policy": "AGENTS.md",
+        "architecture": "README.md",
+    },
+}
+EXPECTED_PLAN_POLICY = {
+    "single_source": "ai/current-plan.md",
+    "agents_reference_only": True,
+    "allowed_status": ["in progress", "complete", "deferred"],
 }
 
 
@@ -506,12 +520,7 @@ def validate_governance_contract(
         "AGENTS.md",
         "README.md",
     ]
-    expected_required_cycle_outputs = [
-        "ai/health-check.summary.json",
-        "ai/repo-map.json",
-        "AGENTS.md",
-    ]
-    expected_detailed_plan_path = "ai/current-plan.md"
+    expected_plan_path = "ai/current-plan.md"
     expected_human_owned_contracts = [CATALOG_REVIEW_FILE, HOTKEY_CATALOG_FILE]
     expected_machine_validated_contracts = [
         "ai/repo-map.json",
@@ -552,21 +561,30 @@ def validate_governance_contract(
             }
         )
 
-    if payload.get("required_cycle_outputs") != expected_required_cycle_outputs:
+    if payload.get("cycle_outputs") != EXPECTED_CYCLE_OUTPUTS:
         issues.append(
             {
                 "type": "governance_cycle_outputs_mismatch",
                 "file": GOVERNANCE_FILE,
-                "message": "governance.json required_cycle_outputs do not match the repo workflow contract.",
+                "message": "governance.json cycle_outputs do not match the stable/conditional output contract.",
             }
         )
 
-    if payload.get("detailed_plan_path") != expected_detailed_plan_path:
+    if payload.get("plan_path") != expected_plan_path:
         issues.append(
             {
                 "type": "governance_plan_path_mismatch",
                 "file": GOVERNANCE_FILE,
-                "message": "governance.json detailed_plan_path must point to ai/current-plan.md.",
+                "message": "governance.json plan_path must point to ai/current-plan.md.",
+            }
+        )
+
+    if payload.get("plan_policy") != EXPECTED_PLAN_POLICY:
+        issues.append(
+            {
+                "type": "governance_plan_policy_mismatch",
+                "file": GOVERNANCE_FILE,
+                "message": "governance.json plan_policy must declare current-plan.md as the single plan source.",
             }
         )
 
@@ -624,16 +642,7 @@ def validate_governance_contract(
             }
         )
 
-    if payload.get("required_current_model_phrases") != list(REQUIRED_CURRENT_MODEL_PHRASES):
-        issues.append(
-            {
-                "type": "governance_current_model_phrases_mismatch",
-                "file": GOVERNANCE_FILE,
-                "message": "governance.json required_current_model_phrases do not match the enforced current-model contract.",
-            }
-        )
-
-    for rel_path in expected_guide_authority + expected_human_owned_contracts + [expected_detailed_plan_path]:
+    for rel_path in expected_guide_authority + expected_human_owned_contracts + [expected_plan_path]:
         if not (repo_root / rel_path).exists():
             issues.append(
                 {
@@ -644,7 +653,7 @@ def validate_governance_contract(
             )
 
     repo_map_read_order = repo_map.get("read-order", []) if isinstance(repo_map, dict) else []
-    for required_read_path in ["ai/current-plan.md", "ai/governance.json", "ai/catalog-review.json"]:
+    for required_read_path in ["ai/current-plan.md"]:
         if required_read_path not in repo_map_read_order:
             issues.append(
                 {
@@ -702,6 +711,28 @@ def validate_repo_map_contracts(
                     }
                 )
 
+    for route_group in ("entrypoints", "domains"):
+        routes = repo_map.get(route_group, [])
+        if not isinstance(routes, list):
+            issues.append(
+                {
+                    "type": "repo_map_routes_invalid",
+                    "file": "ai/repo-map.json",
+                    "message": f"{route_group} must be a list.",
+                }
+            )
+            continue
+        for route in routes:
+            rel_path = route.get("path", "") if isinstance(route, dict) else ""
+            if not rel_path or not (repo_root / rel_path).exists():
+                issues.append(
+                    {
+                        "type": "repo_map_dead_route",
+                        "file": "ai/repo-map.json",
+                        "message": f"{route_group} references a missing path: {rel_path}",
+                    }
+                )
+
     plan_location = repo_map.get("plan-location", {})
     if not isinstance(plan_location, dict):
         issues.append(
@@ -712,16 +743,16 @@ def validate_repo_map_contracts(
             }
         )
     else:
-        detailed_plan = plan_location.get("detailed", "")
-        if detailed_plan != expected_plan_file:
+        plan_path = plan_location.get("path", "")
+        if plan_path != expected_plan_file:
             issues.append(
                 {
                     "type": "repo_map_plan_location_mismatch",
                     "file": "ai/repo-map.json",
-                    "message": "repo-map detailed plan location must point to ai/current-plan.md.",
+                    "message": "repo-map plan location must point to ai/current-plan.md.",
                 }
             )
-        elif not (repo_root / detailed_plan).exists():
+        elif not (repo_root / plan_path).exists():
             issues.append(
                 {
                     "type": "repo_map_plan_missing",
@@ -1262,7 +1293,6 @@ def build_summary(
     unclosed_hotif: list,
     catalog_review_result: dict[str, object],
     governance_result: dict[str, object],
-    next_frontier: str = "",
 ) -> dict[str, object]:
     issues = include_missing + registry_issues + service_call_issues + profile_issues + guide_contract_issues + catalog_review_issues + governance_issues + local_only_contract_issues + hotkey_catalog_issues + macos_runtime_issues + unclosed_hotif + forbidden_references
     profile_counts = {p["label"]: p.get("item_count", 0) for p in profile_results}
@@ -1288,7 +1318,6 @@ def build_summary(
         "dead_constant_candidates": [c["constant"] for c in dead_candidates["dead_constant_candidates"]],
         "forbidden_reference_count": len(forbidden_references),
         "ai_operating_guide": ["AGENTS.md", "README.md", "ai/repo-map.json", "ai/health-check.summary.json"],
-        "next_frontier": next_frontier,
     }
 
 
@@ -1302,12 +1331,10 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
     startup_example_text = read_text(data_dir / "local-startup.example.ini")
     startup_sections = parse_ini_sections(startup_example_text)
 
-    next_frontier = ""
     repo_map: dict[str, object] = {}
     if repo_map_file.exists():
         try:
             repo_map = json.loads(repo_map_file.read_text(encoding="utf-8-sig"))
-            next_frontier = repo_map.get("next-frontier", "")
         except (json.JSONDecodeError, KeyError):
             pass
 
@@ -1356,7 +1383,6 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
         unclosed_hotif,
         catalog_review_result,
         governance_result,
-        next_frontier,
     )
 
     full = {
