@@ -83,10 +83,26 @@ REQUIRED_ROLE_PHRASES = (
     "This repository is permanently operated as a dual-role AI-first repo.",
     "The two supported roles are architect and executor.",
     "Write for the next handoff, not for your own memory.",
+    "AI is the primary code maintainer.",
 )
 REQUIRED_CURRENT_MODEL_PHRASES = (
     "validate_local_only_contract()",
 )
+EXPECTED_MAINTENANCE_MODEL = {
+    "primary_code_maintainer": "ai",
+    "human_role": [
+        "intent",
+        "human-owned contracts",
+        "runtime acceptance",
+    ],
+    "optimization_order": [
+        "machine-verifiable contracts",
+        "explicit ownership and routing",
+        "deterministic validation",
+        "minimal code surface",
+    ],
+    "code_audience": "ai-maintenance-first",
+}
 
 
 def to_repo_path(path: Path, repo_root: Path) -> str:
@@ -578,6 +594,15 @@ def validate_governance_contract(
                 "type": "governance_dual_role_missing",
                 "file": GOVERNANCE_FILE,
                 "message": "governance.json must declare dual_role_repo=true.",
+            }
+        )
+
+    if payload.get("maintenance_model") != EXPECTED_MAINTENANCE_MODEL:
+        issues.append(
+            {
+                "type": "governance_maintenance_model_mismatch",
+                "file": GOVERNANCE_FILE,
+                "message": "governance.json maintenance_model does not match the AI-first maintenance contract.",
             }
         )
 
@@ -1123,16 +1148,11 @@ RE_LUA_DOFILE = re.compile(r'dofile\(scriptDir\s*\.\.\s*"([^"]+)"\)')
 
 
 def validate_macos_runtime(repo_root: Path) -> list[dict[str, object]]:
-    """Validate the macOS Hammerspoon include chain declared in init.lua.
-    This does NOT require Windows/macOS parity — the macOS runtime is
-    expected to cover a smaller slice than the Windows AHK runtime. It only
-    checks that init.lua's dofile() references resolve to real files, and
-    that the generated bindings.lua is current (delegated to hotkey_sync.py
-    via validate_hotkey_catalog, which already covers all platforms)."""
+    """Validate Hammerspoon routing and generated-binding ownership."""
     macos_dir = repo_root / "platforms/macos/hammerspoon"
     init_file = macos_dir / "init.lua"
     if not init_file.exists():
-        return []  # macOS runtime not started yet; nothing to validate.
+        return []
 
     issues: list[dict[str, object]] = []
     text = read_text(init_file)
@@ -1145,6 +1165,58 @@ def validate_macos_runtime(repo_root: Path) -> list[dict[str, object]]:
                 "include": include_value,
                 "target": to_repo_path(target, repo_root),
                 "message": "init.lua references a dofile() target that does not exist.",
+            })
+
+    actions_file = macos_dir / "actions.lua"
+    hotstrings_file = macos_dir / "hotstrings.lua"
+    bindings_file = macos_dir / "generated/bindings.lua"
+    if not all(path.exists() for path in (actions_file, hotstrings_file, bindings_file)):
+        return issues
+
+    actions_text = read_text(actions_file)
+    hotstrings_text = read_text(hotstrings_file)
+    bindings_text = read_text(bindings_file)
+    action_ids = set(re.findall(
+        r"(?:function\s+Actions\.|Actions\.)([A-Za-z_][A-Za-z0-9_]*)\s*(?:=|\()",
+        actions_text,
+    ))
+    hotstring_ids = set(re.findall(r'\bid\s*=\s*"([^"]+)"', hotstrings_text))
+    context_labels = set(re.findall(r'^\s*\["([^"]+)"\]\s*=', text, re.MULTILINE))
+    bindings = re.findall(
+        r'\{id\s*=\s*"([^"]+)",\s*type\s*=\s*"([^"]+)",.*?contextLabel\s*=\s*"([^"]*)"',
+        bindings_text,
+    )
+
+    for binding_id, binding_type, context_label in bindings:
+        if binding_type == "hotkey" and binding_id not in action_ids:
+            issues.append({
+                "type": "macos_action_missing",
+                "file": to_repo_path(actions_file, repo_root),
+                "binding": binding_id,
+                "message": "Generated macOS hotkey has no registered action.",
+            })
+        if binding_type == "hotkey" and context_label not in context_labels:
+            issues.append({
+                "type": "macos_context_missing",
+                "file": to_repo_path(init_file, repo_root),
+                "binding": binding_id,
+                "context": context_label,
+                "message": "Generated macOS hotkey references an unknown application context.",
+            })
+        if binding_type == "hotstring" and binding_id not in hotstring_ids:
+            issues.append({
+                "type": "macos_hotstring_missing",
+                "file": to_repo_path(hotstrings_file, repo_root),
+                "binding": binding_id,
+                "message": "Generated macOS hotstring has no registered trigger.",
+            })
+
+    for runtime_file in (init_file, actions_file, hotstrings_file):
+        if "hs.timer.usleep" in read_text(runtime_file):
+            issues.append({
+                "type": "macos_blocking_sleep",
+                "file": to_repo_path(runtime_file, repo_root),
+                "message": "Hammerspoon runtime must not block its main event thread with hs.timer.usleep.",
             })
     return issues
 

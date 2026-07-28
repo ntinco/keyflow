@@ -8,6 +8,7 @@ For operational maintenance, use `ai/health-check.summary.json`, `ai/repo-map.js
 Machine-readable governance rules live in `ai/governance.json`.
 Reviewer pass: run `python ai/review_check.py --pretty --summary` after another AI finishes a cycle.
 This guide layer is intentionally dual-role: architect selects or reviews the frontier, and executor implements and validates it. One AI may perform both roles when that is simpler.
+Runtime code and the guide layer are optimized for AI maintenance; human responsibility is intent and runtime acceptance.
 
 ## Architecture
 

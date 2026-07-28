@@ -23,6 +23,7 @@ _FALLBACK_ROLE_PHRASES = (
     "This repository is permanently operated as a dual-role AI-first repo.",
     "The two supported roles are architect and executor.",
     "Write for the next handoff, not for your own memory.",
+    "AI is the primary code maintainer.",
 )
 
 # Fallback current-model phrases used only when governance.json is unavailable or malformed.
@@ -198,6 +199,28 @@ def build_review(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]
                 "type": "governance_dual_role_missing",
                 "file": "ai/governance.json",
                 "message": "governance.json must declare dual_role_repo=true.",
+            }
+        )
+
+    maintenance_model = governance.get("maintenance_model", {})
+    maintenance_model_ok = (
+        isinstance(maintenance_model, dict)
+        and maintenance_model.get("primary_code_maintainer") == "ai"
+        and maintenance_model.get("code_audience") == "ai-maintenance-first"
+        and maintenance_model.get("human_role")
+        == ["intent", "human-owned contracts", "runtime acceptance"]
+    )
+    add_check(
+        "governance-ai-maintenance",
+        maintenance_model_ok,
+        "governance declares AI-first code maintenance and the human acceptance boundary",
+    )
+    if not maintenance_model_ok:
+        issues.append(
+            {
+                "type": "governance_maintenance_model_invalid",
+                "file": "ai/governance.json",
+                "message": "governance maintenance_model is not in the expected AI-first shape.",
             }
         )
 

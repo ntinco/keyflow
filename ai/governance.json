@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "guide_authority": [
     "ai/health-check.summary.json",
     "ai/repo-map.json",
@@ -22,6 +22,21 @@
     "platforms/shared/data/hotkeys.db"
   ],
   "dual_role_repo": true,
+  "maintenance_model": {
+    "primary_code_maintainer": "ai",
+    "human_role": [
+      "intent",
+      "human-owned contracts",
+      "runtime acceptance"
+    ],
+    "optimization_order": [
+      "machine-verifiable contracts",
+      "explicit ownership and routing",
+      "deterministic validation",
+      "minimal code surface"
+    ],
+    "code_audience": "ai-maintenance-first"
+  },
   "required_role_sections": [
     "## Repo identity",
     "## Role rules",
@@ -30,7 +45,8 @@
   "required_role_phrases": [
     "This repository is permanently operated as a dual-role AI-first repo.",
     "The two supported roles are architect and executor.",
-    "Write for the next handoff, not for your own memory."
+    "Write for the next handoff, not for your own memory.",
+    "AI is the primary code maintainer."
   ],
   "required_current_model_phrases": [
     "validate_local_only_contract()"

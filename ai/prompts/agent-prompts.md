@@ -32,6 +32,7 @@ Use [executor-prompt.md](executor-prompt.md) for implementation and validation w
 - `README.md`: architecture and onboarding
 - `ai/`: machine-readable state, governance, review, and continuity
 - Architect/executor: optional roles; one AI may perform both when that is clearer
+- AI maintains code; humans own intent, explicitly human-owned contracts, and runtime acceptance
 
 ## Rule of thumb
 

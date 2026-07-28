@@ -47,6 +47,6 @@ Active catalog: **20 hotkeys** and **6 hotstrings**.
 | Trigger | Context | Action | Implementation | Portability |
 |---|---|---|---|---|
 | `Enter` | snipaste | Copy + paste to targets | windows | windows-only |
-| `F12` | launcher | Paste selected files | windows | portable-intent |
-| `Ctrl+S` | launcher | Save clipboard to selected file | windows | portable-intent |
-| `Alt+P` | launcher | Open selected media | windows | portable-intent |
+| `F12` | launcher | Paste selected files | windows, macos | portable-intent |
+| `Ctrl+S` | launcher | Save clipboard to selected file | windows, macos | portable-intent |
+| `Alt+P` | launcher | Open selected media | windows, macos | portable-intent |

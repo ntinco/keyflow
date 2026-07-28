@@ -24,6 +24,7 @@ Roles are fixed:
 This repository is permanently operated as a dual-role AI-first repo.
 
 - The two supported roles are architect and executor.
+- AI is the primary code maintainer. Humans own intent, explicitly human-owned contracts, and runtime acceptance.
 - A single AI may perform both roles when the task is small, clear, or already covered by `ai/current-plan.md`.
 - If a guide edit weakens handoff clarity between roles, treat that as governance drift and fix it in the same cycle.
 
@@ -65,6 +66,8 @@ Claim discipline:
 
 Guide discipline:
 
+- Optimize runtime code and guides for AI maintenance: machine-verifiable contracts, explicit ownership and routing, deterministic validation, then minimal code surface.
+- Do not add tutorial structure, explanatory wrappers, or comments solely for human readability. Preserve human-facing text only where it supports intent, onboarding, or runtime verification.
 - Replace stale status text; do not append history. `Current model` describes invariants of the present state, not a changelog of what changed.
 - This applies to `ai/current-plan.md` too: it holds current implementation state and pending actions, never a narrated history of bugs found/fixed (that belongs in git commit messages and one-line code comments, not prose).
 - Code comments: only write a comment when the code cannot explain itself — a non-obvious constraint, a rejected alternative, a trap someone would otherwise repeat. Never restate what a function/variable name already says.

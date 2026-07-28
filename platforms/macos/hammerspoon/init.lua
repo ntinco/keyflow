@@ -22,19 +22,20 @@ local function parseAhkKey(ahkKey)
   return mods, key
 end
 
-local CONTEXT_APP_NAMES = {
-  ["sap-eclipse"] = "Eclipse",
-  ["sap-gui-session"] = "SAPGUI",
+local CONTEXT_APPS = {
+  ["launcher"] = {bundleID = "com.raycast.macos", name = "Raycast"},
+  ["sap-eclipse"] = {bundleID = "epp.package.committers", name = "Eclipse"},
+  ["sap-gui-session"] = {bundleID = "com.sap.platin", name = "SAPGUI"},
 }
 
 local hotkeysByApp = {}
-for contextLabel in pairs(CONTEXT_APP_NAMES) do
+for contextLabel in pairs(CONTEXT_APPS) do
   hotkeysByApp[contextLabel] = {}
 end
 
 local loadedCount = 0
 for _, binding in ipairs(bindings) do
-  if binding.type == "hotkey" and CONTEXT_APP_NAMES[binding.contextLabel] then
+  if binding.type == "hotkey" and CONTEXT_APPS[binding.contextLabel] then
     local action = Actions[binding.id]
     if action then
       local mods, key = parseAhkKey(binding.key)
@@ -52,11 +53,14 @@ end
 
 local activeContextLabel
 
+local function matchesApp(app, expected)
+  return app and (app:bundleID() == expected.bundleID or app:name() == expected.name)
+end
+
 local function frontAppContext()
   local front = hs.application.frontmostApplication()
-  local frontAppName = front and front:name()
-  for contextLabel, watchedAppName in pairs(CONTEXT_APP_NAMES) do
-    if frontAppName == watchedAppName then
+  for contextLabel, expectedApp in pairs(CONTEXT_APPS) do
+    if matchesApp(front, expectedApp) then
       return contextLabel
     end
   end
@@ -86,9 +90,9 @@ end
 
 syncHotkeysForFrontApp()
 
-local appWatcher = hs.application.watcher.new(function(appName, eventType)
+local appWatcher = hs.application.watcher.new(function(_, eventType, app)
   if eventType == hs.application.watcher.deactivated
-      and appName == CONTEXT_APP_NAMES["sap-gui-session"] then
+      and matchesApp(app, CONTEXT_APPS["sap-gui-session"]) then
     Actions.cancelSapRun()
   end
   if eventType == hs.application.watcher.activated
