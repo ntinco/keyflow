@@ -5,7 +5,6 @@ local Actions = {}
 
 local APP_BUNDLE_IDS = {
   eclipse = "epp.package.committers",
-  finder = "com.apple.finder",
   iina = "com.colliderli.iina",
   raycast = "com.raycast.macos",
   sap = "com.sap.platin",
@@ -128,62 +127,74 @@ local function parsePaths(value)
   return paths
 end
 
-local function withRaycastPaths(callback)
-  if not isFrontApp(APP_BUNDLE_IDS.raycast) then return end
+local function readClipboardPaths()
+  local paths = {}
+  local seen = {}
+  local urls = hs.pasteboard.readURL(nil, true)
+  if type(urls) == "string" then urls = {urls} end
 
-  local clipboard = captureClipboard()
-  hs.pasteboard.clearContents()
-  hs.pasteboard.callbackWhenChanged(0.75, function(changed)
-    if not changed or not isFrontApp(APP_BUNDLE_IDS.raycast) then
-      restoreClipboard(clipboard)
-      return
+  local function add(path)
+    path = decodePath(path):gsub("^localhost/", "/")
+    if path:sub(1, 1) == "/" and not seen[path] then
+      paths[#paths + 1] = path
+      seen[path] = true
     end
-    callback(parsePaths(hs.pasteboard.getContents()), clipboard, APP_BUNDLE_IDS.raycast)
-  end)
-  hs.eventtap.keyStroke({"cmd", "shift"}, "c")
+  end
+
+  for _, url in ipairs(urls or {}) do add(url) end
+  for _, path in ipairs(parsePaths(hs.pasteboard.getContents())) do add(path) end
+  return paths
 end
 
-local function withSpotlightPaths(callback)
-  if not isFrontApp(APP_BUNDLE_IDS.spotlight) then return end
+local function withCopiedPaths(sourceBundleID, shortcuts, callback)
+  if not isFrontApp(sourceBundleID) then return end
 
   local clipboard = captureClipboard()
-  hs.eventtap.keyStroke({"cmd"}, "r")
-  hs.timer.doAfter(0.35, function()
-    if not isFrontApp(APP_BUNDLE_IDS.finder) then
-      restoreClipboard(clipboard)
-      return
-    end
-    local ok, paths = hs.osascript.applescript([[
-      tell application "Finder"
-        set selectedPaths to {}
-        repeat with selectedItem in selection
-          set end of selectedPaths to POSIX path of (selectedItem as alias)
-        end repeat
-        return selectedPaths
-      end tell
-    ]])
-    if not ok or type(paths) ~= "table" or #paths == 0 then
-      restoreClipboard(clipboard)
-      return
-    end
-    callback(paths, clipboard, APP_BUNDLE_IDS.spotlight)
-  end)
+  local shortcutIndex = 1
+
+  local function copy()
+    hs.pasteboard.clearContents()
+    hs.pasteboard.callbackWhenChanged(0.75, function(changed)
+      if not isFrontApp(sourceBundleID) then
+        restoreClipboard(clipboard)
+        return
+      end
+
+      local paths = changed and readClipboardPaths() or {}
+      if #paths > 0 then
+        callback(paths, clipboard, sourceBundleID)
+      elseif shortcutIndex < #shortcuts then
+        shortcutIndex = shortcutIndex + 1
+        copy()
+      else
+        restoreClipboard(clipboard)
+      end
+    end)
+
+    local shortcut = shortcuts[shortcutIndex]
+    hs.eventtap.keyStroke(shortcut.mods, shortcut.key)
+  end
+
+  copy()
 end
 
 local function withLauncherPaths(callback)
   if isFrontApp(APP_BUNDLE_IDS.raycast) then
-    withRaycastPaths(callback)
+    withCopiedPaths(APP_BUNDLE_IDS.raycast, {
+      {mods = {"cmd", "shift"}, key = "c"},
+    }, callback)
   elseif isFrontApp(APP_BUNDLE_IDS.spotlight) then
-    withSpotlightPaths(callback)
+    withCopiedPaths(APP_BUNDLE_IDS.spotlight, {
+      {mods = {"cmd", "shift"}, key = "c"},
+      {mods = {"cmd"}, key = "c"},
+    }, callback)
   end
 end
 
 local function dismissLauncher(sourceBundleID, callback, clipboard)
-  if sourceBundleID == APP_BUNDLE_IDS.raycast then
+  if sourceBundleID == APP_BUNDLE_IDS.raycast
+      or sourceBundleID == APP_BUNDLE_IDS.spotlight then
     hs.eventtap.keyStroke({}, "escape")
-  elseif sourceBundleID == APP_BUNDLE_IDS.spotlight
-      and isFrontApp(APP_BUNDLE_IDS.finder) then
-    hs.eventtap.keyStroke({"cmd"}, "w")
   else
     restoreClipboard(clipboard)
     return
@@ -191,8 +202,7 @@ local function dismissLauncher(sourceBundleID, callback, clipboard)
 
   hs.timer.doAfter(0.1, function()
     if isFrontApp(APP_BUNDLE_IDS.raycast)
-        or isFrontApp(APP_BUNDLE_IDS.spotlight)
-        or isFrontApp(APP_BUNDLE_IDS.finder) then
+        or isFrontApp(APP_BUNDLE_IDS.spotlight) then
       restoreClipboard(clipboard)
       return
     end

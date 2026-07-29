@@ -6,7 +6,7 @@ Status: in progress
 
 - Eclipse/ADT hotkeys (backtick, F1, F2) and simple hotstrings.
 - SAP GUI hotkeys (Alt+5..0 → Workbench/SE16N/SE37/SE38/SE09/SE80) through the native Target Command Field.
-- Raycast and Spotlight launcher actions: paste selected text files, save clipboard text to the selected file, and open selected media with IINA.
+- Raycast and Spotlight launcher actions resolve selected file URLs through the clipboard to paste text files, save clipboard text, or open media with IINA.
 - Contextual hotkeys are enabled only for the active application. SAP command dispatch is non-blocking and stops if SAP GUI loses focus.
 - Governance declares AI as the primary code maintainer. Health validation rejects missing macOS action/context ownership and blocking Hammerspoon sleeps.
 
@@ -26,4 +26,4 @@ Status: in progress
 
 `hotkeys.db` `action` column holds raw AHK syntax; not transpilable to Lua. `ai/hotkey_sync.py` generates binding metadata only (`generated/bindings.lua`); behavior is hand-authored in `actions.lua`/`hotstrings.lua`, matched by row `id`.
 
-Spotlight resolves its selected result through Finder and therefore requires Hammerspoon automation access to Finder.
+Spotlight copies its selected result directly; no Finder automation dependency is required.
