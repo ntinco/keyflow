@@ -23,9 +23,16 @@ local function parseAhkKey(ahkKey)
 end
 
 local CONTEXT_APPS = {
-  ["launcher"] = {bundleID = "com.raycast.macos", name = "Raycast"},
-  ["sap-eclipse"] = {bundleID = "epp.package.committers", name = "Eclipse"},
-  ["sap-gui-session"] = {bundleID = "com.sap.platin", name = "SAPGUI"},
+  ["launcher"] = {
+    {bundleID = "com.apple.Spotlight", name = "Spotlight"},
+    {bundleID = "com.raycast.macos", name = "Raycast"},
+  },
+  ["sap-eclipse"] = {
+    {bundleID = "epp.package.committers", name = "Eclipse"},
+  },
+  ["sap-gui-session"] = {
+    {bundleID = "com.sap.platin", name = "SAPGUI"},
+  },
 }
 
 local hotkeysByApp = {}
@@ -53,8 +60,14 @@ end
 
 local activeContextLabel
 
-local function matchesApp(app, expected)
-  return app and (app:bundleID() == expected.bundleID or app:name() == expected.name)
+local function matchesApp(app, expectedApps)
+  if not app then return false end
+  for _, expected in ipairs(expectedApps) do
+    if app:bundleID() == expected.bundleID or app:name() == expected.name then
+      return true
+    end
+  end
+  return false
 end
 
 local function frontAppContext()

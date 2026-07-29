@@ -52,15 +52,14 @@
         "public services.sap facade",
         "SAP GUI automation",
         "Eclipse ABAP helpers",
-        "tcode execution",
-        "code-save and quick debug helpers"
+        "tcode execution"
       ]
     },
     {
       "id": "runtime-services",
       "path": "platforms/windows/library/automation/",
       "owns": [
-        "6 registered services exposed as services.*"
+        "registered services exposed as services.*"
       ]
     },
     {
@@ -112,9 +111,6 @@
         "repo-map.json",
         "current-plan.md",
         "agent-prompts.md",
-        "executor-prompt.md",
-        "architect-prompt.md",
-        "planner-prompt.md",
         "governance.json",
         "catalog-review.json"
       ]

@@ -8,15 +8,15 @@ Canonical prompt scaffold for dual-role work in `keyflow` and similar AI-first r
 
 ## 2. Planner role
 
-Use [planner-prompt.md](planner-prompt.md) when a new technical frontier should be identified or a new plan should be written.
+`Read AGENTS.md, ai/repo-map.json, ai/governance.json, ai/health-check.summary.json, and ai/current-plan.md. Act as planner for an AI-maintained codebase: identify the next real frontier, prefer machine-verifiable and minimal solutions, and replace ai/current-plan.md only when a concrete runtime, contract, or workflow hotspot exists. If no technical frontier exists, set the plan to deferred.`
 
 ## 3. Architect role
 
-Use [architect-prompt.md](architect-prompt.md) for frontier review and governance alignment work.
+`Read AGENTS.md, ai/repo-map.json, ai/governance.json, ai/health-check.summary.json, and ai/current-plan.md. Act as architect: review the current frontier, enforce machine-verifiable contracts and explicit ownership, keep governance truthful, and leave ai/current-plan.md executable by another AI. Change runtime code only when the architectural correction requires it.`
 
 ## 4. Executor role
 
-Use [executor-prompt.md](executor-prompt.md) for implementation and validation work.
+`Read AGENTS.md, ai/repo-map.json, ai/governance.json, ai/health-check.summary.json, and ai/current-plan.md. Act as executor and primary code maintainer: make the smallest safe change, prefer deterministic validation and minimal code surface, regenerate health artifacts, and run review_check.py when closing the cycle. If the plan is deferred, report that and stop.`
 
 ## Bootstrap a new AI-first repo
 

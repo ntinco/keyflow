@@ -5,9 +5,11 @@ local Actions = {}
 
 local APP_BUNDLE_IDS = {
   eclipse = "epp.package.committers",
+  finder = "com.apple.finder",
   iina = "com.colliderli.iina",
   raycast = "com.raycast.macos",
   sap = "com.sap.platin",
+  spotlight = "com.apple.Spotlight",
 }
 
 local function isFrontApp(bundleID)
@@ -136,15 +138,61 @@ local function withRaycastPaths(callback)
       restoreClipboard(clipboard)
       return
     end
-    callback(parsePaths(hs.pasteboard.getContents()), clipboard)
+    callback(parsePaths(hs.pasteboard.getContents()), clipboard, APP_BUNDLE_IDS.raycast)
   end)
   hs.eventtap.keyStroke({"cmd", "shift"}, "c")
 end
 
-local function dismissRaycast(callback, clipboard)
-  hs.eventtap.keyStroke({}, "escape")
+local function withSpotlightPaths(callback)
+  if not isFrontApp(APP_BUNDLE_IDS.spotlight) then return end
+
+  local clipboard = captureClipboard()
+  hs.eventtap.keyStroke({"cmd"}, "r")
+  hs.timer.doAfter(0.35, function()
+    if not isFrontApp(APP_BUNDLE_IDS.finder) then
+      restoreClipboard(clipboard)
+      return
+    end
+    local ok, paths = hs.osascript.applescript([[
+      tell application "Finder"
+        set selectedPaths to {}
+        repeat with selectedItem in selection
+          set end of selectedPaths to POSIX path of (selectedItem as alias)
+        end repeat
+        return selectedPaths
+      end tell
+    ]])
+    if not ok or type(paths) ~= "table" or #paths == 0 then
+      restoreClipboard(clipboard)
+      return
+    end
+    callback(paths, clipboard, APP_BUNDLE_IDS.spotlight)
+  end)
+end
+
+local function withLauncherPaths(callback)
+  if isFrontApp(APP_BUNDLE_IDS.raycast) then
+    withRaycastPaths(callback)
+  elseif isFrontApp(APP_BUNDLE_IDS.spotlight) then
+    withSpotlightPaths(callback)
+  end
+end
+
+local function dismissLauncher(sourceBundleID, callback, clipboard)
+  if sourceBundleID == APP_BUNDLE_IDS.raycast then
+    hs.eventtap.keyStroke({}, "escape")
+  elseif sourceBundleID == APP_BUNDLE_IDS.spotlight
+      and isFrontApp(APP_BUNDLE_IDS.finder) then
+    hs.eventtap.keyStroke({"cmd"}, "w")
+  else
+    restoreClipboard(clipboard)
+    return
+  end
+
   hs.timer.doAfter(0.1, function()
-    if isFrontApp(APP_BUNDLE_IDS.raycast) then
+    if isFrontApp(APP_BUNDLE_IDS.raycast)
+        or isFrontApp(APP_BUNDLE_IDS.spotlight)
+        or isFrontApp(APP_BUNDLE_IDS.finder) then
       restoreClipboard(clipboard)
       return
     end
@@ -153,7 +201,7 @@ local function dismissRaycast(callback, clipboard)
 end
 
 Actions.launcher_f12 = function()
-  withRaycastPaths(function(paths, clipboard)
+  withLauncherPaths(function(paths, clipboard, sourceBundleID)
     local contents = {}
     for _, path in ipairs(paths) do
       local extension = path:match("%.([^./]+)$")
@@ -167,14 +215,14 @@ Actions.launcher_f12 = function()
       restoreClipboard(clipboard)
       return
     end
-    dismissRaycast(function()
+    dismissLauncher(sourceBundleID, function()
       pasteText(table.concat(contents), clipboard)
     end, clipboard)
   end)
 end
 
 Actions.launcher_ctrl_s = function()
-  withRaycastPaths(function(paths, clipboard)
+  withLauncherPaths(function(paths, clipboard, sourceBundleID)
     local path = paths[1]
     local file = path and clipboard.text and io.open(path, "wb")
     if not file then
@@ -187,13 +235,14 @@ Actions.launcher_ctrl_s = function()
       restoreClipboard(clipboard)
       return
     end
-    hs.pasteboard.clearContents()
-    hs.eventtap.keyStroke({}, "escape")
+    dismissLauncher(sourceBundleID, function()
+      hs.pasteboard.clearContents()
+    end, clipboard)
   end)
 end
 
 Actions.launcher_alt_p = function()
-  withRaycastPaths(function(paths, clipboard)
+  withLauncherPaths(function(paths, clipboard, sourceBundleID)
     local path = paths[1]
     local lowerPath = path and path:lower() or ""
     if not lowerPath:find("music", 1, true)
@@ -202,10 +251,11 @@ Actions.launcher_alt_p = function()
       restoreClipboard(clipboard)
       return
     end
-    restoreClipboard(clipboard)
-    hs.eventtap.keyStroke({}, "escape")
-    local task = hs.task.new("/usr/bin/open", nil, {"-b", APP_BUNDLE_IDS.iina, path})
-    if task then task:start() end
+    dismissLauncher(sourceBundleID, function()
+      restoreClipboard(clipboard)
+      local task = hs.task.new("/usr/bin/open", nil, {"-b", APP_BUNDLE_IDS.iina, path})
+      if task then task:start() end
+    end, clipboard)
   end)
 end
 

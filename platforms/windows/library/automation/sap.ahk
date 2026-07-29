@@ -89,12 +89,6 @@ class SapService {
     services.windowGroup.activateGroup(appActivationTargets, "apps_sap_windows")
   }
 
-  focusEclipseWindows() {
-    if !(services.HasOwnProp("windowGroup"))
-      return
-    services.windowGroup.activateGroup(appActivationTargets, "apps_sap_eclipse")
-  }
-
   promptAndOpenAbapObject() {
     Send("^+a")
     Sleep(this._resolveOperationDelayMs())
@@ -103,16 +97,6 @@ class SapService {
 
   promptAndSearchAbapObject() {
     Send("^o")
-  }
-
-  _runQuickDebug() {
-    Send("^s")
-    Sleep(this._resolveOperationDelayMs())
-    Send("^+{f2}")
-  }
-
-  startQuickDebug() {
-    this._runQuickDebug()
   }
 
   _normalizeTcodeForSap(tcode) {

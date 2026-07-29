@@ -16,7 +16,7 @@ Runtime code and the guide layer are optimized for AI maintenance; human respons
 platforms/windows/keyflow.ahk
   library/bootstrap.ahk
     library/config/constants-core.ahk
-    library/automation/ (6 services)
+    library/automation/ (services)
   hotkeys/global.ahk
   hotkeys/sap-gui.ahk
   hotkeys/sap-eclipse.ahk
@@ -80,11 +80,12 @@ Local-only files that must never be committed:
 2. Symlink the repo into Hammerspoon's config dir, e.g. `ln -s <repo>/platforms/macos/hammerspoon ~/.hammerspoon/keyflow`.
 3. In `~/.hammerspoon/init.lua`, add: `dofile(hs.configdir .. "/keyflow/init.lua")`.
 4. Reload Hammerspoon and check the console for `keyflow: loaded ... app-scoped hotkey(s), hotstring watcher active`.
+5. Approve Hammerspoon automation access to Finder when a Spotlight launcher action first requests it.
 
 ## Current model
 
 This is a summary; `AGENTS.md` → `Current model` is authoritative for governance-enforced detail.
 
 - Objective counts (services, hotkeys, profiles) live in `ai/health-check.summary.json`.
-- The macOS slice covers SAP GUI, Eclipse/ADT, hotstrings, and Raycast launcher workflows. Contextual hotkeys are active only in their target application, and delayed SAP steps stop when SAP GUI loses focus.
+- The macOS slice covers SAP GUI, Eclipse/ADT, hotstrings, and shared Spotlight/Raycast launcher workflows. Contextual hotkeys are active only in their target application, and delayed SAP steps stop when SAP GUI loses focus.
 - No credential-provider, session-launch, or hotkey-usage-tracking dependency exists in either runtime.

@@ -41,6 +41,5 @@
     "README.md",
     "ai/repo-map.json",
     "ai/health-check.summary.json"
-  ],
-  "next_frontier": "macOS: the Raycast launcher slice is implemented alongside Eclipse/ADT, hotstrings, and SAP GUI; runtime acceptance is pending. Current state and pending actions: ai/current-plan.md."
+  ]
 }

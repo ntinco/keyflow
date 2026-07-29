@@ -106,7 +106,7 @@ EXPECTED_CYCLE_OUTPUTS = {
         "ai/health-check.summary.json",
     ],
     "conditional": {
-        "plan state": "ai/current-plan.md",
+        "plan_state": "ai/current-plan.md",
         "routing": "ai/repo-map.json",
         "policy": "AGENTS.md",
         "architecture": "README.md",
@@ -1347,6 +1347,16 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
     catalog_review_result, catalog_review_issues = validate_catalog_review(repo_root, profiles)
     governance_result, governance_issues = validate_governance_contract(repo_root, repo_map)
     service_contracts, registry_issues, service_call_issues, public_api_candidates = build_service_contracts(registry, class_lookup, file_index)
+    service_call_issues.extend(
+        {
+            "type": "public_service_method_without_caller",
+            "service": candidate["service"],
+            "class": candidate["class"],
+            "methods": candidate["methods"],
+            "message": candidate["reason"],
+        }
+        for candidate in public_api_candidates
+    )
     public_calls = collect_public_service_calls(file_index)
     dead_candidates = detect_dead_candidates(file_index, registry, token_counter)
     unused_assignments = scan_assignment_candidates(repo_root, token_counter)

@@ -12,7 +12,7 @@
       "ai/health-check.summary.json"
     ],
     "conditional": {
-      "plan state": "ai/current-plan.md",
+      "plan_state": "ai/current-plan.md",
       "routing": "ai/repo-map.json",
       "policy": "AGENTS.md",
       "architecture": "README.md"
