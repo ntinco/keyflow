@@ -74,14 +74,14 @@ local function frontAppContext()
   local front = hs.application.frontmostApplication()
   for contextLabel, expectedApp in pairs(CONTEXT_APPS) do
     if matchesApp(front, expectedApp) then
-      return contextLabel
+      return contextLabel, front
     end
   end
-  return nil
+  return nil, front
 end
 
 local function syncHotkeysForFrontApp()
-  local nextContextLabel = frontAppContext()
+  local nextContextLabel, front = frontAppContext()
   if nextContextLabel == activeContextLabel then
     return
   end
@@ -99,6 +99,12 @@ local function syncHotkeysForFrontApp()
   end
 
   activeContextLabel = nextContextLabel
+  hs.printf(
+    "keyflow: front app=%s (%s), active context=%s",
+    front and front:name() or "none",
+    front and front:bundleID() or "none",
+    activeContextLabel or "none"
+  )
 end
 
 syncHotkeysForFrontApp()
