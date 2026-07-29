@@ -10,6 +10,8 @@ package.path = package.path .. ";" .. scriptDir .. "?.lua"
 local bindings = dofile(scriptDir .. "generated/bindings.lua")
 local Actions = dofile(scriptDir .. "actions.lua")
 local Hotstrings = dofile(scriptDir .. "hotstrings.lua")
+local Runtime = {hotkeysByApp = {}}
+package.loaded["keyflow.runtime"] = Runtime
 
 local function parseAhkKey(ahkKey)
   local mods = {}
@@ -35,9 +37,8 @@ local CONTEXT_APPS = {
   },
 }
 
-local hotkeysByApp = {}
 for contextLabel in pairs(CONTEXT_APPS) do
-  hotkeysByApp[contextLabel] = {}
+  Runtime.hotkeysByApp[contextLabel] = {}
 end
 
 local loadedCount = 0
@@ -49,7 +50,7 @@ for _, binding in ipairs(bindings) do
       hs.hotkey.deleteAll(mods, key)
       local hotkey = hs.hotkey.new(mods, key, action)
       if hotkey then
-        table.insert(hotkeysByApp[binding.contextLabel], hotkey)
+        table.insert(Runtime.hotkeysByApp[binding.contextLabel], hotkey)
         loadedCount = loadedCount + 1
       end
     else
@@ -87,13 +88,13 @@ local function syncHotkeysForFrontApp()
   end
 
   if activeContextLabel then
-    for _, hotkey in ipairs(hotkeysByApp[activeContextLabel]) do
+    for _, hotkey in ipairs(Runtime.hotkeysByApp[activeContextLabel]) do
       hotkey:disable()
     end
   end
 
   if nextContextLabel then
-    for _, hotkey in ipairs(hotkeysByApp[nextContextLabel]) do
+    for _, hotkey in ipairs(Runtime.hotkeysByApp[nextContextLabel]) do
       hotkey:enable()
     end
   end
@@ -109,7 +110,7 @@ end
 
 syncHotkeysForFrontApp()
 
-local appWatcher = hs.application.watcher.new(function(_, eventType, app)
+Runtime.appWatcher = hs.application.watcher.new(function(_, eventType, app)
   if eventType == hs.application.watcher.deactivated
       and matchesApp(app, CONTEXT_APPS["sap-gui-session"]) then
     Actions.cancelSapRun()
@@ -119,8 +120,38 @@ local appWatcher = hs.application.watcher.new(function(_, eventType, app)
     hs.timer.doAfter(0, syncHotkeysForFrontApp)
   end
 end)
-appWatcher:start()
+Runtime.appWatcher:start()
 
 Hotstrings.start()
+
+local consoleToolbar = hs.console.toolbar()
+local clearConsoleItem = {
+  id = "keyflowClearConsole",
+  image = hs.image.imageFromName("NSTrashFull"),
+  fn = function() hs.console.clearConsole() end,
+  label = "Clear",
+  tooltip = "Clear Console",
+}
+
+local function includes(values, expected)
+  for _, value in ipairs(values) do
+    if value == expected then return true end
+  end
+  return false
+end
+
+if not includes(consoleToolbar:allowedItems(), clearConsoleItem.id) then
+  consoleToolbar:addItems(clearConsoleItem)
+end
+consoleToolbar:modifyItem(clearConsoleItem)
+consoleToolbar:autosaves(true)
+if not hs.settings.get("keyflow.consoleClearInstalled") then
+  consoleToolbar:insertItem(
+    clearConsoleItem.id,
+    #consoleToolbar:visibleItems() + 1
+  )
+  hs.settings.set("keyflow.consoleClearInstalled", true)
+end
+Runtime.consoleToolbar = consoleToolbar
 
 hs.printf("keyflow: loaded %d app-scoped hotkey(s), hotstring watcher active", loadedCount)

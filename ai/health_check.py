@@ -1187,6 +1187,27 @@ def validate_macos_runtime(repo_root: Path) -> list[dict[str, object]]:
 
     issues: list[dict[str, object]] = []
     text = read_text(init_file)
+    required_runtime_ownership = {
+        'package.loaded["keyflow.runtime"] = Runtime':
+            "Hammerspoon runtime must retain its owned objects across garbage collection.",
+        "Runtime.appWatcher = hs.application.watcher.new":
+            "Hammerspoon application watcher must have an explicit runtime owner.",
+        "Runtime.consoleToolbar = consoleToolbar":
+            "Hammerspoon console toolbar must have an explicit runtime owner.",
+        "consoleToolbar:allowedItems()":
+            "Console toolbar item definition must be idempotent across reloads.",
+        'hs.settings.get("keyflow.consoleClearInstalled")':
+            "Console toolbar installation must persist its idempotency state.",
+    }
+    for contract, message in required_runtime_ownership.items():
+        if contract not in text:
+            issues.append({
+                "type": "macos_runtime_ownership_missing",
+                "file": to_repo_path(init_file, repo_root),
+                "contract": contract,
+                "message": message,
+            })
+
     for include_value in RE_LUA_DOFILE.findall(text):
         target = (macos_dir / include_value).resolve()
         if not target.exists():

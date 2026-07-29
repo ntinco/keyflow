@@ -79,7 +79,7 @@ Local-only files that must never be committed:
 1. Install Hammerspoon.
 2. Symlink the repo into Hammerspoon's config dir, e.g. `ln -s <repo>/platforms/macos/hammerspoon ~/.hammerspoon/keyflow`.
 3. In `~/.hammerspoon/init.lua`, add: `dofile(hs.configdir .. "/keyflow/init.lua")`.
-4. Reload Hammerspoon and check the console for `keyflow: loaded ... app-scoped hotkey(s), hotstring watcher active`.
+4. Reload Hammerspoon and check the console for `keyflow: loaded ... app-scoped hotkey(s), hotstring watcher active`. Keyflow owns the console Clear button.
 
 ## Current model
 

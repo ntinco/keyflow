@@ -8,6 +8,7 @@ Status: in progress
 - SAP GUI hotkeys (Alt+5..0 → Workbench/SE16N/SE37/SE38/SE09/SE80) through the native Target Command Field.
 - Raycast and Spotlight launcher actions resolve selected file URLs through the clipboard to paste text files, save clipboard text, or open media with IINA.
 - Contextual hotkeys are enabled only for the active application. SAP command dispatch is non-blocking and stops if SAP GUI loses focus.
+- The retained macOS runtime owns application watchers, contextual hotkeys, and the idempotent console Clear button.
 - Governance declares AI as the primary code maintainer. Health validation rejects missing macOS action/context ownership and blocking Hammerspoon sleeps.
 
 ## Out of scope for current slices

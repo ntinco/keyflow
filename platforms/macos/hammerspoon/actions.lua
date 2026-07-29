@@ -161,6 +161,13 @@ local function withCopiedPaths(sourceBundleID, shortcuts, callback)
       end
 
       local paths = changed and readClipboardPaths() or {}
+      hs.printf(
+        "keyflow: launcher source=%s copy=%d changed=%s paths=%d",
+        sourceBundleID,
+        shortcutIndex,
+        tostring(changed),
+        #paths
+      )
       if #paths > 0 then
         callback(paths, clipboard, sourceBundleID)
       elseif shortcutIndex < #shortcuts then
@@ -211,6 +218,7 @@ local function dismissLauncher(sourceBundleID, callback, clipboard)
 end
 
 Actions.launcher_f12 = function()
+  hs.printf("keyflow: launcher F12 received")
   withLauncherPaths(function(paths, clipboard, sourceBundleID)
     local contents = {}
     for _, path in ipairs(paths) do
