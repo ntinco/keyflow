@@ -8,7 +8,7 @@ Status: in progress
 - SAP GUI hotkeys (Alt+5..0 → Workbench/SE16N/SE37/SE38/SE09/SE80) through the native Target Command Field.
 - Finder and Spotlight launcher actions share one selected-path flow; Spotlight uses its native Finder reveal command before delegating to it.
 - Alt+P invokes IINA's bundled CLI with the selected media paths, ensuring they are opened for playback instead of only activating IINA.
-- Snipaste Command+F1 and Enter share one macOS capture flow: Command+F1 invokes Snipaste, Enter accepts the capture, ImageMagick resizes supported-target images to 80%, and Teams receives an automatic paste. Windows retains MouseFwd as its platform-specific capture trigger.
+- Snipaste Command+F1 and Enter share one macOS capture flow: Command+F1 invokes Snipaste, Enter accepts the capture, ImageMagick resizes supported-target images to 80%, and Teams receives an automatic paste. MouseFwd on macOS is an adapter that emits Command+F1; Windows retains its platform-specific MouseFwd capture trigger.
 - Contextual hotkeys are enabled only for the active application. Spotlight/Finder keys use focused-element dispatch with passthrough outside the launcher. SAP command dispatch is non-blocking and stops if SAP GUI loses focus.
 - The retained macOS runtime owns application watchers, contextual hotkeys, and the idempotent console Clear button.
 - Governance declares AI as the primary code maintainer. Health validation rejects missing macOS action/context ownership and blocking Hammerspoon sleeps.
@@ -28,7 +28,7 @@ Status: in progress
 2. Human: in Finder and Spotlight, verify F12 with a disposable text file and Alt+P with media below a `Music`, `Audio`, or `Video` path.
 3. Human: launch the Windows runtime once to confirm the regenerated `platforms/windows/data/*.json` profiles still autocorrect/paste and run SAP transactions as before.
 4. Human: on macOS, verify SAP transaction codes run only while SAP GUI is frontmost.
-5. Human: verify Snipaste Command+F1 starts capture and Enter returns the processed image to the originating application; confirm Teams also pastes automatically.
+5. Human: verify Snipaste Command+F1 and MouseFwd start capture, then Enter returns the processed image to the originating application; confirm Teams also pastes automatically.
 
 ## Design constraint
 

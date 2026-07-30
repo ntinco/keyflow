@@ -1194,6 +1194,8 @@ def validate_macos_runtime(repo_root: Path) -> list[dict[str, object]]:
             "Hammerspoon application watcher must have an explicit runtime owner.",
         "Runtime.keyWatcher = hs.eventtap.new":
             "Global and overlay bindings must have an explicit keyboard watcher owner.",
+        "Runtime.mouseWatcher = hs.eventtap.new":
+            "MouseFwd routing must have an explicit mouse watcher owner.",
         "Runtime.consoleToolbar = consoleToolbar":
             "Hammerspoon console toolbar must have an explicit runtime owner.",
         "consoleToolbar:allowedItems()":
@@ -1296,6 +1298,8 @@ def validate_macos_runtime(repo_root: Path) -> list[dict[str, object]]:
             "Alt+P must dispatch selected media through IINA's playback CLI.",
         "Actions.snipasteIsActive":
             "Snipaste overlay dispatch must be scoped to Snipaste.",
+        'hs.eventtap.keyStroke({"cmd"}, "f1")':
+            "The macOS MouseFwd adapter must route capture through Command+F1.",
     }
     combined_runtime_text = text + "\n" + actions_text + "\n" + hotstrings_text
     for contract, message in runtime_contracts.items():
