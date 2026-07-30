@@ -10,9 +10,6 @@ services.snipaste.copyPaste("",snipasteTargets)
 f12::{
 services.launcher.pasteSelectedFiles()
 }
-^s::{
-services.launcher.saveClipboardToSelectedFile()
-}
 !p::{
 services.launcher.openSelectedMedia()
 }

@@ -29,7 +29,7 @@
       "exists": true
     },
     "hotkey_counts": {
-      "platforms/windows/hotkeys/domains/productivity.ahk": 4,
+      "platforms/windows/hotkeys/domains/productivity.ahk": 3,
       "platforms/windows/hotkeys/global.ahk": 6,
       "platforms/windows/hotkeys/sap-eclipse.ahk": 3,
       "platforms/windows/hotkeys/sap-gui.ahk": 7
@@ -63,7 +63,13 @@
     "dead_constant_candidates": []
   },
   "audits": {
-    "unused_assignments": [],
+    "unused_assignments": [
+      {
+        "file": "platforms/windows/library/config/constants-core.ahk",
+        "symbol": "exeXyplorer",
+        "reason": "Assignment appears to be declared but not referenced elsewhere."
+      }
+    ],
     "unused_groups_or_targets": [
       {
         "symbol": "apps_sap_eclipse",
@@ -238,18 +244,15 @@
         "referenced_methods": [
           "dismissLauncherUi",
           "openSelectedMedia",
-          "pasteSelectedFiles",
-          "saveClipboardToSelectedFile"
+          "pasteSelectedFiles"
         ],
         "declared_methods": [
           "_isMediaPath",
           "dismissLauncherUi",
           "openSelectedMedia",
           "pasteSelectedFiles",
-          "saveClipboardToSelectedFile",
           "_readSelectedFiles",
           "_incrementRunCount",
-          "_readSelectedFile",
           "_isPasteableTextFile",
           "_waitAfterPaste"
         ]
@@ -519,7 +522,6 @@
         "calls": [
           "launcher.openSelectedMedia",
           "launcher.pasteSelectedFiles",
-          "launcher.saveClipboardToSelectedFile",
           "snipaste.copyPaste"
         ]
       },

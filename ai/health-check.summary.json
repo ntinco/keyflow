@@ -28,7 +28,7 @@
     "exists": true
   },
   "hotkey_counts": {
-    "platforms/windows/hotkeys/domains/productivity.ahk": 4,
+    "platforms/windows/hotkeys/domains/productivity.ahk": 3,
     "platforms/windows/hotkeys/global.ahk": 6,
     "platforms/windows/hotkeys/sap-eclipse.ahk": 3,
     "platforms/windows/hotkeys/sap-gui.ahk": 7
