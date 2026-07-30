@@ -33,6 +33,8 @@ local SPECIAL_BEHAVIORS = {
 
 local MAX_BUFFER = 64
 local CLIPBOARD_RESTORE_DELAY = 0.5
+local SYNTHETIC_EVENT_MARKER = 926491
+local log = hs.logger.new("keyflow.hotstrings", "warning")
 local buffer = ""
 local eventWatcher
 local clipboardSnapshot
@@ -67,16 +69,18 @@ local function restoreClipboard(snapshot)
   end
 end
 
-local function isDirectText(text)
-  return text:match("^[ -~]+$") ~= nil
+local function postSyntheticKey(modifiers, key)
+  for _, isDown in ipairs({true, false}) do
+    local event = hs.eventtap.event.newKeyEvent(modifiers, key, isDown)
+    event:setProperty(
+      hs.eventtap.event.properties.eventSourceUserData,
+      SYNTHETIC_EVENT_MARKER
+    )
+    event:post()
+  end
 end
 
 local function pasteText(text)
-  if isDirectText(text) then
-    hs.eventtap.keyStrokes(text)
-    return
-  end
-
   if not clipboardSnapshot then
     clipboardSnapshot = captureClipboard()
   end
@@ -85,7 +89,7 @@ local function pasteText(text)
   end
 
   hs.pasteboard.setContents(text)
-  hs.eventtap.keyStroke({"cmd"}, "v")
+  postSyntheticKey({"cmd"}, "v")
 
   clipboardRestoreTimer = hs.timer.doAfter(CLIPBOARD_RESTORE_DELAY, function()
     restoreClipboard(clipboardSnapshot)
@@ -96,20 +100,20 @@ end
 
 local function fireReplacement(trigger, replacement, terminator, visibleCount)
   for _ = 1, visibleCount do
-    hs.eventtap.keyStroke({}, "delete")
+    postSyntheticKey({}, "delete")
   end
   pasteText(replacement .. (terminator or ""))
   if trigger.moveCursorUpAfter then
     hs.timer.doAfter(0.05, function()
-      hs.eventtap.keyStroke({}, "up")
+      postSyntheticKey({}, "up")
     end)
   end
   buffer = ""
 end
 
 local function isSyntheticEvent(event)
-  return event:getProperty(hs.eventtap.event.properties.eventSourceUnixProcessID)
-    == hs.processInfo.processID
+  return event:getProperty(hs.eventtap.event.properties.eventSourceUserData)
+    == SYNTHETIC_EVENT_MARKER
 end
 
 local function triggerMatchesContext(trigger)
@@ -167,7 +171,23 @@ function Hotstrings.start(actions, bindings, profiles)
   end
 
   local triggers = buildTriggers(bindings, profiles)
-  eventWatcher = hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(event)
+  eventWatcher = hs.eventtap.new({
+    hs.eventtap.event.types.keyDown,
+    hs.eventtap.event.types.tapDisabledByTimeout,
+    hs.eventtap.event.types.tapDisabledByUserInput,
+  }, function(event)
+    local eventType = event:getType()
+    if eventType == hs.eventtap.event.types.tapDisabledByTimeout
+      or eventType == hs.eventtap.event.types.tapDisabledByUserInput then
+      log.w("event tap disabled (type " .. eventType .. "); restarting")
+      hs.timer.doAfter(0, function()
+        if eventWatcher then
+          eventWatcher:start()
+        end
+      end)
+      return false
+    end
+
     if isSyntheticEvent(event) then
       return false
     end
@@ -189,7 +209,7 @@ function Hotstrings.start(actions, bindings, profiles)
           local visibleCount = #trigger.pattern - 1
           if trigger.run then
             for _ = 1, visibleCount do
-              hs.eventtap.keyStroke({}, "delete")
+              postSyntheticKey({}, "delete")
             end
             trigger.run(actions)
             buffer = ""
@@ -205,7 +225,7 @@ function Hotstrings.start(actions, bindings, profiles)
             local visibleCount = #trigger.pattern
             if trigger.run then
               for _ = 1, visibleCount do
-                hs.eventtap.keyStroke({}, "delete")
+                postSyntheticKey({}, "delete")
               end
               trigger.run(actions)
               buffer = ""

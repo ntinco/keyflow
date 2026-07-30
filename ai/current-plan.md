@@ -14,8 +14,8 @@ Status: in progress
 - Health validation enforces that `init.lua` loads `generated/hotstring_profiles.lua`, that `hotstrings.lua` consumes it, and that `actions.lua` exposes `Actions.runSapTcode`.
 - macOS replacements consume the matching `keyDown` event and delete only characters already inserted before pasting. This prevents the completing trigger character from surviving a replacement (for example, `nadia` now becomes `Nadia`, not `nadiNadia`).
 - macOS uses a resettable clipboard session for consecutive Unicode or multiline replacements: it captures the user clipboard once, keeps it while expansions are being typed, and restores it only after the last replacement. This prevents delayed clipboard-restoration timers from overwriting a later expansion.
-- Short ASCII replacements use direct synthetic keystrokes instead of `Cmd+V`; this removes clipboard/command-paste queueing during rapid sequences such as `hi hi hi hi hi`. Unicode, accented, and multiline replacements continue to use the clipboard path.
-- The hotstring watcher completes each replacement synchronously and ignores Hammerspoon-injected events by source PID. This prevents synthetic Delete/typing/paste events from feeding back into the trigger buffer, while avoiding deferred edits that could race with rapid physical input.
+- Every replacement uses a single clipboard paste, preserving Unicode and avoiding per-character synthetic typing. A resettable clipboard session captures the original clipboard once and restores it after the last expansion.
+- The watcher completes each replacement synchronously. It tags every synthetic Delete, paste shortcut, and cursor event with `eventSourceUserData` and excludes that marker from the trigger buffer, preventing synthetic events from feeding back during rapid input. Human runtime verification completed 17 consecutive `hi` → `Hi` expansions without a missed trigger.
 
 ## Out of scope for current slices
 
@@ -27,7 +27,7 @@ Status: in progress
 1. Human: confirm SAP/Eclipse context switching remains isolated after the loaded configuration change.
 2. Human: in Finder and Spotlight, verify F12 with a disposable text file, Ctrl+S with a disposable destination file, and Alt+P with media below a `Music`, `Audio`, or `Video` path.
 3. Human: launch the Windows runtime once to confirm the regenerated `platforms/windows/data/*.json` profiles still autocorrect/paste and run SAP transactions as before.
-4. Human: on macOS, load Hammerspoon and verify autocorrect/quick-snippets replace correctly and SAP transaction codes run only while SAP GUI is frontmost.
+4. Human: on macOS, verify SAP transaction codes run only while SAP GUI is frontmost.
 5. Architect: after human verification, evaluate whether `snipaste_enter` has a useful native macOS behavior before reclassifying it.
 
 ## Design constraint
