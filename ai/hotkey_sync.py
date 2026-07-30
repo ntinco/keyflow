@@ -388,8 +388,8 @@ def _lua_str(value: str) -> str:
 def generate_macos_bindings(entries: list[dict[str, object]]) -> str:
     """Emit binding metadata only (id, key/trigger, context, label) for
     entries targeting macos. Actual behavior is hand-authored in
-    platforms/macos/hammerspoon/actions.lua, matched by id — the action
-    column holds raw AHK syntax and cannot be transpiled to Lua."""
+    platforms/macos/hammerspoon/actions.lua, matched by id; the action
+    column is implementation intent and is not transpiled to Lua."""
     active = [
         entry for entry in entries
         if entry["active"] and "macos" in entry["platform"]
