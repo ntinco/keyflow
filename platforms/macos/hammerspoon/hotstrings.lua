@@ -46,7 +46,10 @@ end
 
 local function isFrontSap()
   local front = hs.application.frontmostApplication()
-  return front and front:bundleID() == "com.sap.platin"
+  return front and (
+    front:bundleID() == "com.sap.platin"
+    or front:name() == "SAPGUI"
+  )
 end
 
 local function isImmediatePersonName(trigger, value)
@@ -145,9 +148,9 @@ local function buildTriggers(bindings, profiles)
       local mode = profile.mode
       triggers[#triggers + 1] = {
         pattern = entry.trigger,
-        immediate = entry.immediate or (
-          mode == "replace" and isImmediatePersonName(entry.trigger, value)
-        ),
+        immediate = mode == "sap-command"
+          or entry.immediate
+          or (mode == "replace" and isImmediatePersonName(entry.trigger, value)),
         contextLabel = profile.contextLabel,
         replacement = function()
           return value

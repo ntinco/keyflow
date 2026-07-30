@@ -38,6 +38,14 @@ local function isFrontApp(bundleID)
   return front and front:bundleID() == bundleID
 end
 
+local function isFrontSap()
+  local front = hs.application.frontmostApplication()
+  return front and (
+    front:bundleID() == APP_BUNDLE_IDS.sap
+    or front:name() == "SAPGUI"
+  )
+end
+
 local function focusedApp()
   local ok, app = pcall(function()
     local element = hs.axuielement.systemWideElement()
@@ -117,29 +125,25 @@ function Actions.cancelSapRun()
   sapRunToken = sapRunToken + 1
 end
 
-local function scheduleSapStep(token, delaySeconds, action)
-  hs.timer.doAfter(delaySeconds, function()
-    if token == sapRunToken and isFrontApp(APP_BUNDLE_IDS.sap) then
-      action()
-    end
-  end)
+local function normalizeTcode(tcode)
+  local normalized = tcode:match("^%s*(.-)%s*$")
+  if normalized:sub(1, 1) == "/" then
+    return normalized
+  end
+  return "/n" .. normalized:upper()
 end
 
 local function runTcode(tcode)
-  if not isFrontApp(APP_BUNDLE_IDS.sap) then return end
+  if not isFrontSap() then return end
 
   Actions.cancelSapRun()
   local token = sapRunToken
-
-  hs.eventtap.keyStroke({"cmd", "alt"}, "o")
-  scheduleSapStep(token, 0.3, function()
-    hs.eventtap.keyStroke({"cmd"}, "a")
-    scheduleSapStep(token, 0.05, function()
-      pasteText("/n" .. tcode)
-      scheduleSapStep(token, 0.25, function()
-        hs.eventtap.keyStroke({}, "return")
-      end)
-    end)
+  hs.eventtap.keyStroke({"cmd"}, "a")
+  pasteText(normalizeTcode(tcode))
+  hs.timer.doAfter(0.05, function()
+    if token == sapRunToken and isFrontSap() then
+      hs.eventtap.keyStroke({}, "return")
+    end
   end)
 end
 
