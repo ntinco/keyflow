@@ -88,6 +88,13 @@ for _, binding in ipairs(bindings) do
   end
 end
 
+Runtime.snipasteCaptureHotkey = hs.hotkey.bind(
+  {"cmd"},
+  "f1",
+  Actions.global_mouse_fwd
+)
+loadedCount = loadedCount + 1
+
 local function matchesModifiers(flags, expectedMods)
   local expected = {}
   for _, mod in ipairs(expectedMods) do expected[mod] = true end
