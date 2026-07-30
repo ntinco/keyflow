@@ -167,6 +167,31 @@ local function readClipboardPaths()
   return paths
 end
 
+local function axValue(element, attribute)
+  local ok, value = pcall(element.attributeValue, element, attribute)
+  return ok and value or nil
+end
+
+local function axFilePath(element)
+  for _, attribute in ipairs({"AXURL", "AXDocument", "AXPath"}) do
+    local value = axValue(element, attribute)
+    if type(value) == "string" then
+      local path = decodePath(value):gsub("^localhost/", "/")
+      if path:sub(1, 1) == "/" then return path end
+    end
+  end
+  return nil
+end
+
+local function hasSelectedAncestor(element)
+  local ok, path = pcall(element.path, element)
+  if not ok then return false end
+  for _, ancestor in ipairs(path) do
+    if axValue(ancestor, "AXSelected") == true then return true end
+  end
+  return false
+end
+
 local function withCopiedPaths(sourceBundleID, shortcuts, callback)
   if Actions.launcherSourceBundleID() ~= sourceBundleID then return end
 
@@ -206,6 +231,62 @@ local function withCopiedPaths(sourceBundleID, shortcuts, callback)
   copy()
 end
 
+local spotlightSearch
+
+local function withSpotlightPaths(callback)
+  local app = focusedApp()
+  if not app or app:bundleID() ~= APP_BUNDLE_IDS.spotlight then return end
+
+  local clipboard = captureClipboard()
+  local root = hs.axuielement.applicationElementForPID(app:pid())
+  if not root then
+    restoreClipboard(clipboard)
+    return
+  end
+
+  spotlightSearch = root:elementSearch(
+    function(message, results)
+      spotlightSearch = nil
+      if Actions.launcherSourceBundleID() ~= APP_BUNDLE_IDS.spotlight then
+        restoreClipboard(clipboard)
+        return
+      end
+
+      local candidates = {}
+      local selected = {}
+      local seen = {}
+      for _, element in ipairs(results) do
+        local path = axFilePath(element)
+        if path and not seen[path] then
+          candidates[#candidates + 1] = path
+          seen[path] = true
+          if hasSelectedAncestor(element) then
+            selected[#selected + 1] = path
+          end
+        end
+      end
+
+      local paths = #selected > 0 and selected
+        or (#candidates == 1 and candidates)
+        or {}
+      hs.printf(
+        "keyflow: spotlight ax=%s candidates=%d selected=%d paths=%d",
+        message,
+        #candidates,
+        #selected,
+        #paths
+      )
+      if #paths > 0 then
+        callback(paths, clipboard, APP_BUNDLE_IDS.spotlight)
+      else
+        restoreClipboard(clipboard)
+      end
+    end,
+    function(element) return axFilePath(element) ~= nil end,
+    {depth = 12, count = 100}
+  )
+end
+
 local function withLauncherPaths(callback)
   local sourceBundleID = Actions.launcherSourceBundleID()
   if sourceBundleID == APP_BUNDLE_IDS.raycast then
@@ -213,10 +294,7 @@ local function withLauncherPaths(callback)
       {mods = {"cmd", "shift"}, key = "c"},
     }, callback)
   elseif sourceBundleID == APP_BUNDLE_IDS.spotlight then
-    withCopiedPaths(APP_BUNDLE_IDS.spotlight, {
-      {mods = {"cmd", "shift"}, key = "c"},
-      {mods = {"cmd"}, key = "c"},
-    }, callback)
+    withSpotlightPaths(callback)
   end
 end
 
