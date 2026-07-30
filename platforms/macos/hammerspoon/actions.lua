@@ -143,6 +143,8 @@ local function runTcode(tcode)
   end)
 end
 
+Actions.runSapTcode = runTcode
+
 Actions.sap_gui_alt_5 = function() runTcode("ed") end
 Actions.sap_gui_alt_6 = function() runTcode("se16n") end
 Actions.sap_gui_alt_7 = function() runTcode("se37") end

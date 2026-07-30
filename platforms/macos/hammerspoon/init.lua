@@ -8,6 +8,7 @@ end
 package.path = package.path .. ";" .. scriptDir .. "?.lua"
 
 local bindings = dofile(scriptDir .. "generated/bindings.lua")
+local hotstringProfiles = dofile(scriptDir .. "generated/hotstring_profiles.lua")
 local Actions = dofile(scriptDir .. "actions.lua")
 local Hotstrings = dofile(scriptDir .. "hotstrings.lua")
 local Runtime = {hotkeysByApp = {}}
@@ -163,7 +164,7 @@ Runtime.appWatcher = hs.application.watcher.new(function(_, eventType, app)
 end)
 Runtime.appWatcher:start()
 
-Hotstrings.start()
+Hotstrings.start(Actions, bindings, hotstringProfiles)
 
 local consoleToolbar = hs.console.toolbar()
 local clearConsoleItem = {

@@ -1224,18 +1224,44 @@ def validate_macos_runtime(repo_root: Path) -> list[dict[str, object]]:
     actions_file = macos_dir / "actions.lua"
     hotstrings_file = macos_dir / "hotstrings.lua"
     bindings_file = macos_dir / "generated/bindings.lua"
-    if not all(path.exists() for path in (actions_file, hotstrings_file, bindings_file)):
+    profile_file = macos_dir / "generated/hotstring_profiles.lua"
+    if not all(path.exists() for path in (actions_file, hotstrings_file, bindings_file, profile_file)):
         return issues
 
     actions_text = read_text(actions_file)
     hotstrings_text = read_text(hotstrings_file)
     bindings_text = read_text(bindings_file)
+    profile_text = read_text(profile_file)
     action_ids = set(re.findall(
         r"(?:function\s+Actions\.|Actions\.)([A-Za-z_][A-Za-z0-9_]*)\s*(?:=|\()",
         actions_text,
     ))
-    hotstring_ids = set(re.findall(r'\bid\s*=\s*"([^"]+)"', hotstrings_text))
+    hotstring_ids = set(re.findall(r'^\s*(hs_[A-Za-z0-9_]+)\s*=', hotstrings_text, re.MULTILINE))
     context_labels = set(re.findall(r'^\s*\["([^"]+)"\]\s*=', text, re.MULTILINE))
+    if 'dofile(scriptDir .. "generated/hotstring_profiles.lua")' not in text:
+        issues.append({
+            "type": "macos_hotstring_profiles_not_loaded",
+            "file": to_repo_path(init_file, repo_root),
+            "message": "Hammerspoon must load the generated hotstring profile catalog.",
+        })
+    if "buildTriggers(bindings, profiles)" not in hotstrings_text:
+        issues.append({
+            "type": "macos_hotstring_profiles_not_consumed",
+            "file": to_repo_path(hotstrings_file, repo_root),
+            "message": "Hammerspoon hotstring watcher must consume generated profile data.",
+        })
+    if "Actions.runSapTcode = runTcode" not in actions_text:
+        issues.append({
+            "type": "macos_hotstring_sap_adapter_missing",
+            "file": to_repo_path(actions_file, repo_root),
+            "message": "Hammerspoon must expose the SAP command adapter used by generated hotstring profiles.",
+        })
+    if "return {" not in profile_text:
+        issues.append({
+            "type": "macos_hotstring_profiles_invalid",
+            "file": to_repo_path(profile_file, repo_root),
+            "message": "Generated macOS hotstring profile catalog does not return a Lua table.",
+        })
     bindings = re.findall(
         r'\{id\s*=\s*"([^"]+)",\s*type\s*=\s*"([^"]+)",.*?contextLabel\s*=\s*"([^"]*)"',
         bindings_text,

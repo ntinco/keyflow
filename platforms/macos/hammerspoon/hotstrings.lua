@@ -1,10 +1,10 @@
--- hs.eventtap hotstring watcher. Source: platforms/shared/data/hotkeys.db
+-- hs.eventtap hotstring watcher. Catalog data is generated from
+-- platforms/shared/data/hotkeys.db.
 
 local Hotstrings = {}
 
 local function buildCodeSignature()
-  local user = "NTP"
-  return user .. " " .. os.date("%d.%m.%y")
+  return "NTP " .. os.date("%d.%m.%y")
 end
 
 local function buildCodeCommentLine(symbol)
@@ -13,48 +13,72 @@ end
 
 local function buildCommentMarkup(symbol)
   local signature = buildCodeSignature()
-  local openLine = "*" .. symbol .. "{" .. signature
-  local closeLine = "*" .. symbol .. "}" .. signature
-  return openLine .. "\n\n" .. closeLine
+  return "*" .. symbol .. "{" .. signature .. "\n\n*" .. symbol .. "}" .. signature
 end
 
-local TRIGGERS = {
-  {id = "hs_semicolons",        pattern = ";;", immediate = true,  replacement = function() return "ñ" end},
-  {id = "hs_sap_comment_plus",  pattern = "\"+", immediate = true, replacement = function() return buildCodeCommentLine("+") end},
-  {id = "hs_sap_comment_minus", pattern = "\"-", immediate = true, replacement = function() return buildCodeCommentLine("-") end},
-  {id = "hs_sap_block_plus",    pattern = "*+", immediate = true,  replacement = function() return buildCommentMarkup("+") end, moveCursorUpAfter = true},
-  {id = "hs_sap_block_minus",   pattern = "*-", immediate = true,  replacement = function() return buildCommentMarkup("-") end, moveCursorUpAfter = true},
-  {id = "hs_sp",                pattern = "sp", immediate = false, replacement = function() return "summary in prompt" end},
+local SPECIAL_BEHAVIORS = {
+  hs_semicolons = {replacement = function() return "ñ" end},
+  hs_sap_comment_plus = {replacement = function() return buildCodeCommentLine("+") end},
+  hs_sap_comment_minus = {replacement = function() return buildCodeCommentLine("-") end},
+  hs_sap_block_plus = {
+    replacement = function() return buildCommentMarkup("+") end,
+    moveCursorUpAfter = true,
+  },
+  hs_sap_block_minus = {
+    replacement = function() return buildCommentMarkup("-") end,
+    moveCursorUpAfter = true,
+  },
+  hs_sp = {replacement = function() return "summary in prompt" end},
 }
 
-local MAX_BUFFER = 8
+local MAX_BUFFER = 64
 local buffer = ""
+local eventWatcher
 
 local function isTerminator(char)
   return char:match("%s") ~= nil or char:match("%p") ~= nil
 end
 
--- Must paste via clipboard: keyStrokes() would fire one keyDown per char,
--- which this same watcher observes, causing self-retrigger on patterns
--- that appear inside the pasted text (e.g. "*-" inside a comment block).
+local function isFrontSap()
+  local front = hs.application.frontmostApplication()
+  return front and front:bundleID() == "com.sap.platin"
+end
+
+local function isImmediatePersonName(trigger, value)
+  return trigger:match("^[a-z]+$")
+    and value:match("^[A-Z][a-z]+$")
+end
+
+local function captureClipboard()
+  return {
+    data = hs.pasteboard.readAllData(),
+    text = hs.pasteboard.getContents(),
+  }
+end
+
+local function restoreClipboard(snapshot)
+  if snapshot.data and next(snapshot.data) then
+    hs.pasteboard.writeAllData(snapshot.data)
+  else
+    hs.pasteboard.clearContents()
+  end
+end
+
 local function pasteText(text)
-  local savedClipboard = hs.pasteboard.getContents()
+  local clipboard = captureClipboard()
   hs.pasteboard.setContents(text)
   hs.eventtap.keyStroke({"cmd"}, "v")
   hs.timer.doAfter(0.2, function()
-    if savedClipboard then
-      hs.pasteboard.setContents(savedClipboard)
-    else
-      hs.pasteboard.clearContents()
-    end
+    restoreClipboard(clipboard)
   end)
 end
 
-local function fireTrigger(trigger)
-  for _ = 1, #trigger.pattern do
+local function fireReplacement(trigger, replacement, terminator)
+  local count = #trigger.pattern + (terminator and 1 or 0)
+  for _ = 1, count do
     hs.eventtap.keyStroke({}, "delete")
   end
-  pasteText(trigger.replacement())
+  pasteText(replacement .. (terminator or ""))
   if trigger.moveCursorUpAfter then
     hs.timer.doAfter(0.05, function()
       hs.eventtap.keyStroke({}, "up")
@@ -63,22 +87,61 @@ local function fireTrigger(trigger)
   buffer = ""
 end
 
--- Deletes pattern+1 chars: the terminator char is already on screen
--- (event was let through) by the time this callback runs.
-local function fireTerminatedTrigger(trigger, terminatorChar)
-  for _ = 1, #trigger.pattern + 1 do
-    hs.eventtap.keyStroke({}, "delete")
-  end
-  pasteText(trigger.replacement() .. terminatorChar)
-  buffer = ""
+local function triggerMatchesContext(trigger)
+  return trigger.contextLabel == "global"
+    or trigger.contextLabel == ""
+    or (trigger.contextLabel == "sap-gui-session" and isFrontSap())
 end
 
-local eventWatcher
+local function buildTriggers(bindings, profiles)
+  local triggers = {}
 
-function Hotstrings.start()
+  for _, binding in ipairs(bindings) do
+    local behavior = binding.type == "hotstring" and SPECIAL_BEHAVIORS[binding.id]
+    if behavior then
+      triggers[#triggers + 1] = {
+        id = binding.id,
+        pattern = binding.key,
+        immediate = binding.id ~= "hs_sp",
+        contextLabel = binding.contextLabel,
+        replacement = behavior.replacement,
+        moveCursorUpAfter = behavior.moveCursorUpAfter,
+      }
+    end
+  end
+
+  for _, profile in ipairs(profiles) do
+    for _, entry in ipairs(profile.entries) do
+      local value = entry.value
+      local mode = profile.mode
+      triggers[#triggers + 1] = {
+        pattern = entry.trigger,
+        immediate = entry.immediate or (
+          mode == "replace" and isImmediatePersonName(entry.trigger, value)
+        ),
+        contextLabel = profile.contextLabel,
+        replacement = function()
+          return value
+        end,
+        run = mode == "sap-command" and function(actions)
+          actions.runSapTcode(value)
+        end or nil,
+      }
+    end
+  end
+
+  table.sort(triggers, function(left, right)
+    return #left.pattern > #right.pattern
+  end)
+  return triggers
+end
+
+function Hotstrings.start(actions, bindings, profiles)
   if eventWatcher then
     return
   end
+
+  local triggers = buildTriggers(bindings, profiles)
   eventWatcher = hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(event)
     local chars = event:getCharacters()
     if not chars or chars == "" then
@@ -86,22 +149,38 @@ function Hotstrings.start()
     end
 
     buffer = (buffer .. chars):sub(-MAX_BUFFER)
-
-    for _, trigger in ipairs(TRIGGERS) do
-      if trigger.immediate then
-        if buffer:sub(-#trigger.pattern) == trigger.pattern then
-          fireTrigger(trigger)
+    for _, trigger in ipairs(triggers) do
+      if triggerMatchesContext(trigger) then
+        if trigger.immediate and buffer:sub(-#trigger.pattern) == trigger.pattern then
+          if trigger.run then
+            for _ = 1, #trigger.pattern do
+              hs.eventtap.keyStroke({}, "delete")
+            end
+            trigger.run(actions)
+            buffer = ""
+          else
+            fireReplacement(trigger, trigger.replacement())
+          end
           return false
         end
-      else
-        local withTerminator = trigger.pattern .. chars
-        if isTerminator(chars) and buffer:sub(-#withTerminator) == withTerminator then
-          fireTerminatedTrigger(trigger, chars)
-          return false
+
+        if not trigger.immediate and isTerminator(chars) then
+          local match = trigger.pattern .. chars
+          if buffer:sub(-#match) == match then
+            if trigger.run then
+              for _ = 1, #match do
+                hs.eventtap.keyStroke({}, "delete")
+              end
+              trigger.run(actions)
+              buffer = ""
+            else
+              fireReplacement(trigger, trigger.replacement(), chars)
+            end
+            return false
+          end
         end
       end
     end
-
     return false
   end)
   eventWatcher:start()

@@ -1,11 +1,10 @@
 {
   "format": "hotstring-items-v1",
-  "source": "data/autocorrect.json",
+  "source": "shared/hotkeys.db:autocorrect",
   "items": [
     {
       "trigger": "hi",
-      "value": "Hi",
-      "immediate": false
+      "value": "Hi"
     },
     {
       "trigger": "hola",

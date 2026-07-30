@@ -1,6 +1,6 @@
 {
   "format": "hotstring-items-v1",
-  "source": "data/ymt-commands.json",
+  "source": "shared/hotkeys.db:ymt-commands",
   "items": [
     {
       "trigger": "da",

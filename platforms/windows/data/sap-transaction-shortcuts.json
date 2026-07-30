@@ -1,6 +1,6 @@
 {
   "format": "hotstring-items-v1",
-  "source": "data/sap-transaction-shortcuts.json",
+  "source": "shared/hotkeys.db:sap-transaction-shortcuts",
   "items": [
     {
       "trigger": "z0",

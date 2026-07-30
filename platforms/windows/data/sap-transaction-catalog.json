@@ -1,1016 +1,798 @@
 {
   "format": "hotstring-items-v1",
-  "source": "data/sap-transaction-catalog.json",
-  "_ai_hint": "Items are grouped by SAP module via the module field. See modules for the canonical module index. Runtime loader (hotstring.ahk) only reads trigger and value; extra fields are ignored.",
-  "modules": {
-    "BC": "Basis / Technical (ABAP, Transport, Admin, Security)",
-    "CA": "Cross-Application (Classification, Characteristics)",
-    "CO": "Controlling",
-    "DMS": "Document Management System",
-    "EWM": "Extended Warehouse Management (/SCWM)",
-    "FI": "Financial Accounting",
-    "HCM": "Human Capital Management / HR",
-    "MM": "Materials Management",
-    "OData": "OData / SAP Gateway (IW*)",
-    "PM": "Plant Maintenance",
-    "PP": "Production Planning",
-    "PS": "Project System",
-    "QM": "Quality Management",
-    "SD": "Sales and Distribution",
-    "TM": "Transportation Management (/SCMTMS)",
-    "WF": "Workflow (SWI*, SWU*, SWO*)",
-    "Z": "Custom Z-Transactions"
-  },
+  "source": "shared/hotkeys.db:sap-transaction-catalog",
   "items": [
     {
       "trigger": "cl20n",
-      "value": "cl20n",
-      "module": "CA"
+      "value": "cl20n"
     },
     {
       "trigger": "cl24n",
-      "value": "cl24n",
-      "module": "CA"
+      "value": "cl24n"
     },
     {
       "trigger": "cl02",
-      "value": "cl02",
-      "module": "CA"
+      "value": "cl02"
     },
     {
       "trigger": "ct04",
-      "value": "ct04",
-      "module": "CA"
+      "value": "ct04"
     },
     {
       "trigger": "cv01n",
-      "value": "cv01n",
-      "module": "DMS"
+      "value": "cv01n"
     },
     {
       "trigger": "cv02n",
-      "value": "cv02n",
-      "module": "DMS"
+      "value": "cv02n"
     },
     {
       "trigger": "cv03n",
-      "value": "cv03n",
-      "module": "DMS"
+      "value": "cv03n"
     },
     {
       "trigger": "ppom",
-      "value": "ppom",
-      "module": "HCM"
+      "value": "ppom"
     },
     {
       "trigger": "fb03",
-      "value": "fb03",
-      "module": "FI"
+      "value": "fb03"
     },
     {
       "trigger": "fb05",
-      "value": "fb05",
-      "module": "FI"
+      "value": "fb05"
     },
     {
       "trigger": "fb08",
-      "value": "fb08",
-      "module": "FI"
+      "value": "fb08"
     },
     {
       "trigger": "fbra",
-      "value": "fbra",
-      "module": "FI"
+      "value": "fbra"
     },
     {
       "trigger": "fb60",
-      "value": "fb60",
-      "module": "FI"
+      "value": "fb60"
     },
     {
       "trigger": "ob08",
-      "value": "ob08",
-      "module": "FI"
+      "value": "ob08"
     },
     {
       "trigger": "ob28",
-      "value": "ob28",
-      "module": "FI"
+      "value": "ob28"
     },
     {
       "trigger": "obbh",
-      "value": "obbh",
-      "module": "FI"
+      "value": "obbh"
     },
     {
       "trigger": "ggb1",
-      "value": "ggb1",
-      "module": "FI"
+      "value": "ggb1"
     },
     {
       "trigger": "fmavcr01",
-      "value": "fmavcr01",
-      "module": "FI"
+      "value": "fmavcr01"
     },
     {
       "trigger": "fmct",
-      "value": "fmct",
-      "module": "FI"
+      "value": "fmct"
     },
     {
       "trigger": "fibf",
-      "value": "fibf",
-      "module": "FI"
+      "value": "fibf"
     },
     {
       "trigger": "ckm3n",
-      "value": "ckm3n",
-      "module": "CO"
+      "value": "ckm3n"
     },
     {
       "trigger": "ck13n",
-      "value": "ck13n",
-      "module": "CO"
+      "value": "ck13n"
     },
     {
       "trigger": "co09",
-      "value": "co09",
-      "module": "CO"
+      "value": "co09"
     },
     {
       "trigger": "s_alr_87013558",
-      "value": "s_alr_87013558",
-      "module": "CO"
+      "value": "s_alr_87013558"
     },
     {
       "trigger": "olme",
-      "value": "olme",
-      "module": "MM"
+      "value": "olme"
     },
     {
       "trigger": "mm03",
-      "value": "mm03",
-      "module": "MM"
+      "value": "mm03"
     },
     {
       "trigger": "mb23",
-      "value": "mb23",
-      "module": "MM"
+      "value": "mb23"
     },
     {
       "trigger": "mb52",
-      "value": "mb52",
-      "module": "MM"
+      "value": "mb52"
     },
     {
       "trigger": "me21n",
-      "value": "me21n",
-      "module": "MM"
+      "value": "me21n"
     },
     {
       "trigger": "me22n",
-      "value": "me22n",
-      "module": "MM"
+      "value": "me22n"
     },
     {
       "trigger": "me23n",
-      "value": "me23n",
-      "module": "MM"
+      "value": "me23n"
     },
     {
       "trigger": "me28",
-      "value": "me28",
-      "module": "MM"
+      "value": "me28"
     },
     {
       "trigger": "me29n",
-      "value": "me29n",
-      "module": "MM"
+      "value": "me29n"
     },
     {
       "trigger": "me33k",
-      "value": "me33k",
-      "module": "MM"
+      "value": "me33k"
     },
     {
       "trigger": "me43",
-      "value": "me43",
-      "module": "MM"
+      "value": "me43"
     },
     {
       "trigger": "me52n",
-      "value": "me52n",
-      "module": "MM"
+      "value": "me52n"
     },
     {
       "trigger": "me53n",
-      "value": "me53n",
-      "module": "MM"
+      "value": "me53n"
     },
     {
       "trigger": "me54n",
-      "value": "me54n",
-      "module": "MM"
+      "value": "me54n"
     },
     {
       "trigger": "me2on",
-      "value": "me2on",
-      "module": "MM"
+      "value": "me2on"
     },
     {
       "trigger": "ml81n",
-      "value": "ml81n",
-      "module": "MM"
+      "value": "ml81n"
     },
     {
       "trigger": "migo",
-      "value": "migo",
-      "module": "MM"
+      "value": "migo"
     },
     {
       "trigger": "miro",
-      "value": "miro",
-      "module": "MM"
+      "value": "miro"
     },
     {
       "trigger": "mrbr",
-      "value": "mrbr",
-      "module": "MM"
+      "value": "mrbr"
     },
     {
       "trigger": "mir4",
-      "value": "mir4",
-      "module": "MM"
+      "value": "mir4"
     },
     {
       "trigger": "mir7",
-      "value": "mir7",
-      "module": "MM"
+      "value": "mir7"
     },
     {
       "trigger": "nace",
-      "value": "nace",
-      "module": "MM"
+      "value": "nace"
     },
     {
       "trigger": "va01",
-      "value": "va01",
-      "module": "SD"
+      "value": "va01"
     },
     {
       "trigger": "va02",
-      "value": "va02",
-      "module": "SD"
+      "value": "va02"
     },
     {
       "trigger": "va03",
-      "value": "va03",
-      "module": "SD"
+      "value": "va03"
     },
     {
       "trigger": "vl01n",
-      "value": "vl01n",
-      "module": "SD"
+      "value": "vl01n"
     },
     {
       "trigger": "vl02n",
-      "value": "vl02n",
-      "module": "SD"
+      "value": "vl02n"
     },
     {
       "trigger": "vl03n",
-      "value": "vl03n",
-      "module": "SD"
+      "value": "vl03n"
     },
     {
       "trigger": "vl10a",
-      "value": "vl10a",
-      "module": "SD"
+      "value": "vl10a"
     },
     {
       "trigger": "vl33n",
-      "value": "vl33n",
-      "module": "SD"
+      "value": "vl33n"
     },
     {
       "trigger": "vf01",
-      "value": "vf01",
-      "module": "SD"
+      "value": "vf01"
     },
     {
       "trigger": "vf03",
-      "value": "vf03",
-      "module": "SD"
+      "value": "vf03"
     },
     {
       "trigger": "vf04",
-      "value": "vf04",
-      "module": "SD"
+      "value": "vf04"
     },
     {
       "trigger": "vf11",
-      "value": "vf11",
-      "module": "SD"
+      "value": "vf11"
     },
     {
       "trigger": "idcp",
-      "value": "idcp",
-      "module": "SD"
+      "value": "idcp"
     },
     {
       "trigger": "vofm",
-      "value": "vofm",
-      "module": "SD"
+      "value": "vofm"
     },
     {
       "trigger": "vi03",
-      "value": "vi03",
-      "module": "SD"
+      "value": "vi03"
     },
     {
       "trigger": "vt03n",
-      "value": "vt03n",
-      "module": "SD"
+      "value": "vt03n"
     },
     {
       "trigger": "v/08",
-      "value": "v/08",
-      "module": "SD"
+      "value": "v/08"
     },
     {
       "trigger": "ie03",
-      "value": "ie03",
-      "module": "PM"
+      "value": "ie03"
     },
     {
       "trigger": "ih08",
-      "value": "ih08",
-      "module": "PM"
+      "value": "ih08"
     },
     {
       "trigger": "ik03",
-      "value": "ik03",
-      "module": "PM"
+      "value": "ik03"
     },
     {
       "trigger": "ik11",
-      "value": "ik11",
-      "module": "PM"
+      "value": "ik11"
     },
     {
       "trigger": "ik17",
-      "value": "ik17",
-      "module": "PM"
+      "value": "ik17"
     },
     {
       "trigger": "iw22",
-      "value": "iw22",
-      "module": "PM"
+      "value": "iw22"
     },
     {
       "trigger": "iw23",
-      "value": "iw23",
-      "module": "PM"
+      "value": "iw23"
     },
     {
       "trigger": "iw29",
-      "value": "iw29",
-      "module": "PM"
+      "value": "iw29"
     },
     {
       "trigger": "iw32",
-      "value": "iw32",
-      "module": "PM"
+      "value": "iw32"
     },
     {
       "trigger": "iw33",
-      "value": "iw33",
-      "module": "PM"
+      "value": "iw33"
     },
     {
       "trigger": "iw38",
-      "value": "iw38",
-      "module": "PM"
+      "value": "iw38"
     },
     {
       "trigger": "iw53",
-      "value": "iw53",
-      "module": "PM"
+      "value": "iw53"
     },
     {
       "trigger": "iw69",
-      "value": "iw69",
-      "module": "PM"
+      "value": "iw69"
     },
     {
       "trigger": "cor3",
-      "value": "cor3",
-      "module": "PP"
+      "value": "cor3"
     },
     {
       "trigger": "qe51n",
-      "value": "qe51n",
-      "module": "QM"
+      "value": "qe51n"
     },
     {
       "trigger": "cj9ecp",
-      "value": "cj9ecp",
-      "module": "PS"
+      "value": "cj9ecp"
     },
     {
       "trigger": "cj20n",
-      "value": "cj20n",
-      "module": "PS"
+      "value": "cj20n"
     },
     {
       "trigger": "cjbv",
-      "value": "cjbv",
-      "module": "PS"
+      "value": "cjbv"
     },
     {
       "trigger": "/scwm/mon",
-      "value": "/scwm/mon",
-      "module": "EWM"
+      "value": "/scwm/mon"
     },
     {
       "trigger": "mon",
-      "value": "/n/scwm/mon",
-      "module": "EWM"
+      "value": "/n/scwm/mon"
     },
     {
       "trigger": "/scwm/rfui",
-      "value": "/scwm/rfui",
-      "module": "EWM"
+      "value": "/scwm/rfui"
     },
     {
       "trigger": "rfui",
-      "value": "/n/scwm/rfui",
-      "module": "EWM"
+      "value": "/n/scwm/rfui"
     },
     {
       "trigger": "/scwm/prdi",
-      "value": "/scwm/prdi",
-      "module": "EWM"
+      "value": "/scwm/prdi"
     },
     {
       "trigger": "prdi",
-      "value": "/n/scwm/prdi",
-      "module": "EWM"
+      "value": "/n/scwm/prdi"
     },
     {
       "trigger": "/scwm/prdo",
-      "value": "/scwm/prdo",
-      "module": "EWM"
+      "value": "/scwm/prdo"
     },
     {
       "trigger": "prdo",
-      "value": "/n/scwm/prdo",
-      "module": "EWM"
+      "value": "/n/scwm/prdo"
     },
     {
       "trigger": "/scwm/wave",
-      "value": "/scwm/wave",
-      "module": "EWM"
+      "value": "/scwm/wave"
     },
     {
       "trigger": "wave",
-      "value": "/n/scwm/wave",
-      "module": "EWM"
+      "value": "/n/scwm/wave"
     },
     {
       "trigger": "/scmtms/fre_order",
-      "value": "/scmtms/fre_order",
-      "module": "TM"
+      "value": "/scmtms/fre_order"
     },
     {
       "trigger": "pftc",
-      "value": "pftc",
-      "module": "WF"
+      "value": "pftc"
     },
     {
       "trigger": "swo1",
-      "value": "swo1",
-      "module": "WF"
+      "value": "swo1"
     },
     {
       "trigger": "swus",
-      "value": "swus",
-      "module": "WF"
+      "value": "swus"
     },
     {
       "trigger": "swi1",
-      "value": "swi1",
-      "module": "WF"
+      "value": "swi1"
     },
     {
       "trigger": "swi5",
-      "value": "swi5",
-      "module": "WF"
+      "value": "swi5"
     },
     {
       "trigger": "swpr",
-      "value": "swpr",
-      "module": "WF"
+      "value": "swpr"
     },
     {
       "trigger": "swels",
-      "value": "swels",
-      "module": "WF"
+      "value": "swels"
     },
     {
       "trigger": "swel",
-      "value": "swel",
-      "module": "WF"
+      "value": "swel"
     },
     {
       "trigger": "swu3",
-      "value": "swu3",
-      "module": "WF"
+      "value": "swu3"
     },
     {
       "trigger": "swud",
-      "value": "swud",
-      "module": "WF"
+      "value": "swud"
     },
     {
       "trigger": "swnconfig",
-      "value": "swnconfig",
-      "module": "WF"
+      "value": "swnconfig"
     },
     {
       "trigger": "segw",
-      "value": "segw",
-      "module": "OData"
+      "value": "segw"
     },
     {
       "trigger": "/iwfnd/maint_service",
-      "value": "/iwfnd/maint_service",
-      "module": "OData"
+      "value": "/iwfnd/maint_service"
     },
     {
       "trigger": "/iwfnd/gw_client",
-      "value": "/iwfnd/gw_client",
-      "module": "OData"
+      "value": "/iwfnd/gw_client"
     },
     {
       "trigger": "/iwfnd/traces",
-      "value": "/iwfnd/traces",
-      "module": "OData"
+      "value": "/iwfnd/traces"
     },
     {
       "trigger": "/iwfnd/error_log",
-      "value": "/iwfnd/error_log",
-      "module": "OData"
+      "value": "/iwfnd/error_log"
     },
     {
       "trigger": "/iwfnd/cache_cleanup",
-      "value": "/iwfnd/cache_cleanup",
-      "module": "OData"
+      "value": "/iwfnd/cache_cleanup"
     },
     {
       "trigger": "/iwbep/traces",
-      "value": "/iwbep/traces",
-      "module": "OData"
+      "value": "/iwbep/traces"
     },
     {
       "trigger": "/iwbep/error_log",
-      "value": "/iwbep/error_log",
-      "module": "OData"
+      "value": "/iwbep/error_log"
     },
     {
       "trigger": "/iwbep/cache_cleanup",
-      "value": "/iwbep/cache_cleanup",
-      "module": "OData"
+      "value": "/iwbep/cache_cleanup"
     },
     {
       "trigger": "/iwbep/reg_service",
-      "value": "/iwbep/reg_service",
-      "module": "OData"
+      "value": "/iwbep/reg_service"
     },
     {
       "trigger": "/iwbep/reg_model",
-      "value": "/iwbep/reg_model",
-      "module": "OData"
+      "value": "/iwbep/reg_model"
     },
     {
       "trigger": "spro",
-      "value": "spro",
-      "module": "BC"
+      "value": "spro"
     },
     {
       "trigger": "scpr3",
-      "value": "scpr3",
-      "module": "BC"
+      "value": "scpr3"
     },
     {
       "trigger": "scpr20",
-      "value": "scpr20",
-      "module": "BC"
+      "value": "scpr20"
     },
     {
       "trigger": "scc4",
-      "value": "scc4",
-      "module": "BC"
+      "value": "scc4"
     },
     {
       "trigger": "scc1",
-      "value": "scc1",
-      "module": "BC"
+      "value": "scc1"
     },
     {
       "trigger": "rz10",
-      "value": "rz10",
-      "module": "BC"
+      "value": "rz10"
     },
     {
       "trigger": "rz11",
-      "value": "rz11",
-      "module": "BC"
+      "value": "rz11"
     },
     {
       "trigger": "se09",
-      "value": "se09",
-      "module": "BC"
+      "value": "se09"
     },
     {
       "trigger": "se11",
-      "value": "se11",
-      "module": "BC"
+      "value": "se11"
     },
     {
       "trigger": "se14",
-      "value": "se14",
-      "module": "BC"
+      "value": "se14"
     },
     {
       "trigger": "se16n",
-      "value": "se16n",
-      "module": "BC"
+      "value": "se16n"
     },
     {
       "trigger": "se18",
-      "value": "se18",
-      "module": "BC"
+      "value": "se18"
     },
     {
       "trigger": "se24",
-      "value": "se24",
-      "module": "BC"
+      "value": "se24"
     },
     {
       "trigger": "se38",
-      "value": "se38",
-      "module": "BC"
+      "value": "se38"
     },
     {
       "trigger": "se78",
-      "value": "se78",
-      "module": "BC"
+      "value": "se78"
     },
     {
       "trigger": "se80",
-      "value": "se80",
-      "module": "BC"
+      "value": "se80"
     },
     {
       "trigger": "se91",
-      "value": "se91",
-      "module": "BC"
+      "value": "se91"
     },
     {
       "trigger": "se93",
-      "value": "se93",
-      "module": "BC"
+      "value": "se93"
     },
     {
       "trigger": "so10",
-      "value": "so10",
-      "module": "BC"
+      "value": "so10"
     },
     {
       "trigger": "smartforms",
-      "value": "smartforms",
-      "module": "BC"
+      "value": "smartforms"
     },
     {
       "trigger": "sfp",
-      "value": "sfp",
-      "module": "BC"
+      "value": "sfp"
     },
     {
       "trigger": "/smfnd/forms",
-      "value": "/smfnd/forms",
-      "module": "BC"
+      "value": "/smfnd/forms"
     },
     {
       "trigger": "shdb",
-      "value": "shdb",
-      "module": "BC"
+      "value": "shdb"
     },
     {
       "trigger": "snote",
-      "value": "snote",
-      "module": "BC"
+      "value": "snote"
     },
     {
       "trigger": "snro",
-      "value": "snro",
-      "module": "BC"
+      "value": "snro"
     },
     {
       "trigger": "sqvi",
-      "value": "sqvi",
-      "module": "BC"
+      "value": "sqvi"
     },
     {
       "trigger": "sq01",
-      "value": "sq01",
-      "module": "BC"
+      "value": "sq01"
     },
     {
       "trigger": "sq02",
-      "value": "sq02",
-      "module": "BC"
+      "value": "sq02"
     },
     {
       "trigger": "sq03",
-      "value": "sq03",
-      "module": "BC"
+      "value": "sq03"
     },
     {
       "trigger": "atc",
-      "value": "atc",
-      "module": "BC"
+      "value": "atc"
     },
     {
       "trigger": "atr",
-      "value": "/natc_manage_res",
-      "module": "BC"
+      "value": "/natc_manage_res"
     },
     {
       "trigger": "sat",
-      "value": "sat",
-      "module": "BC"
+      "value": "sat"
     },
     {
       "trigger": "sas",
-      "value": "sas",
-      "module": "BC"
+      "value": "sas"
     },
     {
       "trigger": "saab",
-      "value": "saab",
-      "module": "BC"
+      "value": "saab"
     },
     {
       "trigger": "jdbg",
-      "value": "jdbg",
-      "module": "BC"
+      "value": "jdbg"
     },
     {
       "trigger": "st05",
-      "value": "st05",
-      "module": "BC"
+      "value": "st05"
     },
     {
       "trigger": "st22",
-      "value": "st22",
-      "module": "BC"
+      "value": "st22"
     },
     {
       "trigger": "cmod",
-      "value": "cmod",
-      "module": "BC"
+      "value": "cmod"
     },
     {
       "trigger": "=prfb",
-      "value": "=prfb",
-      "module": "BC"
+      "value": "=prfb"
     },
     {
       "trigger": "stvarv",
-      "value": "stvarv",
-      "module": "BC"
+      "value": "stvarv"
     },
     {
       "trigger": "sm30",
-      "value": "sm30",
-      "module": "BC"
+      "value": "sm30"
     },
     {
       "trigger": "sm34",
-      "value": "sm34",
-      "module": "BC"
+      "value": "sm34"
     },
     {
       "trigger": "scmp",
-      "value": "scmp",
-      "module": "BC"
+      "value": "scmp"
     },
     {
       "trigger": "scu0",
-      "value": "scu0",
-      "module": "BC"
+      "value": "scu0"
     },
     {
       "trigger": "srepo",
-      "value": "srepo",
-      "module": "BC"
+      "value": "srepo"
     },
     {
       "trigger": "stms",
-      "value": "stms",
-      "module": "BC"
+      "value": "stms"
     },
     {
       "trigger": "sm12",
-      "value": "sm12",
-      "module": "BC"
+      "value": "sm12"
     },
     {
       "trigger": "sm13",
-      "value": "sm13",
-      "module": "BC"
+      "value": "sm13"
     },
     {
       "trigger": "sm36",
-      "value": "sm36",
-      "module": "BC"
+      "value": "sm36"
     },
     {
       "trigger": "sm37",
-      "value": "sm37",
-      "module": "BC"
+      "value": "sm37"
     },
     {
       "trigger": "sm50",
-      "value": "sm50",
-      "module": "BC"
+      "value": "sm50"
     },
     {
       "trigger": "sm58",
-      "value": "sm58",
-      "module": "BC"
+      "value": "sm58"
     },
     {
       "trigger": "sm59",
-      "value": "sm59",
-      "module": "BC"
+      "value": "sm59"
     },
     {
       "trigger": "smq1",
-      "value": "smq1",
-      "module": "BC"
+      "value": "smq1"
     },
     {
       "trigger": "smq2",
-      "value": "smq2",
-      "module": "BC"
+      "value": "smq2"
     },
     {
       "trigger": "sbwp",
-      "value": "sbwp",
-      "module": "BC"
+      "value": "sbwp"
     },
     {
       "trigger": "sost",
-      "value": "sost",
-      "module": "BC"
+      "value": "sost"
     },
     {
       "trigger": "sp01",
-      "value": "sp01",
-      "module": "BC"
+      "value": "sp01"
     },
     {
       "trigger": "dbacockpit",
-      "value": "dbacockpit",
-      "module": "BC"
+      "value": "dbacockpit"
     },
     {
       "trigger": "dbco",
-      "value": "dbco",
-      "module": "BC"
+      "value": "dbco"
     },
     {
       "trigger": "soamanager",
-      "value": "soamanager",
-      "module": "BC"
+      "value": "soamanager"
     },
     {
       "trigger": "srtutil",
-      "value": "srtutil",
-      "module": "BC"
+      "value": "srtutil"
     },
     {
       "trigger": "ltmc",
-      "value": "ltmc",
-      "module": "BC"
+      "value": "ltmc"
     },
     {
       "trigger": "ltmom",
-      "value": "ltmom",
-      "module": "BC"
+      "value": "ltmom"
     },
     {
       "trigger": "sicf",
-      "value": "sicf",
-      "module": "BC"
+      "value": "sicf"
     },
     {
       "trigger": "strust",
-      "value": "strust",
-      "module": "BC"
+      "value": "strust"
     },
     {
       "trigger": "smicm",
-      "value": "smicm",
-      "module": "BC"
+      "value": "smicm"
     },
     {
       "trigger": "certrule",
-      "value": "certrule",
-      "module": "BC"
+      "value": "certrule"
     },
     {
       "trigger": "cg3y",
-      "value": "cg3y",
-      "module": "BC"
+      "value": "cg3y"
     },
     {
       "trigger": "cg3z",
-      "value": "cg3z",
-      "module": "BC"
+      "value": "cg3z"
     },
     {
       "trigger": "su3",
-      "value": "su3",
-      "module": "BC"
+      "value": "su3"
     },
     {
       "trigger": "su01",
-      "value": "su01",
-      "module": "BC"
+      "value": "su01"
     },
     {
       "trigger": "su53",
-      "value": "su53",
-      "module": "BC"
+      "value": "su53"
     },
     {
       "trigger": "su21",
-      "value": "su21",
-      "module": "BC"
+      "value": "su21"
     },
     {
       "trigger": "su24",
-      "value": "su24",
-      "module": "BC"
+      "value": "su24"
     },
     {
       "trigger": "suim",
-      "value": "suim",
-      "module": "BC"
+      "value": "suim"
     },
     {
       "trigger": "pfcg",
-      "value": "pfcg",
-      "module": "BC"
+      "value": "pfcg"
     },
     {
       "trigger": "sm20",
-      "value": "sm20",
-      "module": "BC"
+      "value": "sm20"
     },
     {
       "trigger": "/ui2/semobj",
-      "value": "/ui2/semobj",
-      "module": "BC"
+      "value": "/ui2/semobj"
     },
     {
       "trigger": "ymt",
-      "value": "ymt",
-      "module": "Z"
+      "value": "ymt"
     },
     {
       "trigger": "ztim",
-      "value": "ztim",
-      "module": "Z"
+      "value": "ztim"
     },
     {
       "trigger": "zconst",
-      "value": "zconst",
-      "module": "Z"
+      "value": "zconst"
     },
     {
       "trigger": "zal11",
-      "value": "zal11",
-      "module": "Z"
+      "value": "zal11"
     },
     {
       "trigger": "zele",
-      "value": "zele",
-      "module": "Z"
+      "value": "zele"
     }
   ]
 }
