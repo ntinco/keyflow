@@ -63,13 +63,7 @@
     "dead_constant_candidates": []
   },
   "audits": {
-    "unused_assignments": [
-      {
-        "file": "platforms/windows/library/config/constants-core.ahk",
-        "symbol": "exeXyplorer",
-        "reason": "Assignment appears to be declared but not referenced elsewhere."
-      }
-    ],
+    "unused_assignments": [],
     "unused_groups_or_targets": [
       {
         "symbol": "apps_sap_eclipse",

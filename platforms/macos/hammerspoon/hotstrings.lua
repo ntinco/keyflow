@@ -36,6 +36,7 @@ local CLIPBOARD_RESTORE_DELAY = 0.5
 local SYNTHETIC_EVENT_MARKER = 926491
 local log = hs.logger.new("keyflow.hotstrings", "warning")
 local buffer = ""
+local bufferAppPID
 local eventWatcher
 local clipboardSnapshot
 local clipboardRestoreTimer
@@ -119,6 +120,12 @@ local function isSyntheticEvent(event)
     == SYNTHETIC_EVENT_MARKER
 end
 
+local function resetBuffer()
+  buffer = ""
+  local front = hs.application.frontmostApplication()
+  bufferAppPID = front and front:pid() or nil
+end
+
 local function triggerMatchesContext(trigger)
   return trigger.contextLabel == "global"
     or trigger.contextLabel == ""
@@ -176,6 +183,9 @@ function Hotstrings.start(actions, bindings, profiles)
   local triggers = buildTriggers(bindings, profiles)
   eventWatcher = hs.eventtap.new({
     hs.eventtap.event.types.keyDown,
+    hs.eventtap.event.types.leftMouseDown,
+    hs.eventtap.event.types.rightMouseDown,
+    hs.eventtap.event.types.otherMouseDown,
     hs.eventtap.event.types.tapDisabledByTimeout,
     hs.eventtap.event.types.tapDisabledByUserInput,
   }, function(event)
@@ -195,13 +205,27 @@ function Hotstrings.start(actions, bindings, profiles)
       return false
     end
 
+    local front = hs.application.frontmostApplication()
+    local frontPID = front and front:pid() or nil
+    if frontPID ~= bufferAppPID then
+      buffer = ""
+      bufferAppPID = frontPID
+    end
+
+    if eventType ~= hs.eventtap.event.types.keyDown then
+      buffer = ""
+      return false
+    end
+
     local flags = event:getFlags()
     if flags.cmd or flags.ctrl or flags.alt then
+      buffer = ""
       return false
     end
 
     local chars = event:getCharacters()
-    if not chars or chars == "" then
+    if not chars or chars == "" or chars == "\127" or chars == "\b" then
+      buffer = ""
       return false
     end
 
@@ -244,6 +268,8 @@ function Hotstrings.start(actions, bindings, profiles)
   end)
   eventWatcher:start()
 end
+
+Hotstrings.reset = resetBuffer
 
 function Hotstrings.stop()
   if eventWatcher then

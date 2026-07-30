@@ -150,6 +150,10 @@ Actions.rememberLauncherTarget(hs.application.frontmostApplication())
 syncHotkeysForFrontApp()
 
 Runtime.appWatcher = hs.application.watcher.new(function(_, eventType, app)
+  if eventType == hs.application.watcher.activated
+      or eventType == hs.application.watcher.deactivated then
+    Hotstrings.reset()
+  end
   if eventType == hs.application.watcher.deactivated then
     Actions.rememberLauncherTarget(app)
   end

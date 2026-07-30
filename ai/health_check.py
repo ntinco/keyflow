@@ -1266,6 +1266,38 @@ def validate_macos_runtime(repo_root: Path) -> list[dict[str, object]]:
         r'\{id\s*=\s*"([^"]+)",\s*type\s*=\s*"([^"]+)",.*?contextLabel\s*=\s*"([^"]*)"',
         bindings_text,
     )
+    bound_hotkey_ids = {
+        binding_id
+        for binding_id, binding_type, _ in bindings
+        if binding_type == "hotkey"
+    }
+    binding_action_prefixes = ("eclipse_", "launcher_", "sap_gui_")
+    for action_id in sorted(action_ids):
+        if action_id.startswith(binding_action_prefixes) and action_id not in bound_hotkey_ids:
+            issues.append({
+                "type": "macos_action_without_binding",
+                "file": to_repo_path(actions_file, repo_root),
+                "action": action_id,
+                "message": "Hammerspoon action has no generated hotkey binding.",
+            })
+
+    runtime_contracts = {
+        'hs.eventtap.keyStroke({"cmd", "alt"}, "o")':
+            "SAP command dispatch must focus the native command field.",
+        "Hotstrings.reset()":
+            "Application changes must reset the macOS hotstring buffer.",
+        "iina-cli":
+            "Alt+P must dispatch selected media through IINA's playback CLI.",
+    }
+    combined_runtime_text = text + "\n" + actions_text + "\n" + hotstrings_text
+    for contract, message in runtime_contracts.items():
+        if contract not in combined_runtime_text:
+            issues.append({
+                "type": "macos_runtime_contract_missing",
+                "file": to_repo_path(macos_dir, repo_root),
+                "contract": contract,
+                "message": message,
+            })
 
     for binding_id, binding_type, context_label in bindings:
         if binding_type == "hotkey" and binding_id not in action_ids:

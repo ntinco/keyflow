@@ -69,7 +69,6 @@ loadCoreApplicationConstants() {
   exeSwitcheroo := "ahk_exe switcheroo.exe"
   exeWinword := "ahk_exe WINWORD.EXE"
   exeWordpad := "ahk_exe wordpad.exe"
-  exeXyplorer := "ahk_exe XYplorer.exe"
   exeEverything := "ahk_exe Everything64.exe"
   exeFlowlauncher := "ahk_exe Flow.Launcher.exe"
   exeMsTeams := "ahk_exe ms-teams.exe"

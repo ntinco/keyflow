@@ -138,11 +138,21 @@ local function runTcode(tcode)
 
   Actions.cancelSapRun()
   local token = sapRunToken
-  hs.eventtap.keyStroke({"cmd"}, "a")
-  pasteText(normalizeTcode(tcode))
-  hs.timer.doAfter(0.05, function()
+
+  hs.eventtap.keyStroke({"cmd", "alt"}, "o")
+  hs.timer.doAfter(0.3, function()
     if token == sapRunToken and isFrontSap() then
-      hs.eventtap.keyStroke({}, "return")
+      hs.eventtap.keyStroke({"cmd"}, "a")
+      hs.timer.doAfter(0.05, function()
+        if token == sapRunToken and isFrontSap() then
+          pasteText(normalizeTcode(tcode))
+          hs.timer.doAfter(0.25, function()
+            if token == sapRunToken and isFrontSap() then
+              hs.eventtap.keyStroke({}, "return")
+            end
+          end)
+        end
+      end)
     end
   end)
 end
@@ -305,41 +315,28 @@ Actions.launcher_f12 = function()
   end)
 end
 
-Actions.launcher_ctrl_s = function()
-  withLauncherPaths(function(paths, clipboard, targetApp)
-    local path = paths[1]
-    local file = path and clipboard.text and io.open(path, "wb")
-    if not file then
-      restoreClipboard(clipboard)
-      return
-    end
-    local written = file:write(clipboard.text)
-    file:close()
-    if not written then
-      restoreClipboard(clipboard)
-      return
-    end
-    withRestoredTarget(targetApp, clipboard, function()
-      hs.pasteboard.clearContents()
-    end)
-  end)
-end
-
 Actions.launcher_alt_p = function()
-  withLauncherPaths(function(paths, clipboard, targetApp)
-    local path = paths[1]
-    local lowerPath = path and path:lower() or ""
-    if not lowerPath:find("music", 1, true)
-        and not lowerPath:find("audio", 1, true)
-        and not lowerPath:find("video", 1, true) then
+  withLauncherPaths(function(paths, clipboard)
+    local mediaPaths = {}
+    for _, path in ipairs(paths) do
+      local lowerPath = path:lower()
+      if lowerPath:find("music", 1, true)
+          or lowerPath:find("audio", 1, true)
+          or lowerPath:find("video", 1, true) then
+        mediaPaths[#mediaPaths + 1] = path
+      end
+    end
+    if #mediaPaths == 0 then
       restoreClipboard(clipboard)
       return
     end
-    withRestoredTarget(targetApp, clipboard, function()
-      restoreClipboard(clipboard)
-      local task = hs.task.new("/usr/bin/open", nil, {"-b", APP_BUNDLE_IDS.iina, path})
-      if task then task:start() end
-    end)
+    restoreClipboard(clipboard)
+    local appPath = hs.application.pathForBundleID(APP_BUNDLE_IDS.iina)
+    local cliPath = appPath and appPath .. "/Contents/MacOS/iina-cli"
+    local args = {"--no-stdin"}
+    for _, path in ipairs(mediaPaths) do args[#args + 1] = path end
+    local task = cliPath and hs.task.new(cliPath, nil, args)
+    if task then task:start() end
   end)
 end
 
