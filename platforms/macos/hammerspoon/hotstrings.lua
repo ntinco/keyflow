@@ -32,8 +32,11 @@ local SPECIAL_BEHAVIORS = {
 }
 
 local MAX_BUFFER = 64
+local CLIPBOARD_RESTORE_DELAY = 0.5
 local buffer = ""
 local eventWatcher
+local clipboardSnapshot
+local clipboardRestoreTimer
 
 local function isTerminator(char)
   return char:match("%s") ~= nil or char:match("%p") ~= nil
@@ -65,11 +68,20 @@ local function restoreClipboard(snapshot)
 end
 
 local function pasteText(text)
-  local clipboard = captureClipboard()
+  if not clipboardSnapshot then
+    clipboardSnapshot = captureClipboard()
+  end
+  if clipboardRestoreTimer then
+    clipboardRestoreTimer:stop()
+  end
+
   hs.pasteboard.setContents(text)
   hs.eventtap.keyStroke({"cmd"}, "v")
-  hs.timer.doAfter(0.2, function()
-    restoreClipboard(clipboard)
+
+  clipboardRestoreTimer = hs.timer.doAfter(CLIPBOARD_RESTORE_DELAY, function()
+    restoreClipboard(clipboardSnapshot)
+    clipboardSnapshot = nil
+    clipboardRestoreTimer = nil
   end)
 end
 
