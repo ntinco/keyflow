@@ -120,6 +120,21 @@ Runtime.keyWatcher = hs.eventtap.new(
 )
 Runtime.keyWatcher:start()
 
+Runtime.mouseWatcher = hs.eventtap.new({
+  hs.eventtap.event.types.otherMouseDown,
+  hs.eventtap.event.types.otherMouseUp,
+}, function(event)
+  local button = event:getProperty(
+    hs.eventtap.event.properties.mouseEventButtonNumber
+  )
+  if button ~= 4 then return false end
+  if event:getType() == hs.eventtap.event.types.otherMouseDown then
+    Actions.mouseFwd()
+  end
+  return true
+end)
+Runtime.mouseWatcher:start()
+
 local activeContextLabel
 
 local function matchesApp(app, expectedApps)

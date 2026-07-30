@@ -436,6 +436,10 @@ local function resizeSnipasteImage(image, targetApp)
   end)
 end
 
+Actions.mouseFwd = function()
+  hs.eventtap.keyStroke({"cmd"}, "f1")
+end
+
 Actions.global_snipaste_capture = function()
   hs.printf("keyflow: Snipaste Command+F1 received")
   currentSnipasteTarget()
