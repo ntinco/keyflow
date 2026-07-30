@@ -42,22 +42,59 @@ for contextLabel in pairs(CONTEXT_APPS) do
 end
 
 local loadedCount = 0
+local launcherBindings = {}
 for _, binding in ipairs(bindings) do
   if binding.type == "hotkey" and CONTEXT_APPS[binding.contextLabel] then
     local action = Actions[binding.id]
     if action then
       local mods, key = parseAhkKey(binding.key)
-      hs.hotkey.deleteAll(mods, key)
-      local hotkey = hs.hotkey.new(mods, key, action)
-      if hotkey then
-        table.insert(Runtime.hotkeysByApp[binding.contextLabel], hotkey)
+      if binding.contextLabel == "launcher" then
+        launcherBindings[#launcherBindings + 1] = {
+          action = action,
+          keyCode = hs.keycodes.map[key:lower()],
+          mods = mods,
+        }
         loadedCount = loadedCount + 1
+      else
+        hs.hotkey.deleteAll(mods, key)
+        local hotkey = hs.hotkey.new(mods, key, action)
+        if hotkey then
+          table.insert(Runtime.hotkeysByApp[binding.contextLabel], hotkey)
+          loadedCount = loadedCount + 1
+        end
       end
     else
       hs.printf("keyflow: no action registered for binding id '%s'", binding.id)
     end
   end
 end
+
+local function matchesModifiers(flags, expectedMods)
+  local expected = {}
+  for _, mod in ipairs(expectedMods) do expected[mod] = true end
+  for _, mod in ipairs({"cmd", "ctrl", "alt", "shift"}) do
+    if (flags[mod] == true) ~= (expected[mod] == true) then return false end
+  end
+  return true
+end
+
+Runtime.launcherWatcher = hs.eventtap.new(
+  {hs.eventtap.event.types.keyDown},
+  function(event)
+    local flags = event:getFlags()
+    local keyCode = event:getKeyCode()
+    for _, binding in ipairs(launcherBindings) do
+      if keyCode == binding.keyCode
+          and matchesModifiers(flags, binding.mods) then
+        if not Actions.launcherSourceBundleID() then return false end
+        binding.action()
+        return true
+      end
+    end
+    return false
+  end
+)
+Runtime.launcherWatcher:start()
 
 local activeContextLabel
 
@@ -154,4 +191,4 @@ if not hs.settings.get("keyflow.consoleClearInstalled") then
 end
 Runtime.consoleToolbar = consoleToolbar
 
-hs.printf("keyflow: loaded %d app-scoped hotkey(s), hotstring watcher active", loadedCount)
+hs.printf("keyflow: loaded %d contextual binding(s), watchers active", loadedCount)

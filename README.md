@@ -79,12 +79,12 @@ Local-only files that must never be committed:
 1. Install Hammerspoon.
 2. Symlink the repo into Hammerspoon's config dir, e.g. `ln -s <repo>/platforms/macos/hammerspoon ~/.hammerspoon/keyflow`.
 3. In `~/.hammerspoon/init.lua`, add: `dofile(hs.configdir .. "/keyflow/init.lua")`.
-4. Reload Hammerspoon and check the console for `keyflow: loaded ... app-scoped hotkey(s), hotstring watcher active`. Keyflow owns the console Clear button.
+4. Reload Hammerspoon and check the console for `keyflow: loaded ... contextual binding(s), watchers active`. Keyflow owns the console Clear button.
 
 ## Current model
 
 This is a summary; `AGENTS.md` → `Current model` is authoritative for governance-enforced detail.
 
 - Objective counts (services, hotkeys, profiles) live in `ai/health-check.summary.json`.
-- The macOS slice covers SAP GUI, Eclipse/ADT, hotstrings, and shared Spotlight/Raycast launcher workflows. Launcher selections are read as file URLs from the clipboard. Contextual hotkeys are active only in their target application, and delayed SAP steps stop when SAP GUI loses focus.
+- The macOS slice covers SAP GUI, Eclipse/ADT, hotstrings, and shared Spotlight/Raycast launcher workflows. Launcher selections are read as file URLs from the clipboard; overlay keys pass through outside the focused launcher. Contextual hotkeys are active only in their target application, and delayed SAP steps stop when SAP GUI loses focus.
 - No credential-provider, session-launch, or hotkey-usage-tracking dependency exists in either runtime.

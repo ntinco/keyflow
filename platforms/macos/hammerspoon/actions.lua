@@ -16,6 +16,27 @@ local function isFrontApp(bundleID)
   return front and front:bundleID() == bundleID
 end
 
+local function focusedApp()
+  local ok, app = pcall(function()
+    local element = hs.axuielement.systemWideElement()
+      :attributeValue("AXFocusedUIElement")
+    return element
+      and hs.application.applicationForPID(element:pid())
+      or nil
+  end)
+  return ok and app or hs.application.frontmostApplication()
+end
+
+function Actions.launcherSourceBundleID()
+  local app = focusedApp()
+  local bundleID = app and app:bundleID()
+  if bundleID == APP_BUNDLE_IDS.raycast
+      or bundleID == APP_BUNDLE_IDS.spotlight then
+    return bundleID
+  end
+  return nil
+end
+
 local function captureClipboard()
   return {
     data = hs.pasteboard.readAllData(),
@@ -147,7 +168,7 @@ local function readClipboardPaths()
 end
 
 local function withCopiedPaths(sourceBundleID, shortcuts, callback)
-  if not isFrontApp(sourceBundleID) then return end
+  if Actions.launcherSourceBundleID() ~= sourceBundleID then return end
 
   local clipboard = captureClipboard()
   local shortcutIndex = 1
@@ -155,7 +176,7 @@ local function withCopiedPaths(sourceBundleID, shortcuts, callback)
   local function copy()
     hs.pasteboard.clearContents()
     hs.pasteboard.callbackWhenChanged(0.75, function(changed)
-      if not isFrontApp(sourceBundleID) then
+      if Actions.launcherSourceBundleID() ~= sourceBundleID then
         restoreClipboard(clipboard)
         return
       end
@@ -186,11 +207,12 @@ local function withCopiedPaths(sourceBundleID, shortcuts, callback)
 end
 
 local function withLauncherPaths(callback)
-  if isFrontApp(APP_BUNDLE_IDS.raycast) then
+  local sourceBundleID = Actions.launcherSourceBundleID()
+  if sourceBundleID == APP_BUNDLE_IDS.raycast then
     withCopiedPaths(APP_BUNDLE_IDS.raycast, {
       {mods = {"cmd", "shift"}, key = "c"},
     }, callback)
-  elseif isFrontApp(APP_BUNDLE_IDS.spotlight) then
+  elseif sourceBundleID == APP_BUNDLE_IDS.spotlight then
     withCopiedPaths(APP_BUNDLE_IDS.spotlight, {
       {mods = {"cmd", "shift"}, key = "c"},
       {mods = {"cmd"}, key = "c"},
@@ -208,8 +230,7 @@ local function dismissLauncher(sourceBundleID, callback, clipboard)
   end
 
   hs.timer.doAfter(0.1, function()
-    if isFrontApp(APP_BUNDLE_IDS.raycast)
-        or isFrontApp(APP_BUNDLE_IDS.spotlight) then
+    if Actions.launcherSourceBundleID() then
       restoreClipboard(clipboard)
       return
     end
