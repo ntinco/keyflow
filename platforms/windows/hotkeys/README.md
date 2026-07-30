@@ -18,7 +18,7 @@ Active catalog: **19 hotkeys** and **6 hotstrings**.
 | `Alt+E` | global | Activate SAP workspace group | windows | windows-only |
 | `Alt+D` | global | Activate IDE group | windows | windows-only |
 | `Win+Esc` | global | Resize window height | windows | windows-only |
-| `MouseFwd` | global | Snipaste screenshot (PrintScreen) | windows | windows-only |
+| `MouseFwd` | global | Snipaste screenshot (PrintScreen) | windows, macos | portable-intent |
 | `Ctrl+Alt+Shift+A` | global | Reload AHK script | windows | windows-only |
 | `Ctrl+C` | global | Snipaste smart copy handler | windows | windows-only |
 
@@ -46,6 +46,6 @@ Active catalog: **19 hotkeys** and **6 hotstrings**.
 
 | Trigger | Context | Action | Implementation | Portability |
 |---|---|---|---|---|
-| `Enter` | snipaste | Copy + paste to targets | windows | windows-only |
+| `Enter` | snipaste | Copy + paste to targets | windows, macos | portable-intent |
 | `F12` | launcher | Paste selected files | windows, macos | portable-intent |
 | `Alt+P` | launcher | Open selected media | windows, macos | portable-intent |

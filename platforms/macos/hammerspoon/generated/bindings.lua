@@ -7,6 +7,7 @@ return {
   {id = "eclipse_backtick", type = "hotkey", key = "`", contextLabel = "sap-eclipse", label = "Prompt and open ABAP object"},
   {id = "eclipse_f1", type = "hotkey", key = "f1", contextLabel = "sap-eclipse", label = "Search ABAP object"},
   {id = "eclipse_f2", type = "hotkey", key = "f2", contextLabel = "sap-eclipse", label = "Rename"},
+  {id = "global_mouse_fwd", type = "hotkey", key = "xbutton2", contextLabel = "global", label = "Snipaste screenshot (PrintScreen)"},
   {id = "hs_sap_block_minus", type = "hotstring", key = "*-", contextLabel = "", label = "SAP insert comment block (-)"},
   {id = "hs_sap_block_plus", type = "hotstring", key = "*+", contextLabel = "", label = "SAP insert comment block (+)"},
   {id = "hs_sap_comment_minus", type = "hotstring", key = "\"-", contextLabel = "", label = "SAP insert comment line (-)"},
@@ -21,4 +22,5 @@ return {
   {id = "sap_gui_alt_7", type = "hotkey", key = "!7", contextLabel = "sap-gui-session", label = "SE37 function modules"},
   {id = "sap_gui_alt_8", type = "hotkey", key = "!8", contextLabel = "sap-gui-session", label = "SE38 ABAP editor"},
   {id = "sap_gui_alt_9", type = "hotkey", key = "!9", contextLabel = "sap-gui-session", label = "SE09 transport organizer"},
+  {id = "snipaste_enter", type = "hotkey", key = "~enter", contextLabel = "snipaste", label = "Copy + paste to targets"},
 }

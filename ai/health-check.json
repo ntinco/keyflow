@@ -12,7 +12,7 @@
       "windows"
     ],
     "profiles": {
-      "autocorrect": 434,
+      "autocorrect": 430,
       "quick-snippets": 15,
       "sap-transaction-shortcuts": 19,
       "sap-transaction-catalog": 198,
@@ -355,7 +355,7 @@
         "exists": true,
         "json_valid": true,
         "has_items_array": true,
-        "item_count": 434
+        "item_count": 430
       },
       {
         "label": "quick-snippets",

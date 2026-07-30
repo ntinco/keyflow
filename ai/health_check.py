@@ -1192,8 +1192,10 @@ def validate_macos_runtime(repo_root: Path) -> list[dict[str, object]]:
             "Hammerspoon runtime must retain its owned objects across garbage collection.",
         "Runtime.appWatcher = hs.application.watcher.new":
             "Hammerspoon application watcher must have an explicit runtime owner.",
-        "Runtime.launcherWatcher = hs.eventtap.new":
+        "Runtime.overlayWatcher = hs.eventtap.new":
             "Overlay launcher bindings must have an explicit passthrough watcher owner.",
+        "Runtime.mouseWatcher = hs.eventtap.new":
+            "Portable mouse bindings must have an explicit runtime owner.",
         "Runtime.consoleToolbar = consoleToolbar":
             "Hammerspoon console toolbar must have an explicit runtime owner.",
         "consoleToolbar:allowedItems()":
@@ -1271,7 +1273,13 @@ def validate_macos_runtime(repo_root: Path) -> list[dict[str, object]]:
         for binding_id, binding_type, _ in bindings
         if binding_type == "hotkey"
     }
-    binding_action_prefixes = ("eclipse_", "launcher_", "sap_gui_")
+    binding_action_prefixes = (
+        "eclipse_",
+        "global_",
+        "launcher_",
+        "sap_gui_",
+        "snipaste_",
+    )
     for action_id in sorted(action_ids):
         if action_id.startswith(binding_action_prefixes) and action_id not in bound_hotkey_ids:
             issues.append({
@@ -1288,6 +1296,10 @@ def validate_macos_runtime(repo_root: Path) -> list[dict[str, object]]:
             "Application changes must reset the macOS hotstring buffer.",
         "iina-cli":
             "Alt+P must dispatch selected media through IINA's playback CLI.",
+        "Actions.snipasteIsActive":
+            "Snipaste overlay dispatch must be scoped to Snipaste.",
+        "mouseEventButtonNumber":
+            "Portable mouse bindings must dispatch by explicit button number.",
     }
     combined_runtime_text = text + "\n" + actions_text + "\n" + hotstrings_text
     for contract, message in runtime_contracts.items():
@@ -1307,7 +1319,11 @@ def validate_macos_runtime(repo_root: Path) -> list[dict[str, object]]:
                 "binding": binding_id,
                 "message": "Generated macOS hotkey has no registered action.",
             })
-        if binding_type == "hotkey" and context_label not in context_labels:
+        if (
+            binding_type == "hotkey"
+            and context_label != "global"
+            and context_label not in context_labels
+        ):
             issues.append({
                 "type": "macos_context_missing",
                 "file": to_repo_path(init_file, repo_root),

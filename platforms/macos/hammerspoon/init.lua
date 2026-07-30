@@ -17,6 +17,7 @@ package.loaded["keyflow.runtime"] = Runtime
 local function parseAhkKey(ahkKey)
   local mods = {}
   local key = ahkKey
+  key = key:gsub("^~", "")
   local prefixMap = {["^"] = "ctrl", ["+"] = "shift", ["!"] = "alt", ["#"] = "cmd"}
   while #key > 0 and prefixMap[key:sub(1, 1)] do
     table.insert(mods, prefixMap[key:sub(1, 1)])
@@ -36,6 +37,9 @@ local CONTEXT_APPS = {
   ["sap-gui-session"] = {
     {bundleID = "com.sap.platin", name = "SAPGUI"},
   },
+  ["snipaste"] = {
+    {bundleID = "com.Snipaste", name = "Snipaste"},
+  },
 }
 
 for contextLabel in pairs(CONTEXT_APPS) do
@@ -43,24 +47,38 @@ for contextLabel in pairs(CONTEXT_APPS) do
 end
 
 local loadedCount = 0
-local launcherBindings = {}
+local overlayBindings = {}
+local mouseBindings = {}
+local MOUSE_BUTTONS = {xbutton1 = 3, xbutton2 = 4}
 for _, binding in ipairs(bindings) do
-  if binding.type == "hotkey" and CONTEXT_APPS[binding.contextLabel] then
+  if binding.type == "hotkey"
+      and (binding.contextLabel == "global" or CONTEXT_APPS[binding.contextLabel]) then
     local action = Actions[binding.id]
     if action then
       local mods, key = parseAhkKey(binding.key)
-      if binding.contextLabel == "launcher" then
-        launcherBindings[#launcherBindings + 1] = {
+      local mouseButton = MOUSE_BUTTONS[key:lower()]
+      if mouseButton then
+        mouseBindings[mouseButton] = action
+        loadedCount = loadedCount + 1
+      elseif binding.contextLabel == "launcher"
+          or binding.contextLabel == "snipaste" then
+        overlayBindings[#overlayBindings + 1] = {
           action = action,
+          contextLabel = binding.contextLabel,
           keyCode = hs.keycodes.map[key:lower()],
           mods = mods,
+          passthrough = binding.key:sub(1, 1) == "~",
         }
         loadedCount = loadedCount + 1
       else
         hs.hotkey.deleteAll(mods, key)
         local hotkey = hs.hotkey.new(mods, key, action)
         if hotkey then
-          table.insert(Runtime.hotkeysByApp[binding.contextLabel], hotkey)
+          if binding.contextLabel == "global" then
+            hotkey:enable()
+          else
+            table.insert(Runtime.hotkeysByApp[binding.contextLabel], hotkey)
+          end
           loadedCount = loadedCount + 1
         end
       end
@@ -79,23 +97,44 @@ local function matchesModifiers(flags, expectedMods)
   return true
 end
 
-Runtime.launcherWatcher = hs.eventtap.new(
+local function overlayIsActive(contextLabel)
+  if contextLabel == "launcher" then
+    return Actions.launcherSourceBundleID() ~= nil
+  end
+  return contextLabel == "snipaste" and Actions.snipasteIsActive()
+end
+
+Runtime.overlayWatcher = hs.eventtap.new(
   {hs.eventtap.event.types.keyDown},
   function(event)
     local flags = event:getFlags()
     local keyCode = event:getKeyCode()
-    for _, binding in ipairs(launcherBindings) do
+    for _, binding in ipairs(overlayBindings) do
       if keyCode == binding.keyCode
           and matchesModifiers(flags, binding.mods) then
-        if not Actions.launcherSourceBundleID() then return false end
+        if not overlayIsActive(binding.contextLabel) then return false end
         binding.action()
-        return true
+        return not binding.passthrough
       end
     end
     return false
   end
 )
-Runtime.launcherWatcher:start()
+Runtime.overlayWatcher:start()
+
+Runtime.mouseWatcher = hs.eventtap.new({
+  hs.eventtap.event.types.otherMouseDown,
+  hs.eventtap.event.types.otherMouseUp,
+}, function(event)
+  local button = event:getProperty(
+    hs.eventtap.event.properties.mouseEventButtonNumber
+  )
+  local action = mouseBindings[button]
+  if not action then return false end
+  if event:getType() == hs.eventtap.event.types.otherMouseDown then action() end
+  return true
+end)
+Runtime.mouseWatcher:start()
 
 local activeContextLabel
 

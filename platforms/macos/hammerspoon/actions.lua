@@ -8,10 +8,26 @@ local APP_BUNDLE_IDS = {
   finder = "com.apple.finder",
   iina = "com.colliderli.iina",
   sap = "com.sap.platin",
+  snipaste = "com.Snipaste",
   spotlight = "com.apple.Spotlight",
 }
 
+local SNIPASTE_RESIZE_TARGETS = {
+  ["com.microsoft.onenote.mac"] = true,
+  ["com.microsoft.teams2"] = true,
+  ["com.microsoft.Outlook"] = true,
+  ["md.obsidian"] = true,
+  ["net.whatsapp.WhatsApp"] = true,
+  ["notion.id"] = true,
+  ["org.libreoffice.script"] = true,
+}
+
+local SNIPASTE_PASTE_TARGETS = {
+  ["com.microsoft.teams2"] = true,
+}
+
 local launcherTargetApp
+local snipasteTargetApp
 
 local function isLauncherApp(app)
   local bundleID = app and app:bundleID()
@@ -65,6 +81,19 @@ function Actions.launcherSourceBundleID()
     return bundleID
   end
   return nil
+end
+
+function Actions.snipasteIsActive()
+  local app = focusedApp()
+  return app and app:bundleID() == APP_BUNDLE_IDS.snipaste
+end
+
+local function currentSnipasteTarget()
+  local front = hs.application.frontmostApplication()
+  if front and front:bundleID() ~= APP_BUNDLE_IDS.snipaste then
+    snipasteTargetApp = front
+  end
+  return snipasteTargetApp
 end
 
 local function captureClipboard()
@@ -338,6 +367,111 @@ Actions.launcher_alt_p = function()
     local task = cliPath and hs.task.new(cliPath, nil, args)
     if task then task:start() end
   end)
+end
+
+local magickPath
+local snipasteRunToken = 0
+
+local function withMagick(callback)
+  if magickPath then
+    callback(magickPath)
+    return
+  end
+  local task = hs.task.new("/bin/zsh", function(exitCode, output)
+    local path = exitCode == 0 and output:match("^%s*(.-)%s*$") or ""
+    if path ~= "" then magickPath = path end
+    callback(magickPath)
+  end, {"-lc", "command -v magick"})
+  if task then
+    task:start()
+  else
+    callback(nil)
+  end
+end
+
+local function completeSnipaste(targetApp)
+  if not targetApp then return end
+  targetApp:activate()
+  if SNIPASTE_PASTE_TARGETS[targetApp:bundleID()] then
+    hs.timer.doAfter(0.15, function()
+      hs.eventtap.keyStroke({"cmd"}, "v", 200000, targetApp)
+    end)
+  end
+end
+
+local function resizeSnipasteImage(image, targetApp)
+  if not targetApp or not SNIPASTE_RESIZE_TARGETS[targetApp:bundleID()] then
+    completeSnipaste(targetApp)
+    return
+  end
+
+  withMagick(function(executable)
+    local temporaryDirectory = hs.fs.temporaryDirectory()
+    local token = tostring(hs.timer.absoluteTime())
+    local inputPath = temporaryDirectory .. "keyflow-snipaste-" .. token .. ".png"
+    local outputPath = temporaryDirectory .. "keyflow-snipaste-" .. token .. "-80.png"
+    if not executable or not image:saveToFile(inputPath, true, "png") then
+      hs.printf("keyflow: Snipaste ImageMagick unavailable")
+      completeSnipaste(targetApp)
+      return
+    end
+
+    local task = hs.task.new(executable, function(exitCode)
+      local resized = exitCode == 0 and hs.image.imageFromPath(outputPath) or nil
+      if resized then
+        hs.pasteboard.writeObjects(resized)
+      else
+        hs.printf("keyflow: Snipaste ImageMagick failed (%d)", exitCode)
+      end
+      os.remove(inputPath)
+      os.remove(outputPath)
+      completeSnipaste(targetApp)
+    end, {inputPath, "-resize", "80%", outputPath})
+    if not task or not task:start() then
+      os.remove(inputPath)
+      os.remove(outputPath)
+      hs.printf("keyflow: Snipaste ImageMagick task did not start")
+      completeSnipaste(targetApp)
+    end
+  end)
+end
+
+Actions.global_mouse_fwd = function()
+  currentSnipasteTarget()
+  local appPath = hs.application.pathForBundleID(APP_BUNDLE_IDS.snipaste)
+  local executable = appPath and appPath .. "/Contents/MacOS/Snipaste"
+  local task = executable and hs.task.new(executable, nil, {"snip"})
+  if not task or not task:start() then
+    hs.printf("keyflow: Snipaste capture did not start")
+  end
+end
+
+Actions.snipaste_enter = function()
+  if not Actions.snipasteIsActive() then return end
+
+  local targetApp = currentSnipasteTarget()
+  local initialChangeCount = hs.pasteboard.changeCount()
+  snipasteRunToken = snipasteRunToken + 1
+  local token = snipasteRunToken
+  local attempts = 0
+
+  local function readCapture()
+    if token ~= snipasteRunToken then return end
+    attempts = attempts + 1
+    if hs.pasteboard.changeCount() ~= initialChangeCount then
+      local image = hs.pasteboard.readImage()
+      if image then
+        resizeSnipasteImage(image, targetApp)
+        return
+      end
+    end
+    if attempts < 30 then
+      hs.timer.doAfter(0.1, readCapture)
+    else
+      hs.printf("keyflow: Snipaste capture timed out")
+    end
+  end
+  hs.timer.doAfter(0.1, readCapture)
 end
 
 return Actions

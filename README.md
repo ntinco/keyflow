@@ -86,5 +86,5 @@ Local-only files that must never be committed:
 This is a summary; `AGENTS.md` → `Current model` is authoritative for governance-enforced detail.
 
 - Objective counts (services, hotkeys, profiles) live in `ai/health-check.summary.json`.
-- The macOS slice covers SAP GUI, Eclipse/ADT, hotstrings, and a shared Finder/Spotlight launcher workflow. Spotlight delegates through its native Finder reveal command; direct Finder actions use the same selected-path flow, then restore the captured target application. Alt+P sends selected media to IINA's bundled CLI. Overlay keys pass through outside the focused launcher. Contextual hotkeys are active only in their target application, and delayed SAP steps stop when SAP GUI loses focus.
+- The macOS slice covers SAP GUI, Eclipse/ADT, hotstrings, Finder/Spotlight launcher actions, and Snipaste capture handoff. Spotlight delegates through Finder, Alt+P sends selected media to IINA's bundled CLI, and Snipaste Enter/MouseFwd share an ImageMagick-backed clipboard flow. Overlay keys pass through outside their focused UI. Contextual hotkeys are active only in their target application, and delayed SAP steps stop when SAP GUI loses focus.
 - No credential-provider, session-launch, or hotkey-usage-tracking dependency exists in either runtime.

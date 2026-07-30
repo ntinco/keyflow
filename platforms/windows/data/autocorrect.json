@@ -3,10 +3,6 @@
   "source": "shared/hotkeys.db:autocorrect",
   "items": [
     {
-      "trigger": "hi",
-      "value": "Hi"
-    },
-    {
       "trigger": "hola",
       "value": "Hola"
     },
@@ -693,18 +689,6 @@
     {
       "trigger": "papa",
       "value": "papá"
-    },
-    {
-      "trigger": "bd",
-      "value": "Buen día"
-    },
-    {
-      "trigger": "bt",
-      "value": "Buenas tardes"
-    },
-    {
-      "trigger": "bn",
-      "value": "Buenas noches"
     },
     {
       "trigger": "accion",

@@ -8,10 +8,11 @@ Status: in progress
 - SAP GUI hotkeys (Alt+5..0 → Workbench/SE16N/SE37/SE38/SE09/SE80) through the native Target Command Field.
 - Finder and Spotlight launcher actions share one selected-path flow; Spotlight uses its native Finder reveal command before delegating to it.
 - Alt+P invokes IINA's bundled CLI with the selected media paths, ensuring they are opened for playback instead of only activating IINA.
+- Snipaste Enter and MouseFwd share one macOS capture flow: MouseFwd invokes Snipaste, Enter accepts the capture, ImageMagick resizes supported-target images to 80%, and Teams receives an automatic paste.
 - Contextual hotkeys are enabled only for the active application. Spotlight/Finder keys use focused-element dispatch with passthrough outside the launcher. SAP command dispatch is non-blocking and stops if SAP GUI loses focus.
 - The retained macOS runtime owns application watchers, contextual hotkeys, and the idempotent console Clear button.
 - Governance declares AI as the primary code maintainer. Health validation rejects missing macOS action/context ownership and blocking Hammerspoon sleeps.
-- `hotkeys.db` owns `hotstring_profiles`/`hotstring_entries` (autocorrect, quick-snippets, sap-transaction-shortcuts, sap-transaction-catalog, ymt-commands: 672 entries total). `ai/hotkey_sync.py --sync` regenerates the Windows `platforms/windows/data/*.json` profiles and `platforms/macos/hammerspoon/generated/hotstring_profiles.lua` from this single source. `hotstrings.lua` consumes the generated profile catalog (`replace` mode pastes text; `sap-command` mode calls `Actions.runSapTcode`, scoped to `sap-gui-session`); only the six special-behavior hotstrings (`hs_semicolons`, `hs_sap_comment_plus/minus`, `hs_sap_block_plus/minus`, `hs_sp`) remain hand-matched by id.
+- `hotkeys.db` owns `hotstring_profiles`/`hotstring_entries`; `ai/hotkey_sync.py --sync` regenerates the Windows JSON profiles and macOS Lua profile catalog from this single source. `hotstrings.lua` consumes the generated data (`replace` pastes text; `sap-command` calls `Actions.runSapTcode`); only the six special-behavior hotstrings remain hand-authored.
 - Health validation enforces that `init.lua` loads `generated/hotstring_profiles.lua`, that `hotstrings.lua` consumes it, and that `actions.lua` exposes `Actions.runSapTcode`.
 - macOS replacements consume the matching `keyDown` event and delete only characters already inserted before pasting. This prevents the completing trigger character from surviving a replacement (for example, `nadia` now becomes `Nadia`, not `nadiNadia`).
 - Every replacement uses a single clipboard paste, preserving Unicode and avoiding per-character synthetic typing. A resettable clipboard session captures the original clipboard once and restores it after the last expansion.
@@ -20,7 +21,6 @@ Status: in progress
 ## Out of scope for current slices
 
 - `sap_gui_ctrl_b`, `eclipse_ctrl_sh_b`: depend on `WindowGroupService` (Windows-specific concept).
-- `snipaste_enter`: `portability=windows-only`; Snipaste is confirmed installed on macOS but not yet reclassified/ported.
 
 ## Next actions
 
@@ -28,7 +28,7 @@ Status: in progress
 2. Human: in Finder and Spotlight, verify F12 with a disposable text file and Alt+P with media below a `Music`, `Audio`, or `Video` path.
 3. Human: launch the Windows runtime once to confirm the regenerated `platforms/windows/data/*.json` profiles still autocorrect/paste and run SAP transactions as before.
 4. Human: on macOS, verify SAP transaction codes run only while SAP GUI is frontmost.
-5. Architect: after human verification, evaluate whether `snipaste_enter` has a useful native macOS behavior before reclassifying it.
+5. Human: verify Snipaste MouseFwd starts capture and Enter returns the processed image to the originating application; confirm Teams also pastes automatically.
 
 ## Design constraint
 

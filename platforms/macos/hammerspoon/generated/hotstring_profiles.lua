@@ -4,7 +4,6 @@
 
 return {
   {id = "autocorrect", mode = "replace", contextLabel = "global", entries = {
-    {trigger = "hi", value = "Hi", immediate = false},
     {trigger = "hola", value = "Hola", immediate = false},
     {trigger = "holi", value = "Holi", immediate = false},
     {trigger = "hello", value = "Hello", immediate = false},
@@ -177,9 +176,6 @@ return {
     {trigger = "gte", value = "Gte", immediate = false},
     {trigger = "qeu", value = "que", immediate = false},
     {trigger = "papa", value = "papá", immediate = false},
-    {trigger = "bd", value = "Buen día", immediate = false},
-    {trigger = "bt", value = "Buenas tardes", immediate = false},
-    {trigger = "bn", value = "Buenas noches", immediate = false},
     {trigger = "accion", value = "acción", immediate = false},
     {trigger = "aplicacion", value = "aplicación", immediate = false},
     {trigger = "comunicacion", value = "comunicación", immediate = false},
