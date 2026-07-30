@@ -67,7 +67,16 @@ local function restoreClipboard(snapshot)
   end
 end
 
+local function isDirectText(text)
+  return text:match("^[ -~]+$") ~= nil
+end
+
 local function pasteText(text)
+  if isDirectText(text) then
+    hs.eventtap.keyStrokes(text)
+    return
+  end
+
   if not clipboardSnapshot then
     clipboardSnapshot = captureClipboard()
   end
@@ -96,6 +105,11 @@ local function fireReplacement(trigger, replacement, terminator, visibleCount)
     end)
   end
   buffer = ""
+end
+
+local function isSyntheticEvent(event)
+  return event:getProperty(hs.eventtap.event.properties.eventSourceUnixProcessID)
+    == hs.processInfo.processID
 end
 
 local function triggerMatchesContext(trigger)
@@ -154,6 +168,15 @@ function Hotstrings.start(actions, bindings, profiles)
 
   local triggers = buildTriggers(bindings, profiles)
   eventWatcher = hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(event)
+    if isSyntheticEvent(event) then
+      return false
+    end
+
+    local flags = event:getFlags()
+    if flags.cmd or flags.ctrl or flags.alt then
+      return false
+    end
+
     local chars = event:getCharacters()
     if not chars or chars == "" then
       return false
