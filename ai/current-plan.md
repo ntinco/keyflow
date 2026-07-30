@@ -5,6 +5,7 @@ Status: in progress
 ## Implemented
 
 - Eclipse/ADT hotkeys (backtick, F1, F2) and simple hotstrings.
+- Global Alt+D rotates among standard windows of running Cursor/VS Code instances; global Alt+E rotates among standard windows of running SAP GUI/Eclipse/ADT instances, including SAP sessions. The macOS adapters use ordered application groups and do not launch missing applications.
 - SAP GUI hotkeys (Alt+5..0 → Workbench/SE16N/SE37/SE38/SE09/SE80) through the native Target Command Field.
 - Finder and Spotlight launcher actions share one selected-path flow; Spotlight uses its native Finder reveal command before delegating to it.
 - Alt+P invokes IINA's bundled CLI with the selected media paths, ensuring they are opened for playback instead of only activating IINA.
@@ -18,17 +19,14 @@ Status: in progress
 - Every replacement uses a single clipboard paste, preserving Unicode and avoiding per-character synthetic typing. A resettable clipboard session captures the original clipboard once and restores it after the last expansion.
 - The watcher completes each replacement synchronously. It tags every synthetic Delete, paste shortcut, and cursor event with `eventSourceUserData`, excludes that marker from the trigger buffer, and resets the buffer across applications, mouse focus changes, modified shortcuts, deletion, and non-text keys.
 
-## Out of scope for current slices
-
-- `sap_gui_ctrl_b`, `eclipse_ctrl_sh_b`: depend on `WindowGroupService` (Windows-specific concept).
-
 ## Next actions
 
-1. Human: confirm SAP/Eclipse context switching remains isolated after the loaded configuration change.
-2. Human: in Finder and Spotlight, verify F12 with a disposable text file and Alt+P with media below a `Music`, `Audio`, or `Video` path.
-3. Human: launch the Windows runtime once to confirm the regenerated `platforms/windows/data/*.json` profiles still autocorrect/paste and run SAP transactions as before.
-4. Human: on macOS, verify SAP transaction codes run only while SAP GUI is frontmost.
-5. Human: verify Snipaste Command+F1 and MouseFwd start capture, then Enter returns the processed image to the originating application; confirm Teams also pastes automatically.
+1. Human: confirm repeated Alt+D rotates standard Cursor/VS Code windows and repeated Alt+E rotates SAP GUI/Eclipse/ADT windows, including SAP sessions, without launching a missing application.
+2. Human: confirm SAP/Eclipse context switching remains isolated after the loaded configuration change.
+3. Human: in Finder and Spotlight, verify F12 with a disposable text file and Alt+P with media below a `Music`, `Audio`, or `Video` path.
+4. Human: launch the Windows runtime once to confirm the regenerated `platforms/windows/data/*.json` profiles still autocorrect/paste and run SAP transactions as before.
+5. Human: on macOS, verify SAP transaction codes run only while SAP GUI is frontmost.
+6. Human: verify Snipaste Command+F1 and MouseFwd start capture, then Enter returns the processed image to the originating application; confirm Teams also pastes automatically.
 
 ## Design constraint
 

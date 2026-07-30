@@ -15,8 +15,8 @@ Active catalog: **20 hotkeys** and **6 hotstrings**.
 | `*+` | global | SAP insert comment block (+) | windows, macos | portable-intent |
 | `*-` | global | SAP insert comment block (-) | windows, macos | portable-intent |
 | `sp` | global | Paste 'summary in prompt' | windows, macos | portable-intent |
-| `Alt+E` | global | Activate SAP workspace group | windows | portable-intent |
-| `Alt+D` | global | Activate IDE group | windows | portable-intent |
+| `Alt+E` | global | Activate SAP workspace group | windows, macos | portable-intent |
+| `Alt+D` | global | Activate IDE group | windows, macos | portable-intent |
 | `Win+Esc` | global | Resize window height | windows | windows-only |
 | `Win+F1` | global | Snipaste capture | macos | portable-intent |
 | `MouseFwd` | global | Snipaste screenshot (PrintScreen) | windows | windows-only |

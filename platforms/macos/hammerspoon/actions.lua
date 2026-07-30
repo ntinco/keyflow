@@ -4,12 +4,14 @@
 local Actions = {}
 
 local APP_BUNDLE_IDS = {
+  cursor = "com.todesktop.230313mzl4w4u",
   eclipse = "epp.package.committers",
   finder = "com.apple.finder",
   iina = "com.colliderli.iina",
   sap = "com.sap.platin",
   snipaste = "com.Snipaste",
   spotlight = "com.apple.Spotlight",
+  vscode = "com.microsoft.VSCode",
 }
 
 local SNIPASTE_RESIZE_TARGETS = {
@@ -52,6 +54,44 @@ end
 local function isFrontApp(bundleID)
   local front = hs.application.frontmostApplication()
   return front and front:bundleID() == bundleID
+end
+
+local function focusNextRunningWindow(bundleIDs)
+  local windows = {}
+  for _, bundleID in ipairs(bundleIDs) do
+    for _, app in ipairs(hs.application.applicationsForBundleID(bundleID) or {}) do
+      for _, window in ipairs(app:allWindows()) do
+        if window:isStandard() then
+          windows[#windows + 1] = window
+        end
+      end
+    end
+  end
+  if #windows == 0 then return false end
+
+  local front = hs.window.frontmostWindow()
+  local nextIndex = 1
+  for index, window in ipairs(windows) do
+    if window:id() == (front and front:id()) then
+      nextIndex = index % #windows + 1
+      break
+    end
+  end
+  return windows[nextIndex]:focus()
+end
+
+Actions.global_alt_d = function()
+  focusNextRunningWindow({
+    APP_BUNDLE_IDS.cursor,
+    APP_BUNDLE_IDS.vscode,
+  })
+end
+
+Actions.global_alt_e = function()
+  focusNextRunningWindow({
+    APP_BUNDLE_IDS.sap,
+    APP_BUNDLE_IDS.eclipse,
+  })
 end
 
 local function isFrontSap()

@@ -7,6 +7,8 @@ return {
   {id = "eclipse_backtick", type = "hotkey", key = "`", contextLabel = "sap-eclipse", label = "Prompt and open ABAP object"},
   {id = "eclipse_f1", type = "hotkey", key = "f1", contextLabel = "sap-eclipse", label = "Search ABAP object"},
   {id = "eclipse_f2", type = "hotkey", key = "f2", contextLabel = "sap-eclipse", label = "Rename"},
+  {id = "global_alt_d", type = "hotkey", key = "!d", contextLabel = "global", label = "Activate IDE group"},
+  {id = "global_alt_e", type = "hotkey", key = "!e", contextLabel = "global", label = "Activate SAP workspace group"},
   {id = "global_snipaste_capture", type = "hotkey", key = "#f1", contextLabel = "global", label = "Snipaste capture"},
   {id = "hs_sap_block_minus", type = "hotstring", key = "*-", contextLabel = "", label = "SAP insert comment block (-)"},
   {id = "hs_sap_block_plus", type = "hotstring", key = "*+", contextLabel = "", label = "SAP insert comment block (+)"},
