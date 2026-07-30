@@ -12,6 +12,7 @@ Status: in progress
 - Governance declares AI as the primary code maintainer. Health validation rejects missing macOS action/context ownership and blocking Hammerspoon sleeps.
 - `hotkeys.db` owns `hotstring_profiles`/`hotstring_entries` (autocorrect, quick-snippets, sap-transaction-shortcuts, sap-transaction-catalog, ymt-commands: 672 entries total). `ai/hotkey_sync.py --sync` regenerates the Windows `platforms/windows/data/*.json` profiles and `platforms/macos/hammerspoon/generated/hotstring_profiles.lua` from this single source. `hotstrings.lua` consumes the generated profile catalog (`replace` mode pastes text; `sap-command` mode calls `Actions.runSapTcode`, scoped to `sap-gui-session`); only the six special-behavior hotstrings (`hs_semicolons`, `hs_sap_comment_plus/minus`, `hs_sap_block_plus/minus`, `hs_sp`) remain hand-matched by id.
 - Health validation enforces that `init.lua` loads `generated/hotstring_profiles.lua`, that `hotstrings.lua` consumes it, and that `actions.lua` exposes `Actions.runSapTcode`.
+- macOS replacements consume the matching `keyDown` event and delete only characters already inserted before pasting. This prevents the completing trigger character from surviving a replacement (for example, `nadia` now becomes `Nadia`, not `nadiNadia`).
 
 ## Out of scope for current slices
 

@@ -73,9 +73,8 @@ local function pasteText(text)
   end)
 end
 
-local function fireReplacement(trigger, replacement, terminator)
-  local count = #trigger.pattern + (terminator and 1 or 0)
-  for _ = 1, count do
+local function fireReplacement(trigger, replacement, terminator, visibleCount)
+  for _ = 1, visibleCount do
     hs.eventtap.keyStroke({}, "delete")
   end
   pasteText(replacement .. (terminator or ""))
@@ -152,31 +151,33 @@ function Hotstrings.start(actions, bindings, profiles)
     for _, trigger in ipairs(triggers) do
       if triggerMatchesContext(trigger) then
         if trigger.immediate and buffer:sub(-#trigger.pattern) == trigger.pattern then
+          local visibleCount = #trigger.pattern - 1
           if trigger.run then
-            for _ = 1, #trigger.pattern do
+            for _ = 1, visibleCount do
               hs.eventtap.keyStroke({}, "delete")
             end
             trigger.run(actions)
             buffer = ""
           else
-            fireReplacement(trigger, trigger.replacement())
+            fireReplacement(trigger, trigger.replacement(), nil, visibleCount)
           end
-          return false
+          return true
         end
 
         if not trigger.immediate and isTerminator(chars) then
           local match = trigger.pattern .. chars
           if buffer:sub(-#match) == match then
+            local visibleCount = #trigger.pattern
             if trigger.run then
-              for _ = 1, #match do
+              for _ = 1, visibleCount do
                 hs.eventtap.keyStroke({}, "delete")
               end
               trigger.run(actions)
               buffer = ""
             else
-              fireReplacement(trigger, trigger.replacement(), chars)
+              fireReplacement(trigger, trigger.replacement(), chars, visibleCount)
             end
-            return false
+            return true
           end
         end
       end
