@@ -48,19 +48,13 @@ end
 
 local loadedCount = 0
 local overlayBindings = {}
-local mouseBindings = {}
-local MOUSE_BUTTONS = {xbutton1 = 3, xbutton2 = 4}
 for _, binding in ipairs(bindings) do
   if binding.type == "hotkey"
       and (binding.contextLabel == "global" or CONTEXT_APPS[binding.contextLabel]) then
     local action = Actions[binding.id]
     if action then
       local mods, key = parseAhkKey(binding.key)
-      local mouseButton = MOUSE_BUTTONS[key:lower()]
-      if mouseButton then
-        mouseBindings[mouseButton] = action
-        loadedCount = loadedCount + 1
-      elseif binding.contextLabel == "launcher"
+      if binding.contextLabel == "launcher"
           or binding.contextLabel == "snipaste" then
         overlayBindings[#overlayBindings + 1] = {
           action = action,
@@ -87,13 +81,6 @@ for _, binding in ipairs(bindings) do
     end
   end
 end
-
-Runtime.snipasteCaptureHotkey = hs.hotkey.bind(
-  {"cmd"},
-  "f1",
-  Actions.global_mouse_fwd
-)
-loadedCount = loadedCount + 1
 
 local function matchesModifiers(flags, expectedMods)
   local expected = {}
@@ -128,20 +115,6 @@ Runtime.overlayWatcher = hs.eventtap.new(
   end
 )
 Runtime.overlayWatcher:start()
-
-Runtime.mouseWatcher = hs.eventtap.new({
-  hs.eventtap.event.types.otherMouseDown,
-  hs.eventtap.event.types.otherMouseUp,
-}, function(event)
-  local button = event:getProperty(
-    hs.eventtap.event.properties.mouseEventButtonNumber
-  )
-  local action = mouseBindings[button]
-  if not action then return false end
-  if event:getType() == hs.eventtap.event.types.otherMouseDown then action() end
-  return true
-end)
-Runtime.mouseWatcher:start()
 
 local activeContextLabel
 

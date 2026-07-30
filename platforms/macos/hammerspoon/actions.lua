@@ -188,10 +188,6 @@ end
 
 Actions.runSapTcode = runTcode
 
-Actions.global_mouse_fwd = function()
-  hs.eventtap.keyStroke({}, "f1")
-end
-
 Actions.sap_gui_alt_5 = function() runTcode("ed") end
 Actions.sap_gui_alt_6 = function() runTcode("se16n") end
 Actions.sap_gui_alt_7 = function() runTcode("se37") end
@@ -440,7 +436,7 @@ local function resizeSnipasteImage(image, targetApp)
   end)
 end
 
-Actions.global_mouse_fwd = function()
+Actions.global_snipaste_capture = function()
   currentSnipasteTarget()
   local appPath = hs.application.pathForBundleID(APP_BUNDLE_IDS.snipaste)
   local executable = appPath and appPath .. "/Contents/MacOS/Snipaste"

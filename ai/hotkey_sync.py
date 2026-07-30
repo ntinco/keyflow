@@ -253,6 +253,8 @@ def validate_entries(entries: list[dict[str, object]]) -> None:
         platforms = entry.get("platform")
         if not isinstance(platforms, list) or not platforms:
             issues.append(f"{entry_id}: platform must be a non-empty JSON array")
+        elif any(platform not in {"windows", "macos"} for platform in platforms):
+            issues.append(f"{entry_id}: platform values must be windows or macos")
         if entry.get("portability") not in {"windows-only", "portable-intent"}:
             issues.append(f"{entry_id}: portability must be windows-only or portable-intent")
         if not str(entry.get("action") or "").strip() or not str(entry.get("label") or "").strip():
@@ -282,7 +284,10 @@ def _render_block(entry: dict[str, object]) -> str:
 
 
 def generate_file(file_key: str, entries: list[dict[str, object]]) -> str:
-    active = [entry for entry in entries if entry["active"]]
+    active = [
+        entry for entry in entries
+        if entry["active"] and "windows" in entry["platform"]
+    ]
     lines = [GENERATED_MARKER, "; Human source: platforms/shared/data/hotkeys.db", "; Regenerate: python ai/hotkey_sync.py --sync"]
     if file_key in FILE_HEADERS:
         lines.append(FILE_HEADERS[file_key])
