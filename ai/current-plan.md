@@ -6,7 +6,7 @@ Status: in progress
 
 - Eclipse/ADT hotkeys (backtick, F1, F2) and simple hotstrings.
 - SAP GUI hotkeys (Alt+5..0 → Workbench/SE16N/SE37/SE38/SE09/SE80) through the native Target Command Field.
-- Raycast and Spotlight launcher actions resolve selected files through clipboard URLs and accessibility respectively to paste text files, save clipboard text, or open media with IINA.
+- Raycast and Spotlight launcher actions resolve selected files through clipboard URLs; Spotlight uses its native Finder reveal command before copying the selected file URL.
 - Contextual hotkeys are enabled only for the active application. Spotlight/Raycast overlay keys use focused-element dispatch with passthrough outside the launcher. SAP command dispatch is non-blocking and stops if SAP GUI loses focus.
 - The retained macOS runtime owns application watchers, contextual hotkeys, and the idempotent console Clear button.
 - Governance declares AI as the primary code maintainer. Health validation rejects missing macOS action/context ownership and blocking Hammerspoon sleeps.
@@ -18,7 +18,7 @@ Status: in progress
 
 ## Next actions
 
-1. Human: reload Hammerspoon and confirm SAP/Eclipse context switching remains isolated.
+1. Human: confirm SAP/Eclipse context switching remains isolated after the loaded configuration change.
 2. Human: in Raycast and Spotlight, verify F12 with a disposable text file, Ctrl+S with a disposable destination file, and Alt+P with media below a `Music`, `Audio`, or `Video` path.
 3. Human: launch the Windows runtime once to confirm a clean start.
 4. Architect: after human verification, evaluate whether `snipaste_enter` has a useful native macOS behavior before reclassifying it.
@@ -27,4 +27,4 @@ Status: in progress
 
 `hotkeys.db` `action` column holds raw AHK syntax; not transpilable to Lua. `ai/hotkey_sync.py` generates binding metadata only (`generated/bindings.lua`); behavior is hand-authored in `actions.lua`/`hotstrings.lua`, matched by row `id`.
 
-Spotlight resolves its selected result through accessibility; no clipboard or Finder automation dependency is required.
+Launcher actions capture and reactivate the exact application behind Spotlight/Raycast. Escape only dismisses Raycast; Spotlight closes through its native Finder handoff.

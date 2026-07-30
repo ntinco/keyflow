@@ -5,11 +5,34 @@ local Actions = {}
 
 local APP_BUNDLE_IDS = {
   eclipse = "epp.package.committers",
+  finder = "com.apple.finder",
   iina = "com.colliderli.iina",
   raycast = "com.raycast.macos",
   sap = "com.sap.platin",
   spotlight = "com.apple.Spotlight",
 }
+
+local launcherTargetApp
+
+local function isLauncherApp(app)
+  local bundleID = app and app:bundleID()
+  return bundleID == APP_BUNDLE_IDS.raycast
+    or bundleID == APP_BUNDLE_IDS.spotlight
+end
+
+function Actions.rememberLauncherTarget(app)
+  if app and not isLauncherApp(app) then
+    launcherTargetApp = app
+  end
+end
+
+local function currentLauncherTarget()
+  local front = hs.application.frontmostApplication()
+  if front and not isLauncherApp(front) then
+    Actions.rememberLauncherTarget(front)
+  end
+  return launcherTargetApp
+end
 
 local function isFrontApp(bundleID)
   local front = hs.application.frontmostApplication()
@@ -167,32 +190,7 @@ local function readClipboardPaths()
   return paths
 end
 
-local function axValue(element, attribute)
-  local ok, value = pcall(element.attributeValue, element, attribute)
-  return ok and value or nil
-end
-
-local function axFilePath(element)
-  for _, attribute in ipairs({"AXURL", "AXDocument", "AXPath"}) do
-    local value = axValue(element, attribute)
-    if type(value) == "string" then
-      local path = decodePath(value):gsub("^localhost/", "/")
-      if path:sub(1, 1) == "/" then return path end
-    end
-  end
-  return nil
-end
-
-local function hasSelectedAncestor(element)
-  local ok, path = pcall(element.path, element)
-  if not ok then return false end
-  for _, ancestor in ipairs(path) do
-    if axValue(ancestor, "AXSelected") == true then return true end
-  end
-  return false
-end
-
-local function withCopiedPaths(sourceBundleID, shortcuts, callback)
+local function withCopiedPaths(sourceBundleID, shortcuts, targetApp, callback)
   if Actions.launcherSourceBundleID() ~= sourceBundleID then return end
 
   local clipboard = captureClipboard()
@@ -215,7 +213,7 @@ local function withCopiedPaths(sourceBundleID, shortcuts, callback)
         #paths
       )
       if #paths > 0 then
-        callback(paths, clipboard, sourceBundleID)
+        callback(paths, clipboard, sourceBundleID, targetApp)
       elseif shortcutIndex < #shortcuts then
         shortcutIndex = shortcutIndex + 1
         copy()
@@ -231,94 +229,74 @@ local function withCopiedPaths(sourceBundleID, shortcuts, callback)
   copy()
 end
 
-local spotlightSearch
-
-local function withSpotlightPaths(callback)
-  local app = focusedApp()
-  if not app or app:bundleID() ~= APP_BUNDLE_IDS.spotlight then return end
-
+local function withSpotlightPaths(targetApp, callback)
   local clipboard = captureClipboard()
-  local root = hs.axuielement.applicationElementForPID(app:pid())
-  if not root then
-    restoreClipboard(clipboard)
-    return
+  local attempts = 0
+
+  local function copyFromFinder()
+    attempts = attempts + 1
+    if isFrontApp(APP_BUNDLE_IDS.finder) then
+      hs.pasteboard.clearContents()
+      hs.pasteboard.callbackWhenChanged(0.75, function(changed)
+        local paths = changed and readClipboardPaths() or {}
+        hs.printf(
+          "keyflow: spotlight finder changed=%s paths=%d",
+          tostring(changed),
+          #paths
+        )
+        if #paths > 0 then
+          callback(paths, clipboard, APP_BUNDLE_IDS.spotlight, targetApp)
+        else
+          restoreClipboard(clipboard)
+          if targetApp then targetApp:activate() end
+        end
+      end)
+      hs.eventtap.keyStroke({"cmd"}, "c")
+    elseif attempts < 20 then
+      hs.timer.doAfter(0.1, copyFromFinder)
+    else
+      restoreClipboard(clipboard)
+      if targetApp then targetApp:activate() end
+      hs.printf("keyflow: spotlight Finder handoff timed out")
+    end
   end
 
-  spotlightSearch = root:elementSearch(
-    function(message, results)
-      spotlightSearch = nil
-      if Actions.launcherSourceBundleID() ~= APP_BUNDLE_IDS.spotlight then
-        restoreClipboard(clipboard)
-        return
-      end
-
-      local candidates = {}
-      local selected = {}
-      local seen = {}
-      for _, element in ipairs(results) do
-        local path = axFilePath(element)
-        if path and not seen[path] then
-          candidates[#candidates + 1] = path
-          seen[path] = true
-          if hasSelectedAncestor(element) then
-            selected[#selected + 1] = path
-          end
-        end
-      end
-
-      local paths = #selected > 0 and selected
-        or (#candidates == 1 and candidates)
-        or {}
-      hs.printf(
-        "keyflow: spotlight ax=%s candidates=%d selected=%d paths=%d",
-        message,
-        #candidates,
-        #selected,
-        #paths
-      )
-      if #paths > 0 then
-        callback(paths, clipboard, APP_BUNDLE_IDS.spotlight)
-      else
-        restoreClipboard(clipboard)
-      end
-    end,
-    function(element) return axFilePath(element) ~= nil end,
-    {depth = 12, count = 100}
-  )
+  hs.eventtap.keyStroke({"cmd"}, "r")
+  hs.timer.doAfter(0.1, copyFromFinder)
 end
 
 local function withLauncherPaths(callback)
   local sourceBundleID = Actions.launcherSourceBundleID()
+  local targetApp = currentLauncherTarget()
   if sourceBundleID == APP_BUNDLE_IDS.raycast then
     withCopiedPaths(APP_BUNDLE_IDS.raycast, {
       {mods = {"cmd", "shift"}, key = "c"},
-    }, callback)
+    }, targetApp, callback)
   elseif sourceBundleID == APP_BUNDLE_IDS.spotlight then
-    withSpotlightPaths(callback)
+    withSpotlightPaths(targetApp, callback)
   end
 end
 
-local function dismissLauncher(sourceBundleID, callback, clipboard)
-  if sourceBundleID == APP_BUNDLE_IDS.raycast
-      or sourceBundleID == APP_BUNDLE_IDS.spotlight then
+local function dismissLauncher(sourceBundleID, targetApp, callback, clipboard)
+  if sourceBundleID == APP_BUNDLE_IDS.raycast then
     hs.eventtap.keyStroke({}, "escape")
-  else
+  elseif sourceBundleID ~= APP_BUNDLE_IDS.spotlight then
     restoreClipboard(clipboard)
     return
   end
 
   hs.timer.doAfter(0.1, function()
-    if Actions.launcherSourceBundleID() then
+    if not targetApp or not targetApp:activate() then
       restoreClipboard(clipboard)
       return
     end
-    callback()
+    hs.timer.doAfter(0.1, callback)
   end)
 end
 
 Actions.launcher_f12 = function()
   hs.printf("keyflow: launcher F12 received")
-  withLauncherPaths(function(paths, clipboard, sourceBundleID)
+  withLauncherPaths(function(paths, clipboard, sourceBundleID, targetApp)
     local contents = {}
     for _, path in ipairs(paths) do
       local extension = path:match("%.([^./]+)$")
@@ -332,14 +310,14 @@ Actions.launcher_f12 = function()
       restoreClipboard(clipboard)
       return
     end
-    dismissLauncher(sourceBundleID, function()
+    dismissLauncher(sourceBundleID, targetApp, function()
       pasteText(table.concat(contents), clipboard)
     end, clipboard)
   end)
 end
 
 Actions.launcher_ctrl_s = function()
-  withLauncherPaths(function(paths, clipboard, sourceBundleID)
+  withLauncherPaths(function(paths, clipboard, sourceBundleID, targetApp)
     local path = paths[1]
     local file = path and clipboard.text and io.open(path, "wb")
     if not file then
@@ -352,14 +330,14 @@ Actions.launcher_ctrl_s = function()
       restoreClipboard(clipboard)
       return
     end
-    dismissLauncher(sourceBundleID, function()
+    dismissLauncher(sourceBundleID, targetApp, function()
       hs.pasteboard.clearContents()
     end, clipboard)
   end)
 end
 
 Actions.launcher_alt_p = function()
-  withLauncherPaths(function(paths, clipboard, sourceBundleID)
+  withLauncherPaths(function(paths, clipboard, sourceBundleID, targetApp)
     local path = paths[1]
     local lowerPath = path and path:lower() or ""
     if not lowerPath:find("music", 1, true)
@@ -368,7 +346,7 @@ Actions.launcher_alt_p = function()
       restoreClipboard(clipboard)
       return
     end
-    dismissLauncher(sourceBundleID, function()
+    dismissLauncher(sourceBundleID, targetApp, function()
       restoreClipboard(clipboard)
       local task = hs.task.new("/usr/bin/open", nil, {"-b", APP_BUNDLE_IDS.iina, path})
       if task then task:start() end
