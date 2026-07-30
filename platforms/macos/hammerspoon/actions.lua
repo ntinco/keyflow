@@ -100,6 +100,12 @@ end
 local function pasteText(text, savedClipboard)
   savedClipboard = savedClipboard or captureClipboard()
   hs.pasteboard.setContents(text)
+  local front = hs.application.frontmostApplication()
+  hs.printf(
+    "keyflow: paste dispatched app=%s bytes=%d",
+    front and front:bundleID() or "none",
+    #text
+  )
   hs.eventtap.keyStroke({"cmd"}, "v")
   hs.timer.doAfter(0.2, function()
     restoreClipboard(savedClipboard)
@@ -231,28 +237,37 @@ end
 
 local function withSpotlightPaths(targetApp, callback)
   local clipboard = captureClipboard()
-  local attempts = 0
+  local finderAttempts = 0
+  local copyAttempts = 0
+
+  local function copySelection()
+    copyAttempts = copyAttempts + 1
+    hs.pasteboard.clearContents()
+    hs.pasteboard.callbackWhenChanged(0.75, function(changed)
+      local paths = changed and readClipboardPaths() or {}
+      hs.printf(
+        "keyflow: spotlight finder copy=%d changed=%s paths=%d",
+        copyAttempts,
+        tostring(changed),
+        #paths
+      )
+      if #paths > 0 then
+        callback(paths, clipboard, APP_BUNDLE_IDS.spotlight, targetApp)
+      elseif copyAttempts < 4 and isFrontApp(APP_BUNDLE_IDS.finder) then
+        hs.timer.doAfter(0.25, copySelection)
+      else
+        restoreClipboard(clipboard)
+        if targetApp then targetApp:activate() end
+      end
+    end)
+    hs.eventtap.keyStroke({"cmd"}, "c")
+  end
 
   local function copyFromFinder()
-    attempts = attempts + 1
+    finderAttempts = finderAttempts + 1
     if isFrontApp(APP_BUNDLE_IDS.finder) then
-      hs.pasteboard.clearContents()
-      hs.pasteboard.callbackWhenChanged(0.75, function(changed)
-        local paths = changed and readClipboardPaths() or {}
-        hs.printf(
-          "keyflow: spotlight finder changed=%s paths=%d",
-          tostring(changed),
-          #paths
-        )
-        if #paths > 0 then
-          callback(paths, clipboard, APP_BUNDLE_IDS.spotlight, targetApp)
-        else
-          restoreClipboard(clipboard)
-          if targetApp then targetApp:activate() end
-        end
-      end)
-      hs.eventtap.keyStroke({"cmd"}, "c")
-    elseif attempts < 20 then
+      hs.timer.doAfter(0.3, copySelection)
+    elseif finderAttempts < 20 then
       hs.timer.doAfter(0.1, copyFromFinder)
     else
       restoreClipboard(clipboard)
@@ -277,6 +292,28 @@ local function withLauncherPaths(callback)
   end
 end
 
+local function withRestoredTarget(targetApp, clipboard, callback)
+  if not targetApp or not targetApp:activate() then
+    restoreClipboard(clipboard)
+    return
+  end
+
+  local attempts = 0
+  local function waitForTarget()
+    attempts = attempts + 1
+    if targetApp:isFrontmost() then
+      hs.printf("keyflow: launcher target restored app=%s", targetApp:bundleID())
+      hs.timer.doAfter(0.15, callback)
+    elseif attempts < 20 then
+      hs.timer.doAfter(0.1, waitForTarget)
+    else
+      restoreClipboard(clipboard)
+      hs.printf("keyflow: launcher target restore timed out")
+    end
+  end
+  waitForTarget()
+end
+
 local function dismissLauncher(sourceBundleID, targetApp, callback, clipboard)
   if sourceBundleID == APP_BUNDLE_IDS.raycast then
     hs.eventtap.keyStroke({}, "escape")
@@ -286,11 +323,7 @@ local function dismissLauncher(sourceBundleID, targetApp, callback, clipboard)
   end
 
   hs.timer.doAfter(0.1, function()
-    if not targetApp or not targetApp:activate() then
-      restoreClipboard(clipboard)
-      return
-    end
-    hs.timer.doAfter(0.1, callback)
+    withRestoredTarget(targetApp, clipboard, callback)
   end)
 end
 
