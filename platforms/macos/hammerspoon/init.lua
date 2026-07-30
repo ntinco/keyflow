@@ -26,8 +26,8 @@ end
 
 local CONTEXT_APPS = {
   ["launcher"] = {
+    {bundleID = "com.apple.finder", name = "Finder"},
     {bundleID = "com.apple.Spotlight", name = "Spotlight"},
-    {bundleID = "com.raycast.macos", name = "Raycast"},
   },
   ["sap-eclipse"] = {
     {bundleID = "epp.package.committers", name = "Eclipse"},

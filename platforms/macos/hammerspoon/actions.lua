@@ -7,7 +7,6 @@ local APP_BUNDLE_IDS = {
   eclipse = "epp.package.committers",
   finder = "com.apple.finder",
   iina = "com.colliderli.iina",
-  raycast = "com.raycast.macos",
   sap = "com.sap.platin",
   spotlight = "com.apple.Spotlight",
 }
@@ -16,7 +15,7 @@ local launcherTargetApp
 
 local function isLauncherApp(app)
   local bundleID = app and app:bundleID()
-  return bundleID == APP_BUNDLE_IDS.raycast
+  return bundleID == APP_BUNDLE_IDS.finder
     or bundleID == APP_BUNDLE_IDS.spotlight
 end
 
@@ -53,7 +52,7 @@ end
 function Actions.launcherSourceBundleID()
   local app = focusedApp()
   local bundleID = app and app:bundleID()
-  if bundleID == APP_BUNDLE_IDS.raycast
+  if bundleID == APP_BUNDLE_IDS.finder
       or bundleID == APP_BUNDLE_IDS.spotlight then
     return bundleID
   end
@@ -97,7 +96,7 @@ Actions.eclipse_f2 = function()
   end
 end
 
-local function pasteText(text, savedClipboard)
+local function pasteText(text, savedClipboard, targetApp)
   savedClipboard = savedClipboard or captureClipboard()
   hs.pasteboard.setContents(text)
   local front = hs.application.frontmostApplication()
@@ -106,8 +105,8 @@ local function pasteText(text, savedClipboard)
     front and front:bundleID() or "none",
     #text
   )
-  hs.eventtap.keyStroke({"cmd"}, "v")
-  hs.timer.doAfter(0.2, function()
+  hs.eventtap.keyStroke({"cmd"}, "v", 200000, targetApp)
+  hs.timer.doAfter(0.5, function()
     restoreClipboard(savedClipboard)
   end)
 end
@@ -196,48 +195,7 @@ local function readClipboardPaths()
   return paths
 end
 
-local function withCopiedPaths(sourceBundleID, shortcuts, targetApp, callback)
-  if Actions.launcherSourceBundleID() ~= sourceBundleID then return end
-
-  local clipboard = captureClipboard()
-  local shortcutIndex = 1
-
-  local function copy()
-    hs.pasteboard.clearContents()
-    hs.pasteboard.callbackWhenChanged(0.75, function(changed)
-      if Actions.launcherSourceBundleID() ~= sourceBundleID then
-        restoreClipboard(clipboard)
-        return
-      end
-
-      local paths = changed and readClipboardPaths() or {}
-      hs.printf(
-        "keyflow: launcher source=%s copy=%d changed=%s paths=%d",
-        sourceBundleID,
-        shortcutIndex,
-        tostring(changed),
-        #paths
-      )
-      if #paths > 0 then
-        callback(paths, clipboard, sourceBundleID, targetApp)
-      elseif shortcutIndex < #shortcuts then
-        shortcutIndex = shortcutIndex + 1
-        copy()
-      else
-        restoreClipboard(clipboard)
-      end
-    end)
-
-    local shortcut = shortcuts[shortcutIndex]
-    hs.eventtap.keyStroke(shortcut.mods, shortcut.key)
-  end
-
-  copy()
-end
-
-local function withSpotlightPaths(targetApp, callback)
-  local clipboard = captureClipboard()
-  local finderAttempts = 0
+local function withFinderPaths(sourceBundleID, targetApp, clipboard, callback)
   local copyAttempts = 0
 
   local function copySelection()
@@ -246,13 +204,13 @@ local function withSpotlightPaths(targetApp, callback)
     hs.pasteboard.callbackWhenChanged(0.75, function(changed)
       local paths = changed and readClipboardPaths() or {}
       hs.printf(
-        "keyflow: spotlight finder copy=%d changed=%s paths=%d",
+        "keyflow: finder copy=%d changed=%s paths=%d",
         copyAttempts,
         tostring(changed),
         #paths
       )
       if #paths > 0 then
-        callback(paths, clipboard, APP_BUNDLE_IDS.spotlight, targetApp)
+        callback(paths, clipboard, targetApp)
       elseif copyAttempts < 4 and isFrontApp(APP_BUNDLE_IDS.finder) then
         hs.timer.doAfter(0.25, copySelection)
       else
@@ -260,13 +218,19 @@ local function withSpotlightPaths(targetApp, callback)
         if targetApp then targetApp:activate() end
       end
     end)
-    hs.eventtap.keyStroke({"cmd"}, "c")
+    hs.eventtap.keyStroke({"cmd", "alt"}, "c")
   end
+
+  hs.timer.doAfter(sourceBundleID == APP_BUNDLE_IDS.spotlight and 0.3 or 0, copySelection)
+end
+
+local function withSpotlightPaths(targetApp, clipboard, callback)
+  local finderAttempts = 0
 
   local function copyFromFinder()
     finderAttempts = finderAttempts + 1
     if isFrontApp(APP_BUNDLE_IDS.finder) then
-      hs.timer.doAfter(0.3, copySelection)
+      withFinderPaths(APP_BUNDLE_IDS.spotlight, targetApp, clipboard, callback)
     elseif finderAttempts < 20 then
       hs.timer.doAfter(0.1, copyFromFinder)
     else
@@ -283,12 +247,11 @@ end
 local function withLauncherPaths(callback)
   local sourceBundleID = Actions.launcherSourceBundleID()
   local targetApp = currentLauncherTarget()
-  if sourceBundleID == APP_BUNDLE_IDS.raycast then
-    withCopiedPaths(APP_BUNDLE_IDS.raycast, {
-      {mods = {"cmd", "shift"}, key = "c"},
-    }, targetApp, callback)
+  local clipboard = captureClipboard()
+  if sourceBundleID == APP_BUNDLE_IDS.finder then
+    withFinderPaths(sourceBundleID, targetApp, clipboard, callback)
   elseif sourceBundleID == APP_BUNDLE_IDS.spotlight then
-    withSpotlightPaths(targetApp, callback)
+    withSpotlightPaths(targetApp, clipboard, callback)
   end
 end
 
@@ -314,22 +277,9 @@ local function withRestoredTarget(targetApp, clipboard, callback)
   waitForTarget()
 end
 
-local function dismissLauncher(sourceBundleID, targetApp, callback, clipboard)
-  if sourceBundleID == APP_BUNDLE_IDS.raycast then
-    hs.eventtap.keyStroke({}, "escape")
-  elseif sourceBundleID ~= APP_BUNDLE_IDS.spotlight then
-    restoreClipboard(clipboard)
-    return
-  end
-
-  hs.timer.doAfter(0.1, function()
-    withRestoredTarget(targetApp, clipboard, callback)
-  end)
-end
-
 Actions.launcher_f12 = function()
   hs.printf("keyflow: launcher F12 received")
-  withLauncherPaths(function(paths, clipboard, sourceBundleID, targetApp)
+  withLauncherPaths(function(paths, clipboard, targetApp)
     local contents = {}
     for _, path in ipairs(paths) do
       local extension = path:match("%.([^./]+)$")
@@ -343,14 +293,14 @@ Actions.launcher_f12 = function()
       restoreClipboard(clipboard)
       return
     end
-    dismissLauncher(sourceBundleID, targetApp, function()
-      pasteText(table.concat(contents), clipboard)
-    end, clipboard)
+    withRestoredTarget(targetApp, clipboard, function()
+      pasteText(table.concat(contents), clipboard, targetApp)
+    end)
   end)
 end
 
 Actions.launcher_ctrl_s = function()
-  withLauncherPaths(function(paths, clipboard, sourceBundleID, targetApp)
+  withLauncherPaths(function(paths, clipboard, targetApp)
     local path = paths[1]
     local file = path and clipboard.text and io.open(path, "wb")
     if not file then
@@ -363,14 +313,14 @@ Actions.launcher_ctrl_s = function()
       restoreClipboard(clipboard)
       return
     end
-    dismissLauncher(sourceBundleID, targetApp, function()
+    withRestoredTarget(targetApp, clipboard, function()
       hs.pasteboard.clearContents()
-    end, clipboard)
+    end)
   end)
 end
 
 Actions.launcher_alt_p = function()
-  withLauncherPaths(function(paths, clipboard, sourceBundleID, targetApp)
+  withLauncherPaths(function(paths, clipboard, targetApp)
     local path = paths[1]
     local lowerPath = path and path:lower() or ""
     if not lowerPath:find("music", 1, true)
@@ -379,11 +329,11 @@ Actions.launcher_alt_p = function()
       restoreClipboard(clipboard)
       return
     end
-    dismissLauncher(sourceBundleID, targetApp, function()
+    withRestoredTarget(targetApp, clipboard, function()
       restoreClipboard(clipboard)
       local task = hs.task.new("/usr/bin/open", nil, {"-b", APP_BUNDLE_IDS.iina, path})
       if task then task:start() end
-    end, clipboard)
+    end)
   end)
 end
 
