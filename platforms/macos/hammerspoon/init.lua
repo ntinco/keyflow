@@ -47,16 +47,17 @@ for contextLabel in pairs(CONTEXT_APPS) do
 end
 
 local loadedCount = 0
-local overlayBindings = {}
+local eventBindings = {}
 for _, binding in ipairs(bindings) do
   if binding.type == "hotkey"
       and (binding.contextLabel == "global" or CONTEXT_APPS[binding.contextLabel]) then
     local action = Actions[binding.id]
     if action then
       local mods, key = parseAhkKey(binding.key)
-      if binding.contextLabel == "launcher"
+      if binding.contextLabel == "global"
+          or binding.contextLabel == "launcher"
           or binding.contextLabel == "snipaste" then
-        overlayBindings[#overlayBindings + 1] = {
+        eventBindings[#eventBindings + 1] = {
           action = action,
           contextLabel = binding.contextLabel,
           keyCode = hs.keycodes.map[key:lower()],
@@ -91,22 +92,25 @@ local function matchesModifiers(flags, expectedMods)
   return true
 end
 
-local function overlayIsActive(contextLabel)
+local function eventContextIsActive(contextLabel)
+  if contextLabel == "global" then
+    return true
+  end
   if contextLabel == "launcher" then
     return Actions.launcherSourceBundleID() ~= nil
   end
   return contextLabel == "snipaste" and Actions.snipasteIsActive()
 end
 
-Runtime.overlayWatcher = hs.eventtap.new(
+Runtime.keyWatcher = hs.eventtap.new(
   {hs.eventtap.event.types.keyDown},
   function(event)
     local flags = event:getFlags()
     local keyCode = event:getKeyCode()
-    for _, binding in ipairs(overlayBindings) do
+    for _, binding in ipairs(eventBindings) do
       if keyCode == binding.keyCode
           and matchesModifiers(flags, binding.mods) then
-        if not overlayIsActive(binding.contextLabel) then return false end
+        if not eventContextIsActive(binding.contextLabel) then return false end
         binding.action()
         return not binding.passthrough
       end
@@ -114,7 +118,7 @@ Runtime.overlayWatcher = hs.eventtap.new(
     return false
   end
 )
-Runtime.overlayWatcher:start()
+Runtime.keyWatcher:start()
 
 local activeContextLabel
 

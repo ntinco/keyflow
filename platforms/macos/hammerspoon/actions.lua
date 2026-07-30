@@ -437,6 +437,7 @@ local function resizeSnipasteImage(image, targetApp)
 end
 
 Actions.global_snipaste_capture = function()
+  hs.printf("keyflow: Snipaste Command+F1 received")
   currentSnipasteTarget()
   local appPath = hs.application.pathForBundleID(APP_BUNDLE_IDS.snipaste)
   local executable = appPath and appPath .. "/Contents/MacOS/Snipaste"

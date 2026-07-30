@@ -29,9 +29,6 @@ services.windowGroup.activateGroup(appActivationTargets,"apps_ide")
 #esc::{
 services.windows.resizeHeight()
 }
-#f1::{
-Actions.global_snipaste_capture()
-}
 xbutton2::{
 services.snipaste.copyPaste("{printscreen}",snipasteTargets)
 }

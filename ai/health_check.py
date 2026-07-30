@@ -1192,8 +1192,8 @@ def validate_macos_runtime(repo_root: Path) -> list[dict[str, object]]:
             "Hammerspoon runtime must retain its owned objects across garbage collection.",
         "Runtime.appWatcher = hs.application.watcher.new":
             "Hammerspoon application watcher must have an explicit runtime owner.",
-        "Runtime.overlayWatcher = hs.eventtap.new":
-            "Overlay launcher bindings must have an explicit passthrough watcher owner.",
+        "Runtime.keyWatcher = hs.eventtap.new":
+            "Global and overlay bindings must have an explicit keyboard watcher owner.",
         "Runtime.consoleToolbar = consoleToolbar":
             "Hammerspoon console toolbar must have an explicit runtime owner.",
         "consoleToolbar:allowedItems()":
