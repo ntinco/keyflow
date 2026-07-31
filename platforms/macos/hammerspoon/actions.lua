@@ -102,6 +102,12 @@ local function isFrontSap()
   )
 end
 
+function Actions.shouldSubmitExistingSapCatalogTcode(profileID)
+  if profileID ~= "sap-transaction-catalog" then return false end
+  local window = hs.window.frontmostWindow()
+  return window and window:title():find("SAP Easy Access", 1, true) ~= nil
+end
+
 local function focusedApp()
   local ok, app = pcall(function()
     local element = hs.axuielement.systemWideElement()
@@ -202,8 +208,12 @@ local function normalizeTcode(tcode)
   return "/n" .. normalized:upper()
 end
 
-local function runTcode(tcode)
+local function runTcode(tcode, profileID)
   if not isFrontSap() then return end
+  if Actions.shouldSubmitExistingSapCatalogTcode(profileID) then
+    hs.eventtap.keyStroke({}, "return")
+    return
+  end
 
   Actions.cancelSapRun()
   local token = sapRunToken

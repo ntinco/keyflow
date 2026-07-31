@@ -159,11 +159,12 @@ local function buildTriggers(bindings, profiles)
           or entry.immediate
           or (mode == "replace" and isImmediatePersonName(entry.trigger, value)),
         contextLabel = profile.contextLabel,
+        profileID = profile.id,
         replacement = function()
           return value
         end,
         run = mode == "sap-command" and function(actions)
-          actions.runSapTcode(value)
+          actions.runSapTcode(value, profile.id)
         end or nil,
       }
     end
@@ -235,6 +236,13 @@ function Hotstrings.start(actions, bindings, profiles)
         if trigger.immediate and buffer:sub(-#trigger.pattern) == trigger.pattern then
           local visibleCount = #trigger.pattern - 1
           if trigger.run then
+            if actions.shouldSubmitExistingSapCatalogTcode(trigger.profileID) then
+              hs.timer.doAfter(0, function()
+                postSyntheticKey({}, "return")
+              end)
+              buffer = ""
+              return false
+            end
             for _ = 1, visibleCount do
               postSyntheticKey({}, "delete")
             end
@@ -249,10 +257,17 @@ function Hotstrings.start(actions, bindings, profiles)
         if not trigger.immediate and isTerminator(chars) then
           local match = trigger.pattern .. chars
           if buffer:sub(-#match) == match then
-            local visibleCount = #trigger.pattern
-            if trigger.run then
-              for _ = 1, visibleCount do
-                postSyntheticKey({}, "delete")
+          local visibleCount = #trigger.pattern
+          if trigger.run then
+            if actions.shouldSubmitExistingSapCatalogTcode(trigger.profileID) then
+              hs.timer.doAfter(0, function()
+                postSyntheticKey({}, "return")
+              end)
+              buffer = ""
+              return false
+            end
+            for _ = 1, visibleCount do
+              postSyntheticKey({}, "delete")
               end
               trigger.run(actions)
               buffer = ""

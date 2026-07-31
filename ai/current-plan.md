@@ -7,6 +7,7 @@ Status: in progress
 - Eclipse/ADT hotkeys (backtick, F1, F2) and simple hotstrings.
 - Global Alt+D rotates among standard windows of running Cursor/VS Code instances; global Alt+E rotates among standard windows of running SAP GUI/Eclipse/ADT instances, including SAP sessions. The macOS adapters use ordered application groups and do not launch missing applications.
 - SAP GUI hotkeys (Alt+5..0 → Workbench/SE16N/SE37/SE38/SE09/SE80) through the native Target Command Field.
+- `sap-transaction-catalog` hotstrings preserve the typed transaction code and send only Enter when the active SAP window title contains `SAP Easy Access`; all other SAP windows and SAP hotstring profiles retain their normal command-field replacement with `/n`.
 - Finder and Spotlight launcher actions share one selected-path flow; Spotlight uses its native Finder reveal command before delegating to it.
 - Alt+P invokes IINA's bundled CLI with the selected media paths, ensuring they are opened for playback instead of only activating IINA.
 - Snipaste Command+F1 and Enter share one macOS capture flow: Command+F1 invokes Snipaste, Enter accepts the capture, ImageMagick resizes supported-target images to 80%, and Teams receives an automatic paste. MouseFwd on macOS is an adapter that emits Command+F1; Windows retains its platform-specific MouseFwd capture trigger.
@@ -22,11 +23,12 @@ Status: in progress
 ## Next actions
 
 1. Human: confirm repeated Alt+D rotates standard Cursor/VS Code windows and repeated Alt+E rotates SAP GUI/Eclipse/ADT windows, including SAP sessions, without launching a missing application.
-2. Human: confirm SAP/Eclipse context switching remains isolated after the loaded configuration change.
-3. Human: in Finder and Spotlight, verify F12 with a disposable text file and Alt+P with media below a `Music`, `Audio`, or `Video` path.
-4. Human: launch the Windows runtime once to confirm the regenerated `platforms/windows/data/*.json` profiles still autocorrect/paste and run SAP transactions as before.
-5. Human: on macOS, verify SAP transaction codes run only while SAP GUI is frontmost.
-6. Human: verify Snipaste Command+F1 and MouseFwd start capture, then Enter returns the processed image to the originating application; confirm Teams also pastes automatically.
+2. Human: in a `SAP Easy Access` window, confirm a `sap-transaction-catalog` hotstring preserves the typed code and sends only Enter; outside that title, confirm it continues to replace through the command field with `/n`. Confirm `sap-transaction-shortcuts` and `ymt-commands` retain their normal command behavior.
+3. Human: confirm SAP/Eclipse context switching remains isolated after the loaded configuration change.
+4. Human: in Finder and Spotlight, verify F12 with a disposable text file and Alt+P with media below a `Music`, `Audio`, or `Video` path.
+5. Human: launch the Windows runtime once to confirm the regenerated `platforms/windows/data/*.json` profiles still autocorrect/paste and run SAP transactions as before.
+6. Human: on macOS, verify SAP transaction codes run only while SAP GUI is frontmost.
+7. Human: verify Snipaste Command+F1 and MouseFwd start capture, then Enter returns the processed image to the originating application; confirm Teams also pastes automatically.
 
 ## Design constraint
 

@@ -218,6 +218,7 @@
         "declared_methods": [
           "set",
           "_registerEntries",
+          "_submitSapTcode",
           "_resolveHotstringOptions",
           "_isImmediatePersonName",
           "_isSapInputMode",

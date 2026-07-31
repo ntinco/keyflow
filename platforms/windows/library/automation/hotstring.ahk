@@ -12,12 +12,10 @@
     else
       HotIfWinActive()
 
-    _registerEntries(this._loadEntries(label), mode)
+    _registerEntries(this._loadEntries(label), label, mode)
     this._resetHotstringContext()
 
-    applySapTcode(hotstringValue, *) => services.sap.runTcode(hotstringValue)
-
-    _registerEntries(entries, mode) {
+    _registerEntries(entries, profileLabel, mode) {
       for entry in entries {
         trigger := entry["trigger"]
         value := entry["value"]
@@ -26,11 +24,21 @@
 
         hotstringOptions := this._resolveHotstringOptions(mode, trigger, value, entry)
         if this._isSapInputMode(mode)
-          hotstring(hotstringOptions . trigger, applySapTcode.Bind(value))
+          hotstring(hotstringOptions . trigger, this._submitSapTcode.Bind(value, profileLabel))
         else
           hotstring(hotstringOptions . trigger, value)
       }
     }
+  }
+
+  _submitSapTcode(hotstringValue, profileLabel, *) {
+    if (profileLabel = "sap-transaction-catalog"
+        and InStr(WinGetTitle("A"), "SAP Easy Access"))
+    {
+      Send("{enter}")
+      return
+    }
+    services.sap.runTcode(hotstringValue)
   }
 
   _resolveHotstringOptions(mode, trigger := "", value := "", entry := "") {
