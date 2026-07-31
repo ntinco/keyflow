@@ -79,6 +79,31 @@ DB_COLUMNS = [
     "action", "label", "platform", "active", "portability",
 ]
 
+LEGACY_HOTKEY_COLUMNS = [
+    "sort_order", "id", "file", "type", "key", "trigger", "options",
+    "context", "context_fn", "context_label",
+    "action", "label", "platform", "active", "notes", "portability",
+]
+
+HOTKEYS_TABLE_SCHEMA = """
+CREATE TABLE hotkeys (
+    sort_order      INTEGER,
+    id              TEXT PRIMARY KEY,
+    file            TEXT NOT NULL,
+    type            TEXT NOT NULL,
+    key             TEXT,
+    trigger         TEXT,
+    options         TEXT,
+    windows_context TEXT,
+    context_label   TEXT,
+    action          TEXT NOT NULL,
+    label           TEXT NOT NULL,
+    platform        TEXT NOT NULL,
+    active          INTEGER NOT NULL DEFAULT 1,
+    portability     TEXT NOT NULL DEFAULT 'windows-only'
+)
+"""
+
 FILE_HEADERS = {
     "sap-gui": "; SAP GUI triggers only; implementation lives in library/automation/sap.ahk.",
     "sap-eclipse": "; SAP ADT/Eclipse triggers only; implementation lives in library/automation/sap.ahk.",
@@ -118,6 +143,56 @@ def create_db() -> None:
     with sqlite3.connect(DB_PATH) as connection:
         connection.executescript(DB_SCHEMA)
     print(f"Created empty catalog: {DB_PATH}")
+
+
+def migrate_hotkeys_schema() -> None:
+    if not DB_PATH.exists():
+        raise CatalogError(f"Human catalog not found: {DB_PATH}")
+
+    with sqlite3.connect(DB_PATH) as connection:
+        columns = [row[1] for row in connection.execute("PRAGMA table_info(hotkeys)")]
+        if columns == DB_COLUMNS:
+            print("Hotkey schema is already current.")
+            return
+        if columns != LEGACY_HOTKEY_COLUMNS:
+            raise CatalogError(
+                "Unexpected legacy hotkeys schema. Expected columns: "
+                + ", ".join(LEGACY_HOTKEY_COLUMNS)
+            )
+
+        connection.execute("BEGIN IMMEDIATE")
+        old_count = connection.execute("SELECT COUNT(*) FROM hotkeys").fetchone()[0]
+        old_ids = {row[0] for row in connection.execute("SELECT id FROM hotkeys")}
+        connection.execute("ALTER TABLE hotkeys RENAME TO hotkeys_legacy")
+        connection.execute(HOTKEYS_TABLE_SCHEMA)
+        connection.execute(
+            """
+            INSERT INTO hotkeys (
+                sort_order, id, file, type, key, trigger, options,
+                windows_context, context_label, action, label,
+                platform, active, portability
+            )
+            SELECT
+                sort_order, id, file, type, key, trigger, options,
+                CASE
+                    WHEN COALESCE(context_fn, '') != '' THEN context_fn
+                    WHEN COALESCE(context, '') != '' THEN 'winactive(' || context || ')'
+                    ELSE NULL
+                END,
+                context_label, action, label, platform, active, portability
+            FROM hotkeys_legacy
+            """
+        )
+        new_count = connection.execute("SELECT COUNT(*) FROM hotkeys").fetchone()[0]
+        new_ids = {row[0] for row in connection.execute("SELECT id FROM hotkeys")}
+        invalid_contexts = connection.execute(
+            "SELECT id FROM hotkeys WHERE windows_context LIKE '#hotif%'"
+        ).fetchall()
+        if new_count != old_count or new_ids != old_ids or invalid_contexts:
+            raise CatalogError("Hotkey schema migration failed its data-preservation checks.")
+        connection.execute("DROP TABLE hotkeys_legacy")
+
+    print(f"Migrated {old_count} hotkeys to the current schema.")
 
 
 def migrate_hotstring_profiles() -> None:
@@ -274,6 +349,13 @@ def validate_entries(entries: list[dict[str, object]]) -> None:
         ):
             issues.append(
                 f"{entry_id}: sap-tcode action requires a hotkey and a valid transaction code"
+            )
+        if tcode is not None and (
+            entry.get("portability") != "portable-intent"
+            or set(platforms if isinstance(platforms, list) else []) != {"windows", "macos"}
+        ):
+            issues.append(
+                f"{entry_id}: sap-tcode action requires portable-intent on windows and macos"
             )
     if issues:
         raise CatalogError("Catalog validation failed:\n- " + "\n- ".join(issues))
@@ -562,6 +644,11 @@ def main() -> int:
     actions = parser.add_mutually_exclusive_group(required=True)
     actions.add_argument("--init-db", action="store_true", help="Create a new empty SQLite catalog if none exists.")
     actions.add_argument(
+        "--migrate-hotkeys-schema",
+        action="store_true",
+        help="Migrate the legacy hotkeys table to the current reduced schema.",
+    )
+    actions.add_argument(
         "--migrate-hotstring-profiles",
         action="store_true",
         help="Import the existing Windows hotstring JSON profiles into hotkeys.db once.",
@@ -574,6 +661,9 @@ def main() -> int:
     try:
         if args.init_db:
             create_db()
+            return 0
+        if args.migrate_hotkeys_schema:
+            migrate_hotkeys_schema()
             return 0
         if args.migrate_hotstring_profiles:
             migrate_hotstring_profiles()
