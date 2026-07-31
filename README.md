@@ -60,12 +60,14 @@ All machine-specific configuration is local-only. Use these versioned examples a
 
 | Example file | Purpose |
 |---|---|
-| `platforms/windows/data/local-paths.example.ini` | Machine paths and ABAP workspace hints |
+| `platforms/shared/data/local-paths.example.ini` | Machine paths and ABAP workspace hints |
 | `platforms/windows/data/local-startup.example.ini` | Runtime environment and SAP delays |
 
 Local-only files that must never be committed:
 
-`local-secrets.ini` · `local-paths.ini` · `local-startup.ini` · `memory-vars.ini` · `rom.ini` · `storage.db` · `ai/run-result.json` · `ai/run-result-macos.json`
+`local-secrets.ini` · `local-startup.ini` · `rom.ini` · `storage.db` · `ai/run-result.json` · `ai/run-result-macos.json`
+
+`platforms/shared/data/`: `memory-vars.ini` · `local-paths.ini` (local-only, shared across the Windows and macOS runtimes).
 
 ## Onboarding — Windows
 

@@ -93,7 +93,8 @@
       "id": "shared-catalogs",
       "path": "platforms/shared/data/",
       "owns": [
-        "human-managed hotkeys.db (drives both the Windows AHK runtime and the macOS Hammerspoon runtime)"
+        "human-managed hotkeys.db (drives both the Windows AHK runtime and the macOS Hammerspoon runtime)",
+        "local-only memory-vars.ini and local-paths.ini (shared across platforms, never versioned)"
       ]
     },
     {
@@ -138,9 +139,9 @@
     "ai/run-result.json",
     "ai/run-result-macos.json",
     "platforms/windows/data/local-secrets.ini",
-    "platforms/windows/data/local-paths.ini",
     "platforms/windows/data/local-startup.ini",
     "platforms/shared/data/memory-vars.ini",
+    "platforms/shared/data/local-paths.ini",
     "platforms/windows/data/rom.ini",
     "storage.db",
     "platforms/windows/storage.db"

@@ -97,7 +97,7 @@ Use one persistent plan location.
 
 ## Hard rules
 
-- Never touch local-only files unless the user explicitly asks: `local-secrets.ini`, `local-paths.ini`, `local-startup.ini`, `memory-vars.ini`, `rom.ini`, `storage.db`, `run-result.json`, `run-result-macos.json`.
+- Never touch local-only files unless the user explicitly asks: `local-secrets.ini`, `local-startup.ini`, `rom.ini`, `storage.db`, `run-result.json`, `run-result-macos.json`, `platforms/shared/data/memory-vars.ini`, `platforms/shared/data/local-paths.ini`.
 - Never reintroduce retired env fallbacks, retired workspace names, or references to removed guide paths.
 - Never guess machine paths; use `*.example.*` only as shape references.
 - Never depend on Git metadata at runtime.
@@ -130,6 +130,7 @@ Avoid mixing: `session` with old login/logon terms, `window` with desktop/gui sy
 | macOS runtime (Hammerspoon) | `platforms/macos/hammerspoon/` |
 | Human-managed hotkey catalog (shared) | `platforms/shared/data/hotkeys.db` |
 | Shared local-only SAP comment signature | `platforms/shared/data/memory-vars.ini` |
+| Shared local-only machine paths | `platforms/shared/data/local-paths.ini` |
 | Hotkey artifact generation and drift check | `ai/hotkey_sync.py` |
 | Windows-only versioned catalogs | `platforms/windows/data/*.json` |
 | Catalog review state | `ai/catalog-review.json` |

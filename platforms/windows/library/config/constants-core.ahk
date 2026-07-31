@@ -22,7 +22,7 @@ loadCorePathConstants() {
   SplitPath(pathScript, , &pathScriptOnelevelup)
   dataDir := resolveDataDir(pathScript)
   memoryVarsIniFile := pathScriptOnelevelup "\shared\data\memory-vars.ini"
-  localPathsFile := localPathsFilePath(pathScript)
+  localPathsFile := localPathsFilePath(pathScriptOnelevelup)
   pathAbapWorkspace := pathConfigValue(localPathsFile, "pathAbapWorkspace", "")
   fileEverythingCli := pathConfigValue(localPathsFile, "fileEverythingCli", pathScript "\tools\exe\everything\es.exe")
 }
@@ -31,8 +31,8 @@ resolveDataDir(pathScript) {
   return pathScript "\data\"
 }
 
-localPathsFilePath(pathScript) {
-  return pathScript "\data\local-paths.ini"
+localPathsFilePath(pathScriptOnelevelup) {
+  return pathScriptOnelevelup "\shared\data\local-paths.ini"
 }
 
 pathConfigValue(localPathsFile, key, defaultValue := "") {
