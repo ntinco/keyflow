@@ -7,6 +7,9 @@
 ^b::{
 services.sap.focusGuiWindows()
 }
+!4::{
+services.sap.openSe24()
+}
 !5::{
 services.sap.openWorkbenchOptions()
 }

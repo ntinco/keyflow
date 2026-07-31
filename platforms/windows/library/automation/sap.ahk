@@ -67,6 +67,10 @@ class SapService {
     this.runTcode("se16n")
   }
 
+  openSe24() {
+    this.runTcode("se24")
+  }
+
   openSe37() {
     this.runTcode("se37")
   }

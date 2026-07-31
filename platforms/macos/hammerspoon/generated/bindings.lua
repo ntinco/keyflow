@@ -19,6 +19,7 @@ return {
   {id = "launcher_alt_p", type = "hotkey", key = "!p", contextLabel = "launcher", label = "Open selected media"},
   {id = "launcher_f12", type = "hotkey", key = "f12", contextLabel = "launcher", label = "Paste selected files"},
   {id = "sap_gui_alt_0", type = "hotkey", key = "!0", contextLabel = "sap-gui-session", label = "SE80 object navigator"},
+  {id = "sap_gui_alt_4", type = "hotkey", key = "!4", contextLabel = "sap-gui-session", label = "SE24 class builder"},
   {id = "sap_gui_alt_5", type = "hotkey", key = "!5", contextLabel = "sap-gui-session", label = "Workbench options"},
   {id = "sap_gui_alt_6", type = "hotkey", key = "!6", contextLabel = "sap-gui-session", label = "SE16N table browser"},
   {id = "sap_gui_alt_7", type = "hotkey", key = "!7", contextLabel = "sap-gui-session", label = "SE37 function modules"},

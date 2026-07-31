@@ -32,7 +32,7 @@
       "platforms/windows/hotkeys/domains/productivity.ahk": 3,
       "platforms/windows/hotkeys/global.ahk": 6,
       "platforms/windows/hotkeys/sap-eclipse.ahk": 3,
-      "platforms/windows/hotkeys/sap-gui.ahk": 7
+      "platforms/windows/hotkeys/sap-gui.ahk": 8
     },
     "dead_class_candidates": [],
     "dead_constant_candidates": [],
@@ -263,6 +263,7 @@
           "isTextInputActive",
           "openSe09",
           "openSe16n",
+          "openSe24",
           "openSe37",
           "openSe38",
           "openSe80",
@@ -283,6 +284,7 @@
           "runTcode",
           "openWorkbenchOptions",
           "openSe16n",
+          "openSe24",
           "openSe37",
           "openSe38",
           "openSe09",
@@ -544,6 +546,7 @@
           "sap.focusGuiWindows",
           "sap.openSe09",
           "sap.openSe16n",
+          "sap.openSe24",
           "sap.openSe37",
           "sap.openSe38",
           "sap.openSe80",
