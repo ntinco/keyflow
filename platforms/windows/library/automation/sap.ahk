@@ -59,12 +59,6 @@ class SapService {
     this._submitTcodeButton(normalizedTcode)
   }
 
-  focusGuiWindows() {
-    if !(services.HasOwnProp("windowGroup"))
-      return
-    services.windowGroup.activateGroup(appActivationTargets, "apps_sap_windows")
-  }
-
   promptAndOpenAbapObject() {
     Send("^+a")
     Sleep(this._resolveOperationDelayMs())

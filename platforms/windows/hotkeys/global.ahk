@@ -35,6 +35,3 @@ services.snipaste.copyPaste("{printscreen}",snipasteTargets)
 $^!+a::{
 reload()
 }
-~^c::{
-services.snipaste.ctrlC()
-}

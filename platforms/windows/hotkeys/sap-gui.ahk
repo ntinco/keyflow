@@ -4,9 +4,6 @@
 ; SAP GUI triggers only; implementation lives in library/automation/sap.ahk.
 
 #hotif winactive("ahk_group group_sap_gui_windows")
-^b::{
-services.sap.focusGuiWindows()
-}
 !4::{
 services.sap.runTcode("SE24")
 }

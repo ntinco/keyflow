@@ -1,8 +1,8 @@
 {
   "summary": {
-    "ok": false,
-    "issue_count": 1,
-    "ai_readiness": 90,
+    "ok": true,
+    "issue_count": 0,
+    "ai_readiness": 100,
     "services": [
       "hotstring",
       "launcher",
@@ -30,9 +30,9 @@
     },
     "hotkey_counts": {
       "platforms/windows/hotkeys/domains/productivity.ahk": 3,
-      "platforms/windows/hotkeys/global.ahk": 6,
+      "platforms/windows/hotkeys/global.ahk": 5,
       "platforms/windows/hotkeys/sap-eclipse.ahk": 3,
-      "platforms/windows/hotkeys/sap-gui.ahk": 10
+      "platforms/windows/hotkeys/sap-gui.ahk": 9
     },
     "dead_class_candidates": [],
     "dead_constant_candidates": [],
@@ -54,14 +54,7 @@
     "governance": [],
     "local_only_contract": [],
     "hotkey_catalog": [],
-    "macos_runtime": [
-      {
-        "type": "macos_runtime_contract_missing",
-        "file": "platforms/macos/hammerspoon",
-        "contract": "hs.eventtap.keyStroke({\"cmd\"}, \"f1\")",
-        "message": "The macOS MouseFwd adapter must route capture through Command+F1."
-      }
-    ],
+    "macos_runtime": [],
     "unclosed_hotif": [],
     "forbidden_references": []
   },
@@ -264,7 +257,6 @@
         "class": "SapService",
         "class_file": "platforms/windows/library/automation/sap.ahk",
         "referenced_methods": [
-          "focusGuiWindows",
           "insertCommentBlock",
           "insertCommentLine",
           "isTextInputActive",
@@ -282,7 +274,6 @@
           "_buildCommentMarkup",
           "isTextInputActive",
           "runTcode",
-          "focusGuiWindows",
           "promptAndOpenAbapObject",
           "promptAndSearchAbapObject",
           "_normalizeTcodeForSap",
@@ -295,12 +286,9 @@
         "class": "SnipasteService",
         "class_file": "platforms/windows/library/automation/snipaste.ahk",
         "referenced_methods": [
-          "copyPaste",
-          "ctrlC"
+          "copyPaste"
         ],
         "declared_methods": [
-          "__new",
-          "ctrlC",
           "copyPaste",
           "_lastEditorActive",
           "_hasImageInClipboard"
@@ -521,7 +509,6 @@
           "sap.insertCommentBlock",
           "sap.insertCommentLine",
           "snipaste.copyPaste",
-          "snipaste.ctrlC",
           "windowGroup.activateGroup",
           "windows.resizeHeight"
         ]
@@ -536,7 +523,6 @@
       {
         "file": "platforms/windows/hotkeys/sap-gui.ahk",
         "calls": [
-          "sap.focusGuiWindows",
           "sap.runTcode"
         ]
       },
@@ -545,12 +531,6 @@
         "calls": [
           "sap.isTextInputActive",
           "sap.runTcode"
-        ]
-      },
-      {
-        "file": "platforms/windows/library/automation/sap.ahk",
-        "calls": [
-          "windowGroup.activateGroup"
         ]
       },
       {

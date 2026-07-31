@@ -1,14 +1,5 @@
 ﻿class SnipasteService {
-  __new() {
-    this.ctrlCSourceExe := ""
-  }
-
-  ctrlC(){
-    try this.ctrlCSourceExe := WinGetProcessname("A")
-  }
-
   copyPaste(key, snipasteTargets := []) {
-    this.ctrlCSourceExe := ""
     A_Clipboard := ""
     Sleep(100)
     if key
