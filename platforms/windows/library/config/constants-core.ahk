@@ -11,9 +11,8 @@ loadCoreBaseConstants() {
   tab := "{tab}"
   enter := "{enter}"
   runtimeEnvFile := runtimeEnvFilePath()
-  EnvSet("YMT1", runtimeEnvValue(runtimeEnvFile, "YMT1", "ym.lnk||X|"))
-  EnvSet("YSAP", runtimeEnvValue(runtimeEnvFile, "YSAP", "ym.lnk||X|"))
-  sapDelayPollMs := runtimeConfigValue(runtimeEnvFile, "sap-delays", "pollMs", "100")
+  EnvSet("YMT", "ym.lnk")
+  sapDelayPollMs := 100
 }
 
 runtimeEnvFilePath() {
@@ -39,9 +38,8 @@ loadCorePathConstants() {
   memoryVarsIniFile := pathScriptOnelevelup "\shared\data\memory-vars.ini"
   localPathsFile := localPathsFilePath(pathScript)
   pathAbapGitRepo := pathConfigValue(localPathsFile, "pathAbapGitRepo", "")
-  pathYmWorkspace := pathConfigValue(localPathsFile, "pathYmWorkspace", "")
-  pathAbapInbox := pathConfigValue(localPathsFile, "pathAbapInbox", "")
-  fileEverythingCli := pathConfigValue(localPathsFile, "fileEverythingCli", pathScriptOnelevelup "\exe\everything\es.exe")
+  pathAbapWorkspace := pathConfigValue(localPathsFile, "pathAbapWorkspace", "")
+  fileEverythingCli := pathConfigValue(localPathsFile, "fileEverythingCli", pathScript "\tools\exe\everything\es.exe")
 }
 
 resolveDataDir(pathScript) {
