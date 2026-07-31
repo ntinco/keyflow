@@ -134,10 +134,6 @@
     "windowGroup",
     "windows"
   ],
-  "startup-config-sections": [
-    "runtime-env",
-    "sap-delays"
-  ],
   "local-only-files": [
     "ai/run-result.json",
     "ai/run-result-macos.json",

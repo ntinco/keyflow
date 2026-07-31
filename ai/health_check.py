@@ -12,7 +12,6 @@ from pathlib import Path
 
 
 RE_INCLUDE = re.compile(r'^\s*#Include\s+"?([^"\r\n]+)"?', re.MULTILINE)
-RE_INI_SECTION = re.compile(r"^\s*\[([^\]]+)\]\s*$", re.MULTILINE)
 RE_CLASS_HEADER = re.compile(
     r"^\s*class\s+([A-Za-z_][A-Za-z0-9_]*)(?:\s+extends\s+([A-Za-z_][A-Za-z0-9_]*))?\s*\{",
     re.MULTILINE,
@@ -163,10 +162,6 @@ def parse_hotstring_profiles(bootstrap_text: str) -> list[dict[str, str]]:
     ):
         entries.append({"label": label, "group": group, "mode": mode})
     return entries
-
-
-def parse_ini_sections(text: str) -> list[str]:
-    return RE_INI_SECTION.findall(text)
 
 
 def resolve_include(include_value: str, current_file: Path) -> Path:
@@ -669,7 +664,6 @@ def validate_governance_contract(
 def validate_repo_map_contracts(
     repo_root: Path,
     repo_map: dict[str, object],
-    startup_sections: list[str],
     registry: dict[str, str],
 ) -> list[dict[str, str]]:
     issues: list[dict[str, str]] = []
@@ -760,16 +754,6 @@ def validate_repo_map_contracts(
                     "message": "repo-map points to ai/current-plan.md but the file does not exist.",
                 }
             )
-
-    repo_map_startup_sections = repo_map.get("startup-config-sections", [])
-    if repo_map_startup_sections != startup_sections:
-        issues.append(
-            {
-                "type": "repo_map_startup_sections_mismatch",
-                "file": "ai/repo-map.json",
-                "message": "startup-config-sections in repo-map.json do not match local-startup.example.ini.",
-            }
-        )
 
     runtime_api = repo_map.get("runtime-api", [])
     if not isinstance(runtime_api, list) or sorted(runtime_api) != sorted(registry):
@@ -1442,8 +1426,6 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
     hotkeys_dir = repo_root / "platforms/windows/hotkeys"
     data_dir = repo_root / "platforms/windows/data"
     bootstrap_text = read_text(bootstrap_file)
-    startup_example_text = read_text(data_dir / "local-startup.example.ini")
-    startup_sections = parse_ini_sections(startup_example_text)
 
     repo_map: dict[str, object] = {}
     if repo_map_file.exists():
@@ -1477,7 +1459,7 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
     unused_groups = scan_group_candidates(repo_root, token_counter)
     forbidden_references = scan_forbidden_references(repo_root)
     repo_map_contract_issues = (
-        validate_repo_map_contracts(repo_root, repo_map, startup_sections, registry)
+        validate_repo_map_contracts(repo_root, repo_map, registry)
         if repo_map
         else []
     )

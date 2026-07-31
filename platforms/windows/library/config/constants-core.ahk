@@ -33,7 +33,6 @@ loadCorePathConstants() {
   dataDir := resolveDataDir(pathScript)
   memoryVarsIniFile := pathScriptOnelevelup "\shared\data\memory-vars.ini"
   localPathsFile := localPathsFilePath(pathScript)
-  pathAbapGitRepo := pathConfigValue(localPathsFile, "pathAbapGitRepo", "")
   pathAbapWorkspace := pathConfigValue(localPathsFile, "pathAbapWorkspace", "")
   fileEverythingCli := pathConfigValue(localPathsFile, "fileEverythingCli", pathScript "\tools\exe\everything\es.exe")
 }
