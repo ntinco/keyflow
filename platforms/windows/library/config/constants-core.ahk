@@ -10,18 +10,8 @@ loadCoreBaseConstants() {
   constDayEs := FormatTime(, "dd.MM.yy")
   tab := "{tab}"
   enter := "{enter}"
-  runtimeEnvFile := runtimeEnvFilePath()
   EnvSet("YMT", "ym.lnk")
   sapDelayPollMs := 100
-}
-
-runtimeEnvFilePath() {
-  SplitPath(A_LineFile, , &configDir)
-  return configDir "\..\..\data\local-startup.ini"
-}
-
-runtimeConfigValue(configFile, section, key, defaultValue := "") {
-  return IniRead(configFile, section, key, defaultValue)
 }
 
 loadCorePathConstants() {
