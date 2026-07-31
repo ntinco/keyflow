@@ -17,13 +17,14 @@ package.loaded["keyflow.runtime"] = Runtime
 local function parseAhkKey(ahkKey)
   local mods = {}
   local key = ahkKey
+  local keyAliases = {enter = "return"}
   key = key:gsub("^~", "")
   local prefixMap = {["^"] = "ctrl", ["+"] = "shift", ["!"] = "alt", ["#"] = "cmd"}
   while #key > 0 and prefixMap[key:sub(1, 1)] do
     table.insert(mods, prefixMap[key:sub(1, 1)])
     key = key:sub(2)
   end
-  return mods, key
+  return mods, keyAliases[key:lower()] or key
 end
 
 local CONTEXT_APPS = {

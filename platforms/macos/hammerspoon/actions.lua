@@ -28,8 +28,10 @@ local SNIPASTE_PASTE_TARGETS = {
   ["com.microsoft.teams2"] = true,
 }
 
+local FINDER_CLIPBOARD_SETTLE_SECONDS = 0.1
 local launcherTargetApp
 local snipasteTargetApp
+local iinaTask
 
 local function isLauncherApp(app)
   local bundleID = app and app:bundleID()
@@ -297,21 +299,24 @@ local function withFinderPaths(sourceBundleID, targetApp, clipboard, callback)
     copyAttempts = copyAttempts + 1
     hs.pasteboard.clearContents()
     hs.pasteboard.callbackWhenChanged(0.75, function(changed)
-      local paths = changed and readClipboardPaths() or {}
-      hs.printf(
-        "keyflow: finder copy=%d changed=%s paths=%d",
-        copyAttempts,
-        tostring(changed),
-        #paths
-      )
-      if #paths > 0 then
-        callback(paths, clipboard, targetApp)
-      elseif copyAttempts < 4 and isFrontApp(APP_BUNDLE_IDS.finder) then
-        hs.timer.doAfter(0.25, copySelection)
-      else
-        restoreClipboard(clipboard)
-        if targetApp then targetApp:activate() end
-      end
+      -- Finder signals the pasteboard before its path text is readable.
+      hs.timer.doAfter(changed and FINDER_CLIPBOARD_SETTLE_SECONDS or 0, function()
+        local paths = changed and readClipboardPaths() or {}
+        hs.printf(
+          "keyflow: finder copy=%d changed=%s paths=%d",
+          copyAttempts,
+          tostring(changed),
+          #paths
+        )
+        if #paths > 0 then
+          callback(paths, clipboard, targetApp)
+        elseif copyAttempts < 4 and isFrontApp(APP_BUNDLE_IDS.finder) then
+          hs.timer.doAfter(0.25, copySelection)
+        else
+          restoreClipboard(clipboard)
+          if targetApp then targetApp:activate() end
+        end
+      end)
     end)
     hs.eventtap.keyStroke({"cmd", "alt"}, "c")
   end
@@ -396,26 +401,29 @@ end
 
 Actions.launcher_alt_p = function()
   withLauncherPaths(function(paths, clipboard)
-    local mediaPaths = {}
-    for _, path in ipairs(paths) do
-      local lowerPath = path:lower()
-      if lowerPath:find("music", 1, true)
-          or lowerPath:find("audio", 1, true)
-          or lowerPath:find("video", 1, true) then
-        mediaPaths[#mediaPaths + 1] = path
-      end
-    end
-    if #mediaPaths == 0 then
-      restoreClipboard(clipboard)
-      return
-    end
     restoreClipboard(clipboard)
     local appPath = hs.application.pathForBundleID(APP_BUNDLE_IDS.iina)
     local cliPath = appPath and appPath .. "/Contents/MacOS/iina-cli"
+    if not cliPath then
+      hs.printf("keyflow: IINA application not found")
+      return
+    end
     local args = {"--no-stdin"}
-    for _, path in ipairs(mediaPaths) do args[#args + 1] = path end
-    local task = cliPath and hs.task.new(cliPath, nil, args)
-    if task then task:start() end
+    for _, path in ipairs(paths) do args[#args + 1] = path end
+    iinaTask = hs.task.new(cliPath, function(exitCode, _, errorOutput)
+      hs.printf(
+        "keyflow: IINA CLI finished exit=%d error=%s",
+        exitCode,
+        (errorOutput or ""):match("^%s*(.-)%s*$")
+      )
+      iinaTask = nil
+    end, args)
+    if not iinaTask or not iinaTask:start() then
+      iinaTask = nil
+      hs.printf("keyflow: IINA CLI did not start")
+      return
+    end
+    hs.printf("keyflow: IINA CLI started paths=%d", #paths)
   end)
 end
 

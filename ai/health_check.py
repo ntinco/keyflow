@@ -1296,8 +1296,14 @@ def validate_macos_runtime(repo_root: Path) -> list[dict[str, object]]:
             "Application changes must reset the macOS hotstring buffer.",
         "iina-cli":
             "Alt+P must dispatch selected media through IINA's playback CLI.",
+        "local iinaTask":
+            "Alt+P must retain the asynchronous IINA task through completion.",
+        "FINDER_CLIPBOARD_SETTLE_SECONDS":
+            "Finder path reads must wait for its pasteboard payload to settle.",
         "Actions.snipasteIsActive":
             "Snipaste overlay dispatch must be scoped to Snipaste.",
+        'enter = "return"':
+            "AHK Enter bindings must map to the macOS Return keycode.",
         'hs.eventtap.keyStroke({"cmd"}, "f1")':
             "The macOS MouseFwd adapter must route capture through Command+F1.",
     }
