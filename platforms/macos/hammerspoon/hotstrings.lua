@@ -60,6 +60,11 @@ local function hasWordCharacterBefore(buffer, pattern, terminator)
   return preceding:match("[%w_]") ~= nil
 end
 
+local function isImmediatePersonName(trigger, value)
+  return trigger:match("^[a-z]+$")
+    and value:match("^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+$")
+end
+
 local function captureClipboard()
   return {
     data = hs.pasteboard.readAllData(),
@@ -157,7 +162,9 @@ local function buildTriggers(bindings, profiles)
       local mode = profile.mode
       triggers[#triggers + 1] = {
         pattern = entry.trigger,
-        immediate = mode == "sap-command" or entry.immediate,
+        immediate = mode == "sap-command"
+          or entry.immediate
+          or (mode == "replace" and isImmediatePersonName(entry.trigger, value)),
         contextLabel = profile.contextLabel,
         profileID = profile.id,
         replacement = function()

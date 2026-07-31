@@ -48,9 +48,21 @@
       return ":*:"
     if (mode = "autocorrect" and entry is Map and entry.Has("immediate"))
       return entry["immediate"] ? ":*:" : "::"
+    if (mode = "autocorrect" and this._isImmediatePersonName(trigger, value))
+      return ":*:"
     if (mode = "autocorrect")
       return "::"
     return "::"
+  }
+
+  _isImmediatePersonName(trigger, value) {
+    if !(trigger is String) || !(value is String)
+      return false
+    if (trigger = "" or value = "")
+      return false
+    if !RegExMatch(trigger, "^[a-z]+$")
+      return false
+    return RegExMatch(value, "^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+$")
   }
 
   _isSapInputMode(mode) {

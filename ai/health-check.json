@@ -220,6 +220,7 @@
           "_registerEntries",
           "_submitSapTcode",
           "_resolveHotstringOptions",
+          "_isImmediatePersonName",
           "_isSapInputMode",
           "_resetHotstringContext",
           "_loadEntries",
