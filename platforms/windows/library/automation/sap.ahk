@@ -59,34 +59,6 @@ class SapService {
     this._submitTcodeButton(normalizedTcode)
   }
 
-  openWorkbenchOptions() {
-    this.runTcode("ed")
-  }
-
-  openSe16n() {
-    this.runTcode("se16n")
-  }
-
-  openSe24() {
-    this.runTcode("se24")
-  }
-
-  openSe37() {
-    this.runTcode("se37")
-  }
-
-  openSe38() {
-    this.runTcode("se38")
-  }
-
-  openSe09() {
-    this.runTcode("se09")
-  }
-
-  openSe80() {
-    this.runTcode("se80")
-  }
-
   focusGuiWindows() {
     if !(services.HasOwnProp("windowGroup"))
       return

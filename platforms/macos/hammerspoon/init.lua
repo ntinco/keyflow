@@ -47,12 +47,21 @@ for contextLabel in pairs(CONTEXT_APPS) do
   Runtime.hotkeysByApp[contextLabel] = {}
 end
 
+local function actionForBinding(binding)
+  if binding.tcode ~= "" then
+    return function()
+      Actions.runSapTcode(binding.tcode)
+    end
+  end
+  return Actions[binding.id]
+end
+
 local loadedCount = 0
 local eventBindings = {}
 for _, binding in ipairs(bindings) do
   if binding.type == "hotkey"
       and (binding.contextLabel == "global" or CONTEXT_APPS[binding.contextLabel]) then
-    local action = Actions[binding.id]
+    local action = actionForBinding(binding)
     if action then
       local mods, key = parseAhkKey(binding.key)
       if binding.contextLabel == "global"

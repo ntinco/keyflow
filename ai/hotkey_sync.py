@@ -44,15 +44,13 @@ CREATE TABLE IF NOT EXISTS hotkeys (
     key           TEXT,
     trigger       TEXT,
     options       TEXT,
-    context       TEXT,
-    context_fn    TEXT,
-    context_label TEXT,
-    action        TEXT NOT NULL,
-    label         TEXT NOT NULL,
-    platform      TEXT NOT NULL,
-    active        INTEGER NOT NULL DEFAULT 1,
-    notes         TEXT DEFAULT '',
-    portability   TEXT NOT NULL DEFAULT 'windows-only'
+    windows_context TEXT,
+    context_label   TEXT,
+    action          TEXT NOT NULL,
+    label           TEXT NOT NULL,
+    platform        TEXT NOT NULL,
+    active          INTEGER NOT NULL DEFAULT 1,
+    portability     TEXT NOT NULL DEFAULT 'windows-only'
 );
 
 CREATE TABLE IF NOT EXISTS hotstring_profiles (
@@ -77,8 +75,8 @@ CREATE TABLE IF NOT EXISTS hotstring_entries (
 
 DB_COLUMNS = [
     "sort_order", "id", "file", "type", "key", "trigger", "options",
-    "context", "context_fn", "context_label",
-    "action", "label", "platform", "active", "notes", "portability",
+    "windows_context", "context_label",
+    "action", "label", "platform", "active", "portability",
 ]
 
 FILE_HEADERS = {
@@ -95,6 +93,8 @@ FILE_TITLES = {
 
 FILE_ORDER = {name: i for i, name in enumerate(FILE_TITLES)}
 FILE_KEY_RE = re.compile(r"^[a-z0-9][a-z0-9/-]*$")
+SAP_TCODE_ACTION_PREFIX = "sap-tcode:"
+SAP_TCODE_RE = re.compile(r"^[A-Za-z0-9._/-]+$")
 
 
 class CatalogError(RuntimeError):
@@ -223,6 +223,13 @@ def load_db() -> list[dict[str, object]]:
     return entries
 
 
+def _sap_tcode(entry: dict[str, object]) -> str | None:
+    action = str(entry["action"])
+    if not action.startswith(SAP_TCODE_ACTION_PREFIX):
+        return None
+    return action.removeprefix(SAP_TCODE_ACTION_PREFIX)
+
+
 def validate_entries(entries: list[dict[str, object]]) -> None:
     issues: list[str] = []
     seen_ids: set[str] = set()
@@ -248,8 +255,9 @@ def validate_entries(entries: list[dict[str, object]]) -> None:
             issues.append(f"{entry_id}: hotkey requires key")
         if entry_type == "hotstring" and (not entry.get("trigger") or not entry.get("options")):
             issues.append(f"{entry_id}: hotstring requires trigger and options")
-        if entry.get("context") and entry.get("context_fn"):
-            issues.append(f"{entry_id}: context and context_fn are mutually exclusive")
+        windows_context = str(entry.get("windows_context") or "").strip()
+        if windows_context.startswith("#hotif"):
+            issues.append(f"{entry_id}: windows_context must be an expression without #hotif")
         platforms = entry.get("platform")
         if not isinstance(platforms, list) or not platforms:
             issues.append(f"{entry_id}: platform must be a non-empty JSON array")
@@ -257,8 +265,16 @@ def validate_entries(entries: list[dict[str, object]]) -> None:
             issues.append(f"{entry_id}: platform values must be windows or macos")
         if entry.get("portability") not in {"windows-only", "portable-intent"}:
             issues.append(f"{entry_id}: portability must be windows-only or portable-intent")
-        if not str(entry.get("action") or "").strip() or not str(entry.get("label") or "").strip():
+        action = str(entry.get("action") or "").strip()
+        if not action or not str(entry.get("label") or "").strip():
             issues.append(f"{entry_id}: action and label are required")
+        tcode = _sap_tcode(entry)
+        if tcode is not None and (
+            entry_type != "hotkey" or not SAP_TCODE_RE.fullmatch(tcode)
+        ):
+            issues.append(
+                f"{entry_id}: sap-tcode action requires a hotkey and a valid transaction code"
+            )
     if issues:
         raise CatalogError("Catalog validation failed:\n- " + "\n- ".join(issues))
 
@@ -268,18 +284,21 @@ def _ahk_str(value: str) -> str:
 
 
 def _format_hotif(entry: dict[str, object]) -> str | None:
-    if entry.get("context_fn"):
-        return f'#hotif {entry["context_fn"]}'
-    if entry.get("context"):
-        return f'#hotif winactive({entry["context"]})'
-    return None
+    windows_context = str(entry.get("windows_context") or "").strip()
+    return f"#hotif {windows_context}" if windows_context else None
 
 
 def _render_block(entry: dict[str, object]) -> str:
+    action = _sap_tcode(entry)
+    rendered_action = (
+        f'services.sap.runTcode("{_ahk_str(action)}")'
+        if action is not None
+        else str(entry["action"])
+    )
     if entry["type"] == "hotstring":
-        lines = [f'{entry["options"]}{entry["trigger"]}::{{', str(entry["action"]), "}"]
+        lines = [f'{entry["options"]}{entry["trigger"]}::{{', rendered_action, "}"]
     else:
-        lines = [f'{entry["key"]}::{{', str(entry["action"]), "}"]
+        lines = [f'{entry["key"]}::{{', rendered_action, "}"]
     return "\n".join(lines)
 
 
@@ -299,7 +318,7 @@ def generate_file(file_key: str, entries: list[dict[str, object]]) -> str:
     groups: dict[str, list[dict[str, object]]] = {}
     order: list[str] = []
     for entry in active:
-        context_key = str(entry.get("context_fn") or entry.get("context") or "__global__")
+        context_key = str(entry.get("windows_context") or "__global__")
         if context_key not in groups:
             groups[context_key] = []
             order.append(context_key)
@@ -386,10 +405,8 @@ def _lua_str(value: str) -> str:
 
 
 def generate_macos_bindings(entries: list[dict[str, object]]) -> str:
-    """Emit binding metadata only (id, key/trigger, context, label) for
-    entries targeting macos. Actual behavior is hand-authored in
-    platforms/macos/hammerspoon/actions.lua, matched by id; the action
-    column is implementation intent and is not transpiled to Lua."""
+    """Emit binding metadata and portable SAP transaction codes for macOS.
+    Other behavior remains hand-authored in actions.lua, matched by id."""
     active = [
         entry for entry in entries
         if entry["active"] and "macos" in entry["platform"]
@@ -398,18 +415,21 @@ def generate_macos_bindings(entries: list[dict[str, object]]) -> str:
         LUA_GENERATED_MARKER,
         "-- Human source: platforms/shared/data/hotkeys.db",
         "-- Regenerate: python ai/hotkey_sync.py --sync",
-        "-- Behavior lives in platforms/macos/hammerspoon/actions.lua and hotstrings.lua, matched by id.",
+        "-- Behavior lives in platforms/macos/hammerspoon/actions.lua and hotstrings.lua.",
+        "-- sap-tcode:<code> actions expose tcode for the shared SAP adapter.",
         "",
         "return {",
     ]
     for entry in sorted(active, key=lambda e: str(e["id"])):
         key_or_trigger = entry["trigger"] if entry["type"] == "hotstring" else entry["key"]
+        tcode = _sap_tcode(entry) or ""
         lines.append(
             "  {"
             f'id = "{_lua_str(str(entry["id"]))}", '
             f'type = "{_lua_str(str(entry["type"]))}", '
             f'key = "{_lua_str(str(key_or_trigger))}", '
             f'contextLabel = "{_lua_str(str(entry.get("context_label") or ""))}", '
+            f'tcode = "{_lua_str(tcode)}", '
             f'label = "{_lua_str(str(entry["label"]))}"'
             "},"
         )

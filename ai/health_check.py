@@ -1265,12 +1265,12 @@ def validate_macos_runtime(repo_root: Path) -> list[dict[str, object]]:
             "message": "Generated macOS hotstring profile catalog does not return a Lua table.",
         })
     bindings = re.findall(
-        r'\{id\s*=\s*"([^"]+)",\s*type\s*=\s*"([^"]+)",.*?contextLabel\s*=\s*"([^"]*)"',
+        r'\{id\s*=\s*"([^"]+)",\s*type\s*=\s*"([^"]+)",.*?contextLabel\s*=\s*"([^"]*)",\s*tcode\s*=\s*"([^"]*)"',
         bindings_text,
     )
     bound_hotkey_ids = {
         binding_id
-        for binding_id, binding_type, _ in bindings
+        for binding_id, binding_type, _, _ in bindings
         if binding_type == "hotkey"
     }
     binding_action_prefixes = (
@@ -1317,13 +1317,24 @@ def validate_macos_runtime(repo_root: Path) -> list[dict[str, object]]:
                 "message": message,
             })
 
-    for binding_id, binding_type, context_label in bindings:
-        if binding_type == "hotkey" and binding_id not in action_ids:
+    for binding_id, binding_type, context_label, tcode in bindings:
+        if (
+            binding_type == "hotkey"
+            and not tcode
+            and binding_id not in action_ids
+        ):
             issues.append({
                 "type": "macos_action_missing",
                 "file": to_repo_path(actions_file, repo_root),
                 "binding": binding_id,
                 "message": "Generated macOS hotkey has no registered action.",
+            })
+        if binding_type == "hotkey" and tcode and "Actions.runSapTcode(binding.tcode)" not in text:
+            issues.append({
+                "type": "macos_sap_tcode_adapter_missing",
+                "file": to_repo_path(init_file, repo_root),
+                "binding": binding_id,
+                "message": "Generated SAP transaction binding requires the shared macOS SAP adapter.",
             })
         if (
             binding_type == "hotkey"

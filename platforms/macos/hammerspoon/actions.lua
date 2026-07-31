@@ -239,14 +239,6 @@ end
 
 Actions.runSapTcode = runTcode
 
-Actions.sap_gui_alt_4 = function() runTcode("se24") end
-Actions.sap_gui_alt_5 = function() runTcode("ed") end
-Actions.sap_gui_alt_6 = function() runTcode("se16n") end
-Actions.sap_gui_alt_7 = function() runTcode("se37") end
-Actions.sap_gui_alt_8 = function() runTcode("se38") end
-Actions.sap_gui_alt_9 = function() runTcode("se09") end
-Actions.sap_gui_alt_0 = function() runTcode("se80") end
-
 local PASTEABLE_EXTENSIONS = {
   abap = true,
   ahk = true,

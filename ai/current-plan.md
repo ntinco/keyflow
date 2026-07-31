@@ -33,7 +33,7 @@ Status: in progress
 
 ## Design constraint
 
-`hotkeys.db` `hotkeys.action` column holds implementation intent (raw AHK for Windows entries), not behavior transpilable to Lua. `ai/hotkey_sync.py` filters generated runtime artifacts by platform and generates binding metadata only (`generated/bindings.lua`) for macOS; behavior is hand-authored in `actions.lua`/`hotstrings.lua`, matched by row `id`.
+`hotkeys.db` is the shared source for both runtimes. Its reduced `hotkeys` schema uses one `windows_context` expression for Windows `#HotIf` generation and has no unused notes field. Most `action` values remain platform-specific implementation owned by the matching runtime `id`; the typed portable action `sap-tcode:<code>` is the intentional exception. `ai/hotkey_sync.py` emits `services.sap.runTcode("<code>")` for Windows and `tcode` metadata in `generated/bindings.lua` for macOS, where one `Actions.runSapTcode` adapter executes it.
 
 `hotstring_profiles`/`hotstring_entries` are portable data (trigger, value, mode, context), not AHK syntax — these generate both the Windows JSON profiles and the macOS Lua profile catalog from one source, with `mode` (`replace`/`sap-command`) selecting the platform adapter at runtime.
 
