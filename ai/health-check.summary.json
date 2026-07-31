@@ -1,7 +1,7 @@
 {
-  "ok": true,
-  "issue_count": 0,
-  "ai_readiness": 100,
+  "ok": false,
+  "issue_count": 1,
+  "ai_readiness": 90,
   "services": [
     "hotstring",
     "launcher",

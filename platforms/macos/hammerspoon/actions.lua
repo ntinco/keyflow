@@ -469,7 +469,7 @@ local function resizeSnipasteImage(image, targetApp)
 end
 
 Actions.mouseFwd = function()
-  hs.eventtap.keyStroke({"cmd"}, "f1")
+  Actions.global_snipaste_capture()
 end
 
 Actions.global_snipaste_capture = function()
