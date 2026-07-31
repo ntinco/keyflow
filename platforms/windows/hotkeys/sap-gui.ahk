@@ -28,4 +28,10 @@ services.sap.runTcode("SE09")
 !0::{
 services.sap.runTcode("SE80")
 }
+!1::{
+services.sap.runTcode("SE11")
+}
+!3::{
+services.sap.runTcode("SE93")
+}
 #hotif

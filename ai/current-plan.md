@@ -6,7 +6,7 @@ Status: in progress
 
 - Eclipse/ADT hotkeys (backtick, F1, F2) and simple hotstrings.
 - Global Alt+D rotates among standard windows of running Cursor/VS Code instances; global Alt+E rotates among standard windows of running SAP GUI/Eclipse/ADT instances, including SAP sessions. The macOS adapters use ordered application groups and do not launch missing applications.
-- SAP GUI hotkeys (Alt+4..0 → SE24/Workbench/SE16N/SE37/SE38/SE09/SE80) through the native Target Command Field.
+- SAP GUI hotkeys (Alt+1 → SE11, Alt+3 → SE93, Alt+4..0 → SE24/Workbench/SE16N/SE37/SE38/SE09/SE80) through the native Target Command Field.
 - `sap-transaction-catalog` hotstrings preserve the typed transaction code and send only Enter when the active SAP window title contains `SAP Easy Access`; all other SAP windows and SAP hotstring profiles retain their normal command-field replacement with `/n`.
 - Finder and Spotlight launcher actions share one selected-path flow; Spotlight uses its native Finder reveal command, then the flow reads Finder's selected `AXURL.filePath` without mutating the clipboard.
 - Alt+P invokes IINA's bundled CLI with every selected Finder/Spotlight path, retains the asynchronous task through completion, and delegates media validation to IINA instead of maintaining a duplicate filename/path heuristic.
@@ -18,18 +18,19 @@ Status: in progress
 - Health validation enforces that `init.lua` loads `generated/hotstring_profiles.lua`, that `hotstrings.lua` consumes it, and that `actions.lua` exposes `Actions.runSapTcode`.
 - macOS replacements consume the matching `keyDown` event and delete only characters already inserted before pasting. This prevents the completing trigger character from surviving a replacement (for example, `nadia` now becomes `Nadia`, not `nadiNadia`).
 - Every replacement uses a single clipboard paste, preserving Unicode and avoiding per-character synthetic typing. A resettable clipboard session captures the original clipboard once and restores it after the last expansion.
-- The watcher completes each replacement synchronously. It tags every synthetic Delete, paste shortcut, and cursor event with `eventSourceUserData`, excludes that marker from the trigger buffer, and resets the buffer across applications, mouse focus changes, modified shortcuts, deletion, and non-text keys.
+- The watcher completes each replacement synchronously. It tags every synthetic Delete, paste shortcut, and cursor event with `eventSourceUserData`, excludes that marker from the trigger buffer, and resets the buffer across applications, mouse focus changes, modified shortcuts, deletion, and non-text keys. Replacements require a word boundary before their trigger; non-immediate replacements also wait for a trailing delimiter, so `eder` expands as a standalone word but never mutates `acceder`.
 
 ## Next actions
 
 1. Human: confirm repeated Alt+D rotates standard Cursor/VS Code windows and repeated Alt+E rotates SAP GUI/Eclipse/ADT windows, including SAP sessions, without launching a missing application.
 2. Human: in a `SAP Easy Access` window, confirm a `sap-transaction-catalog` hotstring preserves the typed code and sends only Enter; outside that title, confirm it continues to replace through the command field with `/n`. Confirm `sap-transaction-shortcuts` and `ymt-commands` retain their normal command behavior.
-3. Human: in an active SAP GUI session, confirm Alt+4 runs SE24 through the native Target Command Field on Windows and macOS.
-4. Human: confirm SAP/Eclipse context switching remains isolated after the loaded configuration change.
-5. Human: in Finder and Spotlight, verify F12 with a disposable text file and Alt+P with a media file selected from any directory.
-6. Human: launch the Windows runtime once to confirm the regenerated `platforms/windows/data/*.json` profiles still autocorrect/paste and run SAP transactions as before.
-7. Human: on macOS, verify SAP transaction codes run only while SAP GUI is frontmost.
-8. Human: verify Snipaste Command+F1 and MouseFwd start capture, then Enter returns the processed image to the originating application; confirm Teams also pastes automatically.
+3. Human: in an active SAP GUI session, confirm Alt+1 runs SE11, Alt+3 runs SE93, and Alt+4 runs SE24 through the native Target Command Field on Windows and macOS.
+4. Human: on macOS, confirm `eder` expands only as a standalone word and that typing `acceder` remains unchanged.
+5. Human: confirm SAP/Eclipse context switching remains isolated after the loaded configuration change.
+6. Human: in Finder and Spotlight, verify F12 with a disposable text file and Alt+P with a media file selected from any directory.
+7. Human: launch the Windows runtime once to confirm the regenerated `platforms/windows/data/*.json` profiles still autocorrect/paste and run SAP transactions as before.
+8. Human: on macOS, verify SAP transaction codes run only while SAP GUI is frontmost.
+9. Human: verify Snipaste Command+F1 and MouseFwd start capture, then Enter returns the processed image to the originating application; confirm Teams also pastes automatically.
 
 ## Design constraint
 

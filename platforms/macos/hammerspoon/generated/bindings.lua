@@ -20,6 +20,8 @@ return {
   {id = "launcher_alt_p", type = "hotkey", key = "!p", contextLabel = "launcher", tcode = "", label = "Open selected media"},
   {id = "launcher_f12", type = "hotkey", key = "f12", contextLabel = "launcher", tcode = "", label = "Paste selected files"},
   {id = "sap_gui_alt_0", type = "hotkey", key = "!0", contextLabel = "sap-gui-session", tcode = "SE80", label = "SE80 object navigator"},
+  {id = "sap_gui_alt_1", type = "hotkey", key = "!1", contextLabel = "sap-gui-session", tcode = "SE11", label = "SE11 ABAP Dictionary"},
+  {id = "sap_gui_alt_3", type = "hotkey", key = "!3", contextLabel = "sap-gui-session", tcode = "SE93", label = "SE93 transaction maintenance"},
   {id = "sap_gui_alt_4", type = "hotkey", key = "!4", contextLabel = "sap-gui-session", tcode = "SE24", label = "SE24 class builder"},
   {id = "sap_gui_alt_5", type = "hotkey", key = "!5", contextLabel = "sap-gui-session", tcode = "ED", label = "Workbench options"},
   {id = "sap_gui_alt_6", type = "hotkey", key = "!6", contextLabel = "sap-gui-session", tcode = "SE16N", label = "SE16N table browser"},

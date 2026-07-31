@@ -32,7 +32,7 @@
       "platforms/windows/hotkeys/domains/productivity.ahk": 3,
       "platforms/windows/hotkeys/global.ahk": 6,
       "platforms/windows/hotkeys/sap-eclipse.ahk": 3,
-      "platforms/windows/hotkeys/sap-gui.ahk": 8
+      "platforms/windows/hotkeys/sap-gui.ahk": 10
     },
     "dead_class_candidates": [],
     "dead_constant_candidates": [],

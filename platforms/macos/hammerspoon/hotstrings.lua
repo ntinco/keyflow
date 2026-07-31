@@ -53,9 +53,11 @@ local function isFrontSap()
   )
 end
 
-local function isImmediatePersonName(trigger, value)
-  return trigger:match("^[a-z]+$")
-    and value:match("^[A-Z][a-z]+$")
+local function hasWordCharacterBefore(buffer, pattern, terminator)
+  local startIndex = #buffer - #pattern - #(terminator or "") + 1
+  if startIndex <= 1 then return false end
+  local preceding = buffer:sub(startIndex - 1, startIndex - 1)
+  return preceding:match("[%w_]") ~= nil
 end
 
 local function captureClipboard()
@@ -155,9 +157,7 @@ local function buildTriggers(bindings, profiles)
       local mode = profile.mode
       triggers[#triggers + 1] = {
         pattern = entry.trigger,
-        immediate = mode == "sap-command"
-          or entry.immediate
-          or (mode == "replace" and isImmediatePersonName(entry.trigger, value)),
+        immediate = mode == "sap-command" or entry.immediate,
         contextLabel = profile.contextLabel,
         profileID = profile.id,
         replacement = function()
@@ -233,7 +233,9 @@ function Hotstrings.start(actions, bindings, profiles)
     buffer = (buffer .. chars):sub(-MAX_BUFFER)
     for _, trigger in ipairs(triggers) do
       if triggerMatchesContext(trigger) then
-        if trigger.immediate and buffer:sub(-#trigger.pattern) == trigger.pattern then
+        if trigger.immediate
+            and buffer:sub(-#trigger.pattern) == trigger.pattern
+            and not hasWordCharacterBefore(buffer, trigger.pattern) then
           local visibleCount = #trigger.pattern - 1
           if trigger.run then
             if actions.shouldSubmitExistingSapCatalogTcode(trigger.profileID) then
@@ -256,7 +258,8 @@ function Hotstrings.start(actions, bindings, profiles)
 
         if not trigger.immediate and isTerminator(chars) then
           local match = trigger.pattern .. chars
-          if buffer:sub(-#match) == match then
+          if buffer:sub(-#match) == match
+              and not hasWordCharacterBefore(buffer, trigger.pattern, chars) then
           local visibleCount = #trigger.pattern
           if trigger.run then
             if actions.shouldSubmitExistingSapCatalogTcode(trigger.profileID) then
