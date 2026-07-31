@@ -8,7 +8,7 @@
 services.sap.runTcode("SE24")
 }
 !5::{
-services.sap.runTcode("ED")
+services.sap.runTcode("=ED_OPTIONS")
 }
 !6::{
 services.sap.runTcode("SE16N")

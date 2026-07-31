@@ -119,7 +119,7 @@ FILE_TITLES = {
 FILE_ORDER = {name: i for i, name in enumerate(FILE_TITLES)}
 FILE_KEY_RE = re.compile(r"^[a-z0-9][a-z0-9/-]*$")
 SAP_TCODE_ACTION_PREFIX = "sap-tcode:"
-SAP_TCODE_RE = re.compile(r"^[A-Za-z0-9._/-]+$")
+SAP_TCODE_RE = re.compile(r"^=?[A-Za-z0-9._/-]+$")
 
 
 class CatalogError(RuntimeError):

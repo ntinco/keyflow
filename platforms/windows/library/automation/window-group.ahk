@@ -24,10 +24,12 @@ class WindowGroupService {
     if actives.Length > 0
     {
       targetId := actives[1].id
-      if WinActivate(targetId) = this.currentExe
+      ; If the top match in this group is the window already active, cycle
+      ; its internal tabs/documents instead of re-activating the same window.
+      sameWindowAlreadyActive := targetId = "ahk_id " this.currentId
+      WinActivate(targetId)
+      if sameWindowAlreadyActive
         Send("^{tab}")
-      else
-        WinActivate(targetId)
       this.currentId := targetId
     }
     else

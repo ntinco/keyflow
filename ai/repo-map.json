@@ -140,11 +140,11 @@
   ],
   "local-only-files": [
     "ai/run-result.json",
-    "platforms/windows/data/hotkey-usage.json",
+    "ai/run-result-macos.json",
     "platforms/windows/data/local-secrets.ini",
     "platforms/windows/data/local-paths.ini",
     "platforms/windows/data/local-startup.ini",
-    "platforms/windows/data/memory-vars.ini",
+    "platforms/shared/data/memory-vars.ini",
     "platforms/windows/data/rom.ini",
     "storage.db",
     "platforms/windows/storage.db"

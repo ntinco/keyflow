@@ -64,12 +64,7 @@
   },
   "audits": {
     "unused_assignments": [],
-    "unused_groups_or_targets": [
-      {
-        "symbol": "apps_sap_eclipse",
-        "reason": "Activation target is defined but not referenced elsewhere."
-      }
-    ],
+    "unused_groups_or_targets": [],
     "public_service_methods_without_callers": []
   },
   "contracts": {

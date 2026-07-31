@@ -3,12 +3,11 @@ ahk_out.txt
 __pycache__/
 ai/run-result.json
 ai/run-result-macos.json
-*data/hotkey-usage.json
 *data/local-secrets.ini
 *data/local-paths.ini
 *data/local-startup.ini
-*data/memory-vars.ini
 *data/rom.ini
+platforms/shared/data/memory-vars.ini
 storage.db
 */storage.db
 

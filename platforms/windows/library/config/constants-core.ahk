@@ -36,6 +36,7 @@ loadCorePathConstants() {
   SplitPath(pathScript, , &pathScript)
   SplitPath(pathScript, , &pathScriptOnelevelup)
   dataDir := resolveDataDir(pathScript)
+  memoryVarsIniFile := pathScriptOnelevelup "\shared\data\memory-vars.ini"
   localPathsFile := localPathsFilePath(pathScript)
   pathAbapGitRepo := pathConfigValue(localPathsFile, "pathAbapGitRepo", "")
   pathYmWorkspace := pathConfigValue(localPathsFile, "pathYmWorkspace", "")
@@ -101,17 +102,12 @@ loadCoreRuleConstants() {
   appActivationTargets := []
   appActivationTargets.Push(["apps_ide", exeVscode])
   appActivationTargets.Push(["apps_ide", exeCursor])
-  appActivationTargets.Push(["apps_sap_windows", classSapGuiSession])
-  appActivationTargets.Push(["apps_sap_windows", exeNwbc])
-  appActivationTargets.Push(["apps_sap_eclipse", exeEclipse])
   appActivationTargets.Push(["apps_sap_workspace", classSapGuiSession])
   appActivationTargets.Push(["apps_sap_workspace", exeNwbc])
   appActivationTargets.Push(["apps_sap_workspace", exeEclipse])
 
   GroupAdd("group_launcher", exeEverything)
   GroupAdd("group_launcher", exeFlowlauncher)
-  GroupAdd("group_launcher_apps", exeEverything)
-  GroupAdd("group_launcher_apps", exeFlowlauncher)
   GroupAdd("group_sap_gui_windows", classSapGuiSession)
   GroupAdd("group_sap_gui_windows", exeNwbc)
   GroupAdd("group_sap_runtime_windows", classSapGuiSession)

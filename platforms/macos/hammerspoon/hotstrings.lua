@@ -3,8 +3,44 @@
 
 local Hotstrings = {}
 
+local function shellQuote(str)
+  return "'" .. str:gsub("'", "'\\''") .. "'"
+end
+
+local function moduleDir()
+  local source = debug.getinfo(1, "S").source:match("@(.*/)")
+  return source or "./"
+end
+
+-- moduleDir() may be a symlinked path (~/.hammerspoon/keyflow/); resolve the
+-- physical directory so ".." traversal reaches the real repo, not the symlink parent.
+local function physicalDir(dir)
+  local handle = io.popen("cd " .. shellQuote(dir) .. " 2>/dev/null && pwd -P")
+  if not handle then return dir end
+  local result = handle:read("*l")
+  handle:close()
+  return result and (result .. "/") or dir
+end
+
+local MEMORY_VARS_INI = physicalDir(moduleDir()) .. "../../shared/data/memory-vars.ini"
+
+local function readMemoryVarsValue(name, defaultValue)
+  local file = io.open(MEMORY_VARS_INI, "r")
+  if not file then return defaultValue end
+  local value = defaultValue
+  for line in file:lines() do
+    local key, iniValue = line:match("^%s*([%w_]+)%s*=%s*(.-)%s*$")
+    if key == name and iniValue ~= "" then
+      value = iniValue
+      break
+    end
+  end
+  file:close()
+  return value
+end
+
 local function buildCodeSignature()
-  return "NTP " .. os.date("%d.%m.%y")
+  return readMemoryVarsValue("sap_comment_user", "NTP") .. " " .. os.date("%d.%m.%y")
 end
 
 local function buildCodeCommentLine(symbol)
@@ -267,17 +303,17 @@ function Hotstrings.start(actions, bindings, profiles)
           local match = trigger.pattern .. chars
           if buffer:sub(-#match) == match
               and not hasWordCharacterBefore(buffer, trigger.pattern, chars) then
-          local visibleCount = #trigger.pattern
-          if trigger.run then
-            if actions.shouldSubmitExistingSapCatalogTcode(trigger.profileID) then
-              hs.timer.doAfter(0, function()
-                postSyntheticKey({}, "return")
-              end)
-              buffer = ""
-              return false
-            end
-            for _ = 1, visibleCount do
-              postSyntheticKey({}, "delete")
+            local visibleCount = #trigger.pattern
+            if trigger.run then
+              if actions.shouldSubmitExistingSapCatalogTcode(trigger.profileID) then
+                hs.timer.doAfter(0, function()
+                  postSyntheticKey({}, "return")
+                end)
+                buffer = ""
+                return false
+              end
+              for _ = 1, visibleCount do
+                postSyntheticKey({}, "delete")
               end
               trigger.run(actions)
               buffer = ""
@@ -295,12 +331,5 @@ function Hotstrings.start(actions, bindings, profiles)
 end
 
 Hotstrings.reset = resetBuffer
-
-function Hotstrings.stop()
-  if eventWatcher then
-    eventWatcher:stop()
-    eventWatcher = nil
-  end
-end
 
 return Hotstrings
