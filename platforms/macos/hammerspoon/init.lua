@@ -138,15 +138,12 @@ Runtime.mouseWatcher = hs.eventtap.new({
     hs.eventtap.event.properties.mouseEventButtonNumber
   )
   if event:getType() ~= hs.eventtap.event.types.otherMouseDown then
-    return button == 4
+    return button == 3 or button == 4
   end
-  if button == 4 then
-    hs.printf("keyflow: MouseFwd button=%d", button)
+  hs.printf("keyflow: other mouse button=%d", button)
+  if button == 3 or button == 4 then
     Actions.mouseFwd()
     return true
-  end
-  if button == 3 then
-    hs.printf("keyflow: side mouse button=%d ignored (expected MouseFwd=4)", button)
   end
   return false
 end)

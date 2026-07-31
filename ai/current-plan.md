@@ -30,7 +30,7 @@ Status: in progress
 6. Human: in Finder and Spotlight, verify F12 with a disposable text file and Alt+P with a media file selected from any directory.
 7. Human: launch the Windows runtime once to confirm the regenerated `platforms/windows/data/*.json` profiles still autocorrect/paste and run SAP transactions as before.
 8. Human: on macOS, verify SAP transaction codes run only while SAP GUI is frontmost.
-9. Human: verify Snipaste Command+F1 and MouseFwd start capture, then Enter returns the processed image to the originating application; confirm Teams also pastes automatically. Hammerspoon Console must log `MouseFwd button=4`; if it logs only the ignored side button `3`, the device driver must map its forward side button to 4.
+9. Human: verify Snipaste Command+F1 and either side mouse button start capture, then Enter returns the processed image to the originating application; confirm Teams also pastes automatically. Hammerspoon Console logs the detected `other mouse button=<n>` and routes the common side-button indices `3` and `4` through Command+F1.
 
 ## Design constraint
 
