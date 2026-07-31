@@ -20,10 +20,6 @@ runtimeEnvFilePath() {
   return configDir "\..\..\data\local-startup.ini"
 }
 
-runtimeEnvValue(configFile, key, defaultValue := "") {
-  return IniRead(configFile, "runtime-env", key, defaultValue)
-}
-
 runtimeConfigValue(configFile, section, key, defaultValue := "") {
   return IniRead(configFile, section, key, defaultValue)
 }
