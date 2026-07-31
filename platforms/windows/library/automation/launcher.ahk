@@ -76,7 +76,7 @@
   }
 
   _waitAfterPaste() {
-    ; "YM" matches any window titled with the YMT1/YSAP workspace prefix
+    ; "YM" matches any window titled with the YMT workspace prefix
     ; (see constants-core.ahk); that app needs a long settle delay before Ctrl+F3.
     If WinActive("YM")
     {
