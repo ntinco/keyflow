@@ -1304,8 +1304,8 @@ def validate_macos_runtime(repo_root: Path) -> list[dict[str, object]]:
             "Snipaste overlay dispatch must be scoped to Snipaste.",
         'enter = "return"':
             "AHK Enter bindings must map to the macOS Return keycode.",
-        "Actions.global_snipaste_capture()":
-            "The macOS MouseFwd adapter must dispatch the shared Snipaste capture action.",
+        'hs.eventtap.keyStroke({"cmd"}, "f1")':
+            "The macOS MouseFwd adapter must emit Snipaste's Command+F1 shortcut.",
     }
     combined_runtime_text = text + "\n" + actions_text + "\n" + hotstrings_text
     for contract, message in runtime_contracts.items():
