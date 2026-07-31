@@ -28,7 +28,6 @@ local SNIPASTE_PASTE_TARGETS = {
   ["com.microsoft.teams2"] = true,
 }
 
-local FINDER_CLIPBOARD_SETTLE_SECONDS = 0.1
 local launcherTargetApp
 local snipasteTargetApp
 local iinaTask
@@ -254,74 +253,56 @@ local PASTEABLE_EXTENSIONS = {
   txt = true,
 }
 
-local function decodePath(path)
-  path = path:match("^%s*(.-)%s*$")
-  path = path:gsub("^file://", "")
-  return path:gsub("%%(%x%x)", function(hex)
-    return string.char(tonumber(hex, 16))
-  end)
-end
-
-local function parsePaths(value)
-  local paths = {}
-  for line in (value or ""):gmatch("[^\r\n]+") do
-    local path = decodePath(line)
-    if path:sub(1, 1) == "/" then
-      paths[#paths + 1] = path
-    end
-  end
-  return paths
-end
-
-local function readClipboardPaths()
+local function readFinderSelectionPaths()
   local paths = {}
   local seen = {}
-  local urls = hs.pasteboard.readURL(nil, true)
-  if type(urls) == "string" then urls = {urls} end
-
-  local function add(path)
-    path = decodePath(path):gsub("^localhost/", "/")
-    if path:sub(1, 1) == "/" and not seen[path] then
+  local function collect(element)
+    if not element then return end
+    local url = element:attributeValue("AXURL")
+    local path = type(url) == "table" and url.filePath or nil
+    if path and not seen[path] then
       paths[#paths + 1] = path
       seen[path] = true
     end
+    for _, child in ipairs(element:attributeValue("AXChildren") or {}) do
+      collect(child)
+    end
   end
-
-  for _, url in ipairs(urls or {}) do add(url) end
-  for _, path in ipairs(parsePaths(hs.pasteboard.getContents())) do add(path) end
+  local ok = pcall(function()
+    local finder = hs.application.get(APP_BUNDLE_IDS.finder)
+    local app = finder and hs.axuielement.applicationElement(finder)
+    local focused = app and app:attributeValue("AXFocusedUIElement")
+    for _, selected in ipairs(
+      focused and focused:attributeValue("AXSelectedChildren") or {}
+    ) do
+      collect(selected)
+    end
+  end)
+  if not ok then return {} end
   return paths
 end
 
 local function withFinderPaths(sourceBundleID, targetApp, clipboard, callback)
-  local copyAttempts = 0
+  local readAttempts = 0
 
-  local function copySelection()
-    copyAttempts = copyAttempts + 1
-    hs.pasteboard.clearContents()
-    hs.pasteboard.callbackWhenChanged(0.75, function(changed)
-      -- Finder signals the pasteboard before its path text is readable.
-      hs.timer.doAfter(changed and FINDER_CLIPBOARD_SETTLE_SECONDS or 0, function()
-        local paths = changed and readClipboardPaths() or {}
-        hs.printf(
-          "keyflow: finder copy=%d changed=%s paths=%d",
-          copyAttempts,
-          tostring(changed),
-          #paths
-        )
-        if #paths > 0 then
-          callback(paths, clipboard, targetApp)
-        elseif copyAttempts < 4 and isFrontApp(APP_BUNDLE_IDS.finder) then
-          hs.timer.doAfter(0.25, copySelection)
-        else
-          restoreClipboard(clipboard)
-          if targetApp then targetApp:activate() end
-        end
-      end)
-    end)
-    hs.eventtap.keyStroke({"cmd", "alt"}, "c")
+  local function readSelection()
+    readAttempts = readAttempts + 1
+    local paths = readFinderSelectionPaths()
+    hs.printf("keyflow: finder selection=%d paths=%d", readAttempts, #paths)
+    if #paths > 0 then
+      callback(paths, clipboard, targetApp)
+    elseif readAttempts < 20 and isFrontApp(APP_BUNDLE_IDS.finder) then
+      hs.timer.doAfter(0.1, readSelection)
+    else
+      restoreClipboard(clipboard)
+      if targetApp then targetApp:activate() end
+    end
   end
 
-  hs.timer.doAfter(sourceBundleID == APP_BUNDLE_IDS.spotlight and 0.3 or 0, copySelection)
+  hs.timer.doAfter(
+    sourceBundleID == APP_BUNDLE_IDS.spotlight and 0.3 or 0,
+    readSelection
+  )
 end
 
 local function withSpotlightPaths(targetApp, clipboard, callback)

@@ -1298,8 +1298,8 @@ def validate_macos_runtime(repo_root: Path) -> list[dict[str, object]]:
             "Alt+P must dispatch selected media through IINA's playback CLI.",
         "local iinaTask":
             "Alt+P must retain the asynchronous IINA task through completion.",
-        "FINDER_CLIPBOARD_SETTLE_SECONDS":
-            "Finder path reads must wait for its pasteboard payload to settle.",
+        'attributeValue("AXSelectedChildren")':
+            "Finder paths must come from its selected Accessibility elements.",
         "Actions.snipasteIsActive":
             "Snipaste overlay dispatch must be scoped to Snipaste.",
         'enter = "return"':
