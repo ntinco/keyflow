@@ -17,7 +17,7 @@ Outcome values in the artifact:
                     Indicates a parse or startup failure.
     exited_clean  — Process exited with code 0 within timeout.
                     Unexpected but not a failure.
-    not_run       — AHK executable or entry point not found; smoke was skipped.
+    not_run       — AHK executable/entry point unavailable or unlaunchable; smoke was skipped.
 """
 from __future__ import annotations
 
@@ -118,12 +118,23 @@ def run_smoke(repo_root: Path, timeout: int) -> dict[str, object]:
             "notes": f"Entry point not found at {entry.as_posix()}. Smoke skipped.",
         }
 
-    proc = subprocess.Popen(
-        [str(ahk_exe), "/ErrorStdOut=CP65001", str(entry)],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        cwd=str(repo_root),
-    )
+    try:
+        proc = subprocess.Popen(
+            [str(ahk_exe), "/ErrorStdOut=CP65001", str(entry)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=str(repo_root),
+        )
+    except OSError as exc:
+        return {
+            "tool": "ai/run_smoke.py",
+            "command": command,
+            "timestamp_utc": timestamp,
+            "outcome": "not_run",
+            "exit_code": None,
+            "stderr_lines": [str(exc)],
+            "notes": f"Could not launch the Windows AutoHotkey executable: {exc}. Smoke skipped.",
+        }
 
     try:
         stdout_bytes, stderr_bytes = proc.communicate(timeout=timeout)

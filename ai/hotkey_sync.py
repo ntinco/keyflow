@@ -250,6 +250,10 @@ def load_hotstring_profiles() -> list[dict[str, object]]:
 
     by_profile: dict[str, list[dict[str, object]]] = defaultdict(list)
     for profile_id, sort_order, trigger, value, immediate in entries:
+        if immediate not in {0, 1}:
+            raise CatalogError(
+                f"{profile_id}:{trigger}: immediate must be 0 or 1"
+            )
         by_profile[str(profile_id)].append({
             "sort_order": sort_order,
             "trigger": trigger,
