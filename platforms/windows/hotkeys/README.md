@@ -19,7 +19,7 @@ Active catalog: **21 hotkeys** and **6 hotstrings**.
 | `Alt+D` | global | Activate IDE group | windows, macos | portable-intent |
 | `Win+Esc` | global | Resize window height | windows | windows-only |
 | `Win+F1` | global | Snipaste capture | macos | portable-intent |
-| `MouseFwd` | global | Snipaste screenshot (PrintScreen) | windows | windows-only |
+| `MouseFwd` | global | Snipaste screenshot (Windows; manual on macOS) | windows | windows-only |
 | `Ctrl+Alt+Shift+A` | global | Reload AHK script | windows | windows-only |
 
 ## SAP GUI and NWBC

@@ -479,8 +479,6 @@ Actions.global_snipaste_capture = function()
   end
 end
 
-Actions.mouseFwd = Actions.global_snipaste_capture
-
 Actions.snipaste_enter = function()
   if not Actions.snipasteIsActive() then return end
 

@@ -1178,8 +1178,6 @@ def validate_macos_runtime(repo_root: Path) -> list[dict[str, object]]:
             "Hammerspoon application watcher must have an explicit runtime owner.",
         "Runtime.keyWatcher = hs.eventtap.new":
             "Global and overlay bindings must have an explicit keyboard watcher owner.",
-        "Runtime.mouseWatcher = hs.eventtap.new":
-            "MouseFwd routing must have an explicit mouse watcher owner.",
         "Runtime.consoleToolbar = consoleToolbar":
             "Hammerspoon console toolbar must have an explicit runtime owner.",
         "consoleToolbar:allowedItems()":
@@ -1288,8 +1286,6 @@ def validate_macos_runtime(repo_root: Path) -> list[dict[str, object]]:
             "Snipaste overlay dispatch must be scoped to Snipaste.",
         'enter = "return"':
             "AHK Enter bindings must map to the macOS Return keycode.",
-        "Actions.mouseFwd = Actions.global_snipaste_capture":
-            "MouseFwd must invoke the shared Snipaste capture action directly.",
     }
     combined_runtime_text = text + "\n" + actions_text + "\n" + hotstrings_text
     for contract, message in runtime_contracts.items():
