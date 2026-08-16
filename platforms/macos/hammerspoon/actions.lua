@@ -468,12 +468,8 @@ local function resizeSnipasteImage(image, targetApp)
   end)
 end
 
-Actions.mouseFwd = function()
-  hs.eventtap.keyStroke({"cmd"}, "f1")
-end
-
 Actions.global_snipaste_capture = function()
-  hs.printf("keyflow: Snipaste Command+F1 received")
+  hs.printf("keyflow: Snipaste capture requested")
   currentSnipasteTarget()
   local appPath = hs.application.pathForBundleID(APP_BUNDLE_IDS.snipaste)
   local executable = appPath and appPath .. "/Contents/MacOS/Snipaste"
@@ -482,6 +478,8 @@ Actions.global_snipaste_capture = function()
     hs.printf("keyflow: Snipaste capture did not start")
   end
 end
+
+Actions.mouseFwd = Actions.global_snipaste_capture
 
 Actions.snipaste_enter = function()
   if not Actions.snipasteIsActive() then return end
