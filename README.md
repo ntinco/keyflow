@@ -1,6 +1,6 @@
 # keyflow
 
-Private Windows automation workspace built on AutoHotkey v2, with a first macOS Hammerspoon slice. Optimized for fast AI maintenance, not for public packaging.
+Personal automation workspace built on AutoHotkey v2, with a first macOS Hammerspoon slice. Optimized for fast AI maintenance, not for public packaging.
 
 ## AI operating guide
 
