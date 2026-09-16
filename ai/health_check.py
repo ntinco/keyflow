@@ -10,45 +10,28 @@ from collections import Counter, defaultdict
 from datetime import date
 from pathlib import Path
 
-
 RE_INCLUDE = re.compile(r'^\s*#Include\s+"?([^"\r\n]+)"?', re.MULTILINE)
-RE_CLASS_HEADER = re.compile(
-    r"^\s*class\s+([A-Za-z_][A-Za-z0-9_]*)(?:\s+extends\s+([A-Za-z_][A-Za-z0-9_]*))?\s*\{",
-    re.MULTILINE,
-)
 RE_SERVICE_CALL = re.compile(r"services\.([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z_][A-Za-z0-9_]*)")
 RE_ASSIGN = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*:=", re.MULTILINE)
 RE_GROUP_ADD = re.compile(r'GroupAdd\("([^"]+)"')
 RE_APP_TARGET = re.compile(r'appActivationTargets\.Push\(\["([^"]+)"')
+RE_HOTIF_OPEN = re.compile(r"^\s*#[Hh]ot[Ii]f\b(?!\s*$)", re.MULTILINE)
+RE_HOTIF_CLOSE = re.compile(r"^\s*#[Hh]ot[Ii]f\s*$", re.MULTILINE)
+RE_LUA_DOFILE = re.compile(r'dofile\(scriptDir\s*\.\.\s*"([^"]+)"\)')
+
 RESERVED_METHOD_NAMES = {
-    "if",
-    "else",
-    "for",
-    "while",
-    "switch",
-    "case",
-    "catch",
-    "try",
-    "return",
-    "loop",
+    "if", "else", "for", "while", "switch", "case", "catch", "try", "return", "loop",
 }
 
 LEGACY_ENV_PREFIX = "NOR" "MAN_"
 LEGACY_WORKSPACE_NAME = "nor" "man_src"
 RETIRED_DOCS_SEGMENT = "do" "cs/"
-
 FORBIDDEN_REFERENCE_PATTERNS = (
     ("legacy_env_symbol", re.compile(r"\b" + re.escape(LEGACY_ENV_PREFIX) + r"[A-Z0-9_]+\b")),
     ("legacy_workspace_name", re.compile(re.escape(LEGACY_WORKSPACE_NAME), re.IGNORECASE)),
     ("retired_docs_reference", re.compile(r"(^|[\s`\"'=:(])" + re.escape(RETIRED_DOCS_SEGMENT), re.IGNORECASE | re.MULTILINE)),
 )
-
-FORBIDDEN_SCAN_EXCLUDED_PREFIXES = (
-    ".git/",
-    ".axet-code/",
-    "ai/__pycache__/",
-)
-
+FORBIDDEN_SCAN_EXCLUDED_PREFIXES = (".git/", ".axet-code/", "ai/__pycache__/")
 FORBIDDEN_SCAN_EXACT_PATHS = {
     "ai/health-check.json",
     "ai/health-check.summary.json",
@@ -64,58 +47,13 @@ FORBIDDEN_SCAN_EXACT_PATHS = {
     "platforms/windows/storage.db",
 }
 
-# Unregistered classes in library/automation/ that are known dead code.
 KNOWN_DEAD_CLASSES = {"PasteService"}
-
-# Constants that are declared but have no known consumers.
 KNOWN_DEAD_CONSTANTS: tuple[str, ...] = ()
+CATALOG_REVIEW_STATUS_VALUES = {"pending_human_review", "verified"}
+GOVERNANCE_FILE = "ai/governance.md"
+REPO_MAP_FILE = "ai/repo-map.json"
 CATALOG_REVIEW_FILE = "ai/catalog-review.json"
 HOTKEY_CATALOG_FILE = "platforms/shared/data/hotkeys.db"
-CATALOG_REVIEW_STATUS_VALUES = {"pending_human_review", "verified"}
-GOVERNANCE_FILE = "ai/governance.json"
-REQUIRED_ROLE_SECTIONS = (
-    "## Repo identity",
-    "## Role rules",
-    "## Next evolution frontier",
-)
-REQUIRED_ROLE_PHRASES = (
-    "This repository is permanently operated as a dual-role AI-first repo.",
-    "The two supported roles are architect and executor.",
-    "Write for the next handoff, not for your own memory.",
-    "AI is the primary code maintainer.",
-)
-EXPECTED_MAINTENANCE_MODEL = {
-    "primary_code_maintainer": "ai",
-    "human_role": [
-        "intent",
-        "human-owned contracts",
-        "runtime acceptance",
-    ],
-    "optimization_order": [
-        "machine-verifiable contracts",
-        "explicit ownership and routing",
-        "deterministic validation",
-        "minimal code surface",
-    ],
-    "code_audience": "ai-maintenance-first",
-}
-EXPECTED_CYCLE_OUTPUTS = {
-    "always": [
-        "ai/health-check.json",
-        "ai/health-check.summary.json",
-    ],
-    "conditional": {
-        "plan_state": "ai/current-plan.md",
-        "routing": "ai/repo-map.json",
-        "policy": "AGENTS.md",
-        "architecture": "README.md",
-    },
-}
-EXPECTED_PLAN_POLICY = {
-    "single_source": "ai/current-plan.md",
-    "agents_reference_only": True,
-    "allowed_status": ["in progress", "complete", "deferred"],
-}
 
 
 def to_repo_path(path: Path, repo_root: Path) -> str:
@@ -127,6 +65,15 @@ def to_repo_path(path: Path, repo_root: Path) -> str:
 
 def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8-sig")
+
+
+def nested(mapping: dict[str, object], *keys: str, default: str = "") -> str:
+    value: object = mapping
+    for key in keys:
+        if not isinstance(value, dict):
+            return default
+        value = value.get(key, {})
+    return value if isinstance(value, str) else default
 
 
 def find_block(text: str, anchor: str) -> str:
@@ -155,10 +102,9 @@ def parse_registry(bootstrap_text: str) -> dict[str, str]:
 
 def parse_hotstring_profiles(bootstrap_text: str) -> list[dict[str, str]]:
     block = find_block(bootstrap_text, "keyflowHotstringProfiles()")
-    entries = []
+    entries: list[dict[str, str]] = []
     for label, group, mode in re.findall(
-        r'\{label:\s*"([^"]+)",\s*group:\s*"([^"]*)",\s*mode:\s*"([^"]+)"\}',
-        block,
+        r'\{label:\s*"([^"]+)",\s*group:\s*"([^"]*)",\s*mode:\s*"([^"]+)"\}', block
     ):
         entries.append({"label": label, "group": group, "mode": mode})
     return entries
@@ -168,9 +114,14 @@ def resolve_include(include_value: str, current_file: Path) -> Path:
     return (current_file.parent / include_value.replace("\\", "/")).resolve()
 
 
-def build_include_graph(
-    entry_file: Path, repo_root: Path
-) -> tuple[list[dict[str, object]], list[dict[str, str]]]:
+def build_include_graph(entry_file: Path, repo_root: Path) -> tuple[list[dict[str, object]], list[dict[str, str]]]:
+    if not entry_file.exists():
+        return [], [{
+            "type": "entrypoint_missing",
+            "file": to_repo_path(entry_file, repo_root),
+            "message": "Windows entrypoint is missing.",
+        }]
+
     visited: set[Path] = set()
     include_edges: list[dict[str, object]] = []
     missing: list[dict[str, str]] = []
@@ -179,45 +130,40 @@ def build_include_graph(
         if file_path in visited:
             return
         visited.add(file_path)
-        text = read_text(file_path)
-        includes = []
-        for include_value in RE_INCLUDE.findall(text):
+        includes: list[dict[str, object]] = []
+        for include_value in RE_INCLUDE.findall(read_text(file_path)):
             target = resolve_include(include_value, file_path)
             exists = target.exists()
-            includes.append(
-                {
-                    "include": include_value.replace("\\", "/"),
-                    "target": to_repo_path(target, repo_root),
-                    "exists": exists,
-                }
-            )
+            includes.append({
+                "include": include_value.replace("\\", "/"),
+                "target": to_repo_path(target, repo_root),
+                "exists": exists,
+            })
             if exists:
                 walk(target)
             else:
-                missing.append(
-                    {
-                        "from": to_repo_path(file_path, repo_root),
-                        "include": include_value.replace("\\", "/"),
-                        "target": to_repo_path(target, repo_root),
-                    }
-                )
+                missing.append({
+                    "type": "include_missing",
+                    "from": to_repo_path(file_path, repo_root),
+                    "include": include_value.replace("\\", "/"),
+                    "target": to_repo_path(target, repo_root),
+                    "message": "Included AutoHotkey file is missing.",
+                })
         include_edges.append({"file": to_repo_path(file_path, repo_root), "includes": includes})
 
     walk(entry_file.resolve())
-    include_edges.sort(key=lambda item: item["file"])
-    missing.sort(key=lambda item: (item["from"], item["include"]))
+    include_edges.sort(key=lambda item: str(item["file"]))
+    missing.sort(key=lambda item: (item.get("from", ""), item.get("include", "")))
     return include_edges, missing
 
 
 def parse_class_methods(text: str) -> dict[str, dict[str, object]]:
     results: dict[str, dict[str, object]] = {}
-    lines = text.splitlines()
-    current_class = None
+    current_class: str | None = None
     class_depth = 0
-    for line in lines:
+    for line in text.splitlines():
         class_match = re.match(
-            r"^\s*class\s+([A-Za-z_][A-Za-z0-9_]*)(?:\s+extends\s+([A-Za-z_][A-Za-z0-9_]*))?\s*\{",
-            line,
+            r"^\s*class\s+([A-Za-z_][A-Za-z0-9_]*)(?:\s+extends\s+([A-Za-z_][A-Za-z0-9_]*))?\s*\{", line
         )
         if class_match and current_class is None:
             current_class = class_match.group(1)
@@ -228,8 +174,9 @@ def parse_class_methods(text: str) -> dict[str, dict[str, object]]:
             method_match = re.match(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*\([^)]*\)\s*\{\s*$", line)
             if method_match:
                 method_name = method_match.group(1)
-                if method_name not in RESERVED_METHOD_NAMES and method_name not in results[current_class]["methods"]:
-                    results[current_class]["methods"].append(method_name)
+                methods = results[current_class]["methods"]
+                if method_name not in RESERVED_METHOD_NAMES and method_name not in methods:
+                    methods.append(method_name)
             class_depth += line.count("{") - line.count("}")
             if class_depth <= 0:
                 current_class = None
@@ -255,12 +202,16 @@ def parse_file_index(repo_root: Path) -> tuple[dict[str, dict[str, object]], Cou
 def build_class_lookup(file_index: dict[str, dict[str, object]]) -> dict[str, dict[str, object]]:
     lookup: dict[str, dict[str, object]] = {}
     for repo_path, meta in file_index.items():
-        for class_name, class_meta in meta["classes"].items():
-            lookup[class_name] = {
-                "file": repo_path,
-                "methods": class_meta["methods"],
-                "parent": class_meta["parent"],
-            }
+        classes = meta.get("classes", {})
+        if not isinstance(classes, dict):
+            continue
+        for class_name, class_meta in classes.items():
+            if isinstance(class_meta, dict):
+                lookup[class_name] = {
+                    "file": repo_path,
+                    "methods": class_meta.get("methods", []),
+                    "parent": class_meta.get("parent", ""),
+                }
     return lookup
 
 
@@ -273,25 +224,20 @@ def resolve_declared_methods(class_name: str, class_lookup: dict[str, dict[str, 
         class_meta = class_lookup.get(current)
         if not class_meta:
             break
-        for method_name in class_meta["methods"]:
-            if method_name not in resolved:
+        for method_name in class_meta.get("methods", []):
+            if isinstance(method_name, str) and method_name not in resolved:
                 resolved.append(method_name)
-        current = class_meta.get("parent", "")
+        parent = class_meta.get("parent", "")
+        current = parent if isinstance(parent, str) else ""
     return resolved
 
 
-def validate_profiles(
-    profiles: list[dict[str, str]], data_dir: Path, repo_root: Path
-) -> tuple[list[dict[str, object]], list[dict[str, str]]]:
-    results = []
-    issues = []
+def validate_profiles(profiles: list[dict[str, str]], data_dir: Path, repo_root: Path) -> tuple[list[dict[str, object]], list[dict[str, str]]]:
+    results: list[dict[str, object]] = []
+    issues: list[dict[str, str]] = []
     for profile in profiles:
         json_path = data_dir / f"{profile['label']}.json"
-        entry: dict[str, object] = {
-            **profile,
-            "file": to_repo_path(json_path, repo_root),
-            "exists": json_path.exists(),
-        }
+        entry: dict[str, object] = {**profile, "file": to_repo_path(json_path, repo_root), "exists": json_path.exists()}
         if json_path.exists():
             try:
                 payload = json.loads(json_path.read_text(encoding="utf-8-sig"))
@@ -300,910 +246,397 @@ def validate_profiles(
                 entry["has_items_array"] = has_items
                 entry["item_count"] = len(payload.get("items", [])) if has_items else None
                 if not has_items:
-                    issues.append(
-                        {
-                            "type": "profile_catalog_shape",
-                            "profile": profile["label"],
-                            "file": to_repo_path(json_path, repo_root),
-                            "message": "Catalog is valid JSON but does not expose items[].",
-                        }
-                    )
+                    issues.append({
+                        "type": "profile_catalog_shape",
+                        "file": to_repo_path(json_path, repo_root),
+                        "message": "Catalog is valid JSON but does not expose items[].",
+                    })
             except json.JSONDecodeError as exc:
                 entry["json_valid"] = False
                 entry["error"] = str(exc)
-                issues.append(
-                    {
-                        "type": "profile_catalog_invalid_json",
-                        "profile": profile["label"],
-                        "file": to_repo_path(json_path, repo_root),
-                        "message": str(exc),
-                    }
-                )
-        else:
-            issues.append(
-                {
-                    "type": "profile_catalog_missing",
-                    "profile": profile["label"],
+                issues.append({
+                    "type": "profile_catalog_invalid_json",
                     "file": to_repo_path(json_path, repo_root),
-                    "message": "Expected hotstring catalog file is missing.",
-                }
-            )
+                    "message": str(exc),
+                })
+        else:
+            issues.append({
+                "type": "profile_catalog_missing",
+                "file": to_repo_path(json_path, repo_root),
+                "message": "Expected hotstring catalog file is missing.",
+            })
         results.append(entry)
     return results, issues
 
 
-def validate_catalog_review(
-    repo_root: Path,
-    profiles: list[dict[str, str]],
-) -> tuple[dict[str, object], list[dict[str, str]]]:
-    review_path = repo_root / CATALOG_REVIEW_FILE
-    expected_catalogs = {
-        profile["label"]: f"platforms/windows/data/{profile['label']}.json"
-        for profile in profiles
-    }
-    result: dict[str, object] = {
-        "file": CATALOG_REVIEW_FILE,
-        "exists": review_path.exists(),
-        "catalogs": [],
-    }
+def validate_catalog_review(repo_root: Path, review_rel: str, profiles: list[dict[str, str]]) -> tuple[dict[str, object], list[dict[str, str]]]:
+    review_path = repo_root / review_rel
+    expected_catalogs = {profile["label"]: f"platforms/windows/data/{profile['label']}.json" for profile in profiles}
+    result: dict[str, object] = {"file": review_rel, "exists": review_path.exists(), "catalogs": []}
     issues: list[dict[str, str]] = []
 
     if not review_path.exists():
-        issues.append(
-            {
-                "type": "catalog_review_missing",
-                "file": CATALOG_REVIEW_FILE,
-                "message": "Catalog review contract is missing.",
-            }
-        )
-        return result, issues
-
+        return result, [{"type": "catalog_review_missing", "file": review_rel, "message": "Catalog review contract is missing."}]
     try:
         payload = json.loads(review_path.read_text(encoding="utf-8-sig"))
     except json.JSONDecodeError as exc:
-        issues.append(
-            {
-                "type": "catalog_review_invalid_json",
-                "file": CATALOG_REVIEW_FILE,
-                "message": str(exc),
-            }
-        )
-        return result, issues
+        return result, [{"type": "catalog_review_invalid_json", "file": review_rel, "message": str(exc)}]
 
     catalogs = payload.get("catalogs")
     if not isinstance(catalogs, list):
-        issues.append(
-            {
-                "type": "catalog_review_catalogs_missing",
-                "file": CATALOG_REVIEW_FILE,
-                "message": "catalog-review.json must expose catalogs[] as a list.",
-            }
-        )
-        return result, issues
+        return result, [{"type": "catalog_review_catalogs_missing", "file": review_rel, "message": "catalog-review.json must expose catalogs[] as a list."}]
 
     seen_ids: set[str] = set()
     pending_count = 0
     verified_count = 0
-
     for entry in catalogs:
         if not isinstance(entry, dict):
-            issues.append(
-                {
-                    "type": "catalog_review_entry_invalid",
-                    "file": CATALOG_REVIEW_FILE,
-                    "message": "Each catalogs[] item must be an object.",
-                }
-            )
+            issues.append({"type": "catalog_review_entry_invalid", "file": review_rel, "message": "Each catalogs[] item must be an object."})
             continue
-
         catalog_id = entry.get("id", "")
         catalog_file = entry.get("file", "")
         status = entry.get("status", "")
         verified_on = entry.get("last_human_verification", "")
         result["catalogs"].append(entry)
-
-        if not catalog_id or not isinstance(catalog_id, str):
-            issues.append(
-                {
-                    "type": "catalog_review_id_missing",
-                    "file": CATALOG_REVIEW_FILE,
-                    "message": "Each catalog review entry must define a string id.",
-                }
-            )
+        if not isinstance(catalog_id, str) or not catalog_id:
+            issues.append({"type": "catalog_review_id_missing", "file": review_rel, "message": "Each catalog review entry must define a string id."})
             continue
-
         if catalog_id in seen_ids:
-            issues.append(
-                {
-                    "type": "catalog_review_duplicate_id",
-                    "file": CATALOG_REVIEW_FILE,
-                    "message": f"Duplicate catalog review id: {catalog_id}",
-                }
-            )
+            issues.append({"type": "catalog_review_duplicate_id", "file": review_rel, "message": f"Duplicate catalog review id: {catalog_id}"})
         seen_ids.add(catalog_id)
-
         expected_file = expected_catalogs.get(catalog_id)
         if not expected_file:
-            issues.append(
-                {
-                    "type": "catalog_review_unknown_id",
-                    "file": CATALOG_REVIEW_FILE,
-                    "message": f"Catalog review entry does not match an active versioned catalog: {catalog_id}",
-                }
-            )
+            issues.append({"type": "catalog_review_unknown_id", "file": review_rel, "message": f"Catalog review entry does not match an active catalog: {catalog_id}"})
         elif catalog_file != expected_file:
-            issues.append(
-                {
-                    "type": "catalog_review_file_mismatch",
-                    "file": CATALOG_REVIEW_FILE,
-                    "message": f"Catalog review entry for {catalog_id} must point to {expected_file}.",
-                }
-            )
-
+            issues.append({"type": "catalog_review_file_mismatch", "file": review_rel, "message": f"Catalog review entry for {catalog_id} must point to {expected_file}."})
         if status not in CATALOG_REVIEW_STATUS_VALUES:
-            issues.append(
-                {
-                    "type": "catalog_review_status_invalid",
-                    "file": CATALOG_REVIEW_FILE,
-                    "message": f"Catalog review entry for {catalog_id} uses an unknown status: {status}",
-                }
-            )
+            issues.append({"type": "catalog_review_status_invalid", "file": review_rel, "message": f"Unknown catalog review status for {catalog_id}: {status}"})
         elif status == "pending_human_review":
             pending_count += 1
-        elif status == "verified":
+        else:
             verified_count += 1
-
-        if status == "verified":
             if not verified_on:
-                issues.append(
-                    {
-                        "type": "catalog_review_verified_date_missing",
-                        "file": CATALOG_REVIEW_FILE,
-                        "message": f"Verified catalog {catalog_id} must include last_human_verification.",
-                    }
-                )
+                issues.append({"type": "catalog_review_verified_date_missing", "file": review_rel, "message": f"Verified catalog {catalog_id} must include last_human_verification."})
             else:
                 try:
-                    date.fromisoformat(verified_on)
+                    date.fromisoformat(str(verified_on))
                 except ValueError:
-                    issues.append(
-                        {
-                            "type": "catalog_review_verified_date_invalid",
-                            "file": CATALOG_REVIEW_FILE,
-                            "message": f"Catalog {catalog_id} has an invalid last_human_verification date: {verified_on}",
-                        }
-                    )
-            notes_text = str(entry.get("notes", ""))
-            if re.search(r"\bpending\b", notes_text, re.IGNORECASE):
-                issues.append(
-                    {
-                        "type": "catalog_review_note_stale",
-                        "file": CATALOG_REVIEW_FILE,
-                        "message": f"Verified catalog {catalog_id} still contains stale pending wording in notes.",
-                    }
-                )
-
-    missing_ids = sorted(set(expected_catalogs) - seen_ids)
-    for missing_id in missing_ids:
-        issues.append(
-            {
-                "type": "catalog_review_entry_missing",
-                "file": CATALOG_REVIEW_FILE,
-                "message": f"Active catalog missing from review contract: {missing_id}",
-            }
-        )
-
+                    issues.append({"type": "catalog_review_verified_date_invalid", "file": review_rel, "message": f"Catalog {catalog_id} has invalid verification date: {verified_on}"})
+    for missing_id in sorted(set(expected_catalogs) - seen_ids):
+        issues.append({"type": "catalog_review_entry_missing", "file": review_rel, "message": f"Active catalog missing from review contract: {missing_id}"})
     result["pending_human_review_count"] = pending_count
     result["verified_count"] = verified_count
     return result, issues
 
 
-def validate_governance_contract(
-    repo_root: Path,
-    repo_map: dict[str, object],
-) -> tuple[dict[str, object], list[dict[str, str]]]:
-    governance_path = repo_root / GOVERNANCE_FILE
-    result: dict[str, object] = {
-        "file": GOVERNANCE_FILE,
-        "exists": governance_path.exists(),
-    }
-    issues: list[dict[str, str]] = []
-
-    expected_guide_authority = [
-        "ai/health-check.summary.json",
-        "ai/repo-map.json",
-        "AGENTS.md",
-        "README.md",
-    ]
-    expected_plan_path = "ai/current-plan.md"
-    expected_human_owned_contracts = [CATALOG_REVIEW_FILE, HOTKEY_CATALOG_FILE]
-    expected_machine_validated_contracts = [
-        "ai/repo-map.json",
-        CATALOG_REVIEW_FILE,
-        HOTKEY_CATALOG_FILE,
-    ]
-
-    if not governance_path.exists():
-        issues.append(
-            {
-                "type": "governance_missing",
-                "file": GOVERNANCE_FILE,
-                "message": "Governance contract is missing.",
-            }
-        )
-        return result, issues
-
+def load_repo_map(repo_root: Path) -> tuple[dict[str, object], list[dict[str, str]]]:
+    path = repo_root / REPO_MAP_FILE
+    if not path.exists():
+        return {}, [{"type": "repo_map_missing", "file": REPO_MAP_FILE, "message": "Routing map is missing."}]
     try:
-        payload = json.loads(governance_path.read_text(encoding="utf-8-sig"))
+        payload = json.loads(path.read_text(encoding="utf-8-sig"))
     except json.JSONDecodeError as exc:
-        issues.append(
-            {
-                "type": "governance_invalid_json",
-                "file": GOVERNANCE_FILE,
-                "message": str(exc),
-            }
-        )
-        return result, issues
-
-    result.update(payload)
-
-    if payload.get("guide_authority") != expected_guide_authority:
-        issues.append(
-            {
-                "type": "governance_guide_authority_mismatch",
-                "file": GOVERNANCE_FILE,
-                "message": "governance.json guide_authority does not match the repo guide contract.",
-            }
-        )
-
-    if payload.get("cycle_outputs") != EXPECTED_CYCLE_OUTPUTS:
-        issues.append(
-            {
-                "type": "governance_cycle_outputs_mismatch",
-                "file": GOVERNANCE_FILE,
-                "message": "governance.json cycle_outputs do not match the stable/conditional output contract.",
-            }
-        )
-
-    if payload.get("plan_path") != expected_plan_path:
-        issues.append(
-            {
-                "type": "governance_plan_path_mismatch",
-                "file": GOVERNANCE_FILE,
-                "message": "governance.json plan_path must point to ai/current-plan.md.",
-            }
-        )
-
-    if payload.get("plan_policy") != EXPECTED_PLAN_POLICY:
-        issues.append(
-            {
-                "type": "governance_plan_policy_mismatch",
-                "file": GOVERNANCE_FILE,
-                "message": "governance.json plan_policy must declare current-plan.md as the single plan source.",
-            }
-        )
-
-    if payload.get("human_owned_contracts") != expected_human_owned_contracts:
-        issues.append(
-            {
-                "type": "governance_human_contracts_mismatch",
-                "file": GOVERNANCE_FILE,
-                "message": "governance.json human_owned_contracts do not match the current repo contract.",
-            }
-        )
-
-    if payload.get("machine_validated_contracts") != expected_machine_validated_contracts:
-        issues.append(
-            {
-                "type": "governance_machine_contracts_mismatch",
-                "file": GOVERNANCE_FILE,
-                "message": "governance.json machine_validated_contracts do not match the current repo contract.",
-            }
-        )
-
-    if payload.get("dual_role_repo") is not True:
-        issues.append(
-            {
-                "type": "governance_dual_role_missing",
-                "file": GOVERNANCE_FILE,
-                "message": "governance.json must declare dual_role_repo=true.",
-            }
-        )
-
-    if payload.get("maintenance_model") != EXPECTED_MAINTENANCE_MODEL:
-        issues.append(
-            {
-                "type": "governance_maintenance_model_mismatch",
-                "file": GOVERNANCE_FILE,
-                "message": "governance.json maintenance_model does not match the AI-first maintenance contract.",
-            }
-        )
-
-    if payload.get("required_role_sections") != list(REQUIRED_ROLE_SECTIONS):
-        issues.append(
-            {
-                "type": "governance_role_sections_mismatch",
-                "file": GOVERNANCE_FILE,
-                "message": "governance.json required_role_sections do not match the enforced role contract.",
-            }
-        )
-
-    if payload.get("required_role_phrases") != list(REQUIRED_ROLE_PHRASES):
-        issues.append(
-            {
-                "type": "governance_role_phrases_mismatch",
-                "file": GOVERNANCE_FILE,
-                "message": "governance.json required_role_phrases do not match the enforced role contract.",
-            }
-        )
-
-    for rel_path in expected_guide_authority + expected_human_owned_contracts + [expected_plan_path]:
-        if not (repo_root / rel_path).exists():
-            issues.append(
-                {
-                    "type": "governance_referenced_file_missing",
-                    "file": GOVERNANCE_FILE,
-                    "message": f"governance.json depends on a missing file: {rel_path}",
-                }
-            )
-
-    repo_map_read_order = repo_map.get("read-order", []) if isinstance(repo_map, dict) else []
-    for required_read_path in ["ai/current-plan.md"]:
-        if required_read_path not in repo_map_read_order:
-            issues.append(
-                {
-                    "type": "governance_repo_map_read_order_missing",
-                    "file": "ai/repo-map.json",
-                    "message": f"repo-map read-order must include {required_read_path}.",
-                }
-            )
-
-    return result, issues
+        return {}, [{"type": "repo_map_invalid_json", "file": REPO_MAP_FILE, "message": str(exc)}]
+    if not isinstance(payload, dict):
+        return {}, [{"type": "repo_map_invalid", "file": REPO_MAP_FILE, "message": "repo-map.json must be an object."}]
+    return payload, []
 
 
-def validate_repo_map_contracts(
-    repo_root: Path,
-    repo_map: dict[str, object],
-    registry: dict[str, str],
-) -> list[dict[str, str]]:
+def validate_repo_map(repo_root: Path, repo_map: dict[str, object]) -> list[dict[str, str]]:
     issues: list[dict[str, str]] = []
-    expected_guide_files = {
-        "summary": "ai/health-check.summary.json",
-        "map": "ai/repo-map.json",
-        "rules": "AGENTS.md",
-        "architecture": "README.md",
-    }
-    expected_plan_file = "ai/current-plan.md"
+    expected_keys = {"schema_version", "purpose", "routing", "ownership", "local_only", "validators"}
+    if set(repo_map) != expected_keys:
+        issues.append({
+            "type": "repo_map_top_level_shape",
+            "file": REPO_MAP_FILE,
+            "message": f"repo-map.json keys must be {sorted(expected_keys)}.",
+        })
+    if repo_map.get("schema_version") != "1.0":
+        issues.append({"type": "repo_map_schema_version", "file": REPO_MAP_FILE, "message": "schema_version must be 1.0."})
+    if not isinstance(repo_map.get("purpose"), str) or not str(repo_map.get("purpose", "")).strip():
+        issues.append({"type": "repo_map_purpose", "file": REPO_MAP_FILE, "message": "purpose must be a non-empty string."})
 
-    guide_files = repo_map.get("guide-files")
-    if guide_files != expected_guide_files:
-        issues.append(
-            {
-                "type": "repo_map_guide_files_mismatch",
-                "file": "ai/repo-map.json",
-                "message": "guide-files in repo-map.json do not match the standard AI guide contract.",
-            }
-        )
-
-    read_order = repo_map.get("read-order", [])
-    if not isinstance(read_order, list):
-        issues.append(
-            {
-                "type": "repo_map_read_order_invalid",
-                "file": "ai/repo-map.json",
-                "message": "read-order must be a list of repo-relative file paths.",
-            }
-        )
+    route_specs = [
+        ("governance",),
+        ("windows", "entrypoint"), ("windows", "bootstrap"), ("windows", "services"), ("windows", "hotkeys"), ("windows", "catalogs"),
+        ("macos", "entrypoint"), ("macos", "actions"), ("macos", "hotstrings"), ("macos", "generated"),
+        ("shared", "hotkeys"), ("shared", "catalog_review"),
+        ("validation", "health"), ("validation", "hotkey_sync"), ("validation", "smoke"),
+    ]
+    routing = repo_map.get("routing")
+    if not isinstance(routing, dict):
+        issues.append({"type": "repo_map_routing", "file": REPO_MAP_FILE, "message": "routing must be an object."})
     else:
-        for rel_path in read_order:
-            if not isinstance(rel_path, str) or not (repo_root / rel_path).exists():
-                issues.append(
-                    {
-                        "type": "repo_map_read_order_missing",
-                        "file": "ai/repo-map.json",
-                        "message": f"read-order references a missing file: {rel_path}",
-                    }
-                )
+        for keys in route_specs:
+            rel = nested(routing, *keys)
+            if not rel:
+                issues.append({"type": "repo_map_route_missing", "file": REPO_MAP_FILE, "message": f"Missing route: {'.'.join(keys)}"})
+            elif not (repo_root / rel).exists():
+                issues.append({"type": "repo_map_dead_route", "file": REPO_MAP_FILE, "message": f"Route {'.'.join(keys)} points to missing path: {rel}"})
+        active_work = nested(routing, "conditional", "active_work")
+        if active_work and (repo_root / active_work).exists() and not (repo_root / active_work).is_file():
+            issues.append({"type": "repo_map_active_work_invalid", "file": REPO_MAP_FILE, "message": "conditional.active_work must point to a file when present."})
 
-    for route_group in ("entrypoints", "domains"):
-        routes = repo_map.get(route_group, [])
-        if not isinstance(routes, list):
-            issues.append(
-                {
-                    "type": "repo_map_routes_invalid",
-                    "file": "ai/repo-map.json",
-                    "message": f"{route_group} must be a list.",
-                }
-            )
-            continue
-        for route in routes:
-            rel_path = route.get("path", "") if isinstance(route, dict) else ""
-            if not rel_path or not (repo_root / rel_path).exists():
-                issues.append(
-                    {
-                        "type": "repo_map_dead_route",
-                        "file": "ai/repo-map.json",
-                        "message": f"{route_group} references a missing path: {rel_path}",
-                    }
-                )
-
-    plan_location = repo_map.get("plan-location", {})
-    if not isinstance(plan_location, dict):
-        issues.append(
-            {
-                "type": "repo_map_plan_location_invalid",
-                "file": "ai/repo-map.json",
-                "message": "plan-location must be an object.",
-            }
-        )
+    ownership = repo_map.get("ownership")
+    if not isinstance(ownership, dict):
+        issues.append({"type": "repo_map_ownership", "file": REPO_MAP_FILE, "message": "ownership must be an object."})
     else:
-        plan_path = plan_location.get("path", "")
-        if plan_path != expected_plan_file:
-            issues.append(
-                {
-                    "type": "repo_map_plan_location_mismatch",
-                    "file": "ai/repo-map.json",
-                    "message": "repo-map plan location must point to ai/current-plan.md.",
-                }
-            )
-        elif not (repo_root / plan_path).exists():
-            issues.append(
-                {
-                    "type": "repo_map_plan_missing",
-                    "file": "ai/repo-map.json",
-                    "message": "repo-map points to ai/current-plan.md but the file does not exist.",
-                }
-            )
+        for key in ("human_owned", "generated_versioned", "generated_local"):
+            if not isinstance(ownership.get(key), list):
+                issues.append({"type": "repo_map_ownership_list", "file": REPO_MAP_FILE, "message": f"ownership.{key} must be a list."})
+        for rel in ownership.get("human_owned", []) if isinstance(ownership.get("human_owned"), list) else []:
+            if not isinstance(rel, str) or not (repo_root / rel).exists():
+                issues.append({"type": "repo_map_human_owned_missing", "file": REPO_MAP_FILE, "message": f"Human-owned path is missing: {rel}"})
+        for rel in ownership.get("generated_versioned", []) if isinstance(ownership.get("generated_versioned"), list) else []:
+            if not isinstance(rel, str):
+                continue
+            if "*" in rel:
+                if not list(repo_root.glob(rel)):
+                    issues.append({"type": "repo_map_generated_route_missing", "file": REPO_MAP_FILE, "message": f"Generated path pattern matches nothing: {rel}"})
+            elif not (repo_root / rel).exists():
+                issues.append({"type": "repo_map_generated_route_missing", "file": REPO_MAP_FILE, "message": f"Generated path is missing: {rel}"})
 
-    runtime_api = repo_map.get("runtime-api", [])
-    if not isinstance(runtime_api, list) or sorted(runtime_api) != sorted(registry):
-        issues.append(
-            {
-                "type": "repo_map_runtime_api_mismatch",
-                "file": "ai/repo-map.json",
-                "message": "runtime-api in repo-map.json must match the registered services in bootstrap.ahk.",
-            }
-        )
+    local_only = repo_map.get("local_only")
+    if not isinstance(local_only, list):
+        issues.append({"type": "repo_map_local_only", "file": REPO_MAP_FILE, "message": "local_only must be a list."})
+    else:
+        generated_local = ownership.get("generated_local", []) if isinstance(ownership, dict) else []
+        if isinstance(generated_local, list):
+            missing_local = sorted(set(generated_local) - set(local_only))
+            if missing_local:
+                issues.append({"type": "repo_map_generated_local_gap", "file": REPO_MAP_FILE, "message": f"generated_local paths must also be local_only: {missing_local}"})
 
+    validators = repo_map.get("validators")
+    if not isinstance(validators, list) or not validators or any(not isinstance(value, str) or not value.strip() for value in validators):
+        issues.append({"type": "repo_map_validators", "file": REPO_MAP_FILE, "message": "validators must be a non-empty list of commands."})
     return issues
 
 
-def validate_local_only_contract(
-    repo_root: Path,
-    repo_map: dict[str, object],
-) -> list[dict[str, str]]:
-    """Detect runtime-local boundary drift: verify every file in repo-map
-    local-only-files is covered by .gitignore and acknowledged in AGENTS.md.
-    This check is cheap, deterministic, and machine-visible before cleanup starts.
-    """
+def validate_control_plane(repo_root: Path, repo_map: dict[str, object]) -> tuple[dict[str, object], list[dict[str, str]]]:
     issues: list[dict[str, str]] = []
-    local_only_files = repo_map.get("local-only-files", [])
-    if not isinstance(local_only_files, list):
+    if not (repo_root / "AGENTS.md").is_file():
+        issues.append({"type": "agents_missing", "file": "AGENTS.md", "message": "AGENTS.md cold-start contract is missing."})
+    if (repo_root / "agents.md").exists():
+        issues.append({"type": "agents_wrong_case", "file": "agents.md", "message": "Lowercase agents.md must not coexist with AGENTS.md."})
+    if not (repo_root / "README.md").is_file():
+        issues.append({"type": "readme_missing", "file": "README.md", "message": "README.md is missing."})
+    governance_rel = nested(repo_map.get("routing", {}) if isinstance(repo_map.get("routing"), dict) else {}, "governance", default=GOVERNANCE_FILE)
+    governance_path = repo_root / governance_rel
+    if not governance_path.is_file():
+        issues.append({"type": "governance_missing", "file": governance_rel, "message": "Durable governance file is missing."})
+    if (repo_root / "ai/governance.json").exists():
+        issues.append({"type": "duplicate_governance", "file": "ai/governance.json", "message": "Legacy governance JSON duplicates policy authority."})
+    return {"file": governance_rel, "exists": governance_path.exists()}, issues
+
+
+def git_path_ignored(repo_root: Path, rel: str, gitignore_text: str) -> bool:
+    if (repo_root / ".git").exists():
+        result = subprocess.run(
+            ["git", "check-ignore", "-q", "--no-index", rel],
+            cwd=repo_root,
+            capture_output=True,
+            check=False,
+        )
+        return result.returncode == 0
+    basename = Path(rel).name
+    return rel in gitignore_text or basename in gitignore_text
+
+
+def git_path_tracked(repo_root: Path, rel: str) -> bool:
+    if not (repo_root / ".git").exists():
+        return False
+    result = subprocess.run(
+        ["git", "ls-files", "--error-unmatch", rel],
+        cwd=repo_root,
+        capture_output=True,
+        check=False,
+    )
+    return result.returncode == 0
+
+
+def validate_local_only_contract(repo_root: Path, repo_map: dict[str, object]) -> list[dict[str, str]]:
+    issues: list[dict[str, str]] = []
+    local_only = repo_map.get("local_only", [])
+    if not isinstance(local_only, list):
         return issues
-
     gitignore_path = repo_root / ".gitignore"
-    agents_path = repo_root / "AGENTS.md"
-
     gitignore_text = read_text(gitignore_path) if gitignore_path.exists() else ""
-    agents_text = read_text(agents_path) if agents_path.exists() else ""
-
-    seen_basenames: set[str] = set()
-    for entry in local_only_files:
-        if not isinstance(entry, str):
+    for rel in local_only:
+        if not isinstance(rel, str):
             continue
-        basename = Path(entry).name
-        if basename in seen_basenames:
-            continue  # already checked (e.g. storage.db appears twice with different paths)
-        seen_basenames.add(basename)
-
-        if basename not in gitignore_text:
-            issues.append({
-                "type": "local_only_gitignore_gap",
-                "file": ".gitignore",
-                "message": f"Runtime-local artifact '{basename}' is in repo-map local-only-files but not covered by .gitignore.",
-            })
-
-        if basename not in agents_text:
-            issues.append({
-                "type": "local_only_agents_gap",
-                "file": "AGENTS.md",
-                "message": f"Runtime-local artifact '{basename}' is in repo-map local-only-files but not acknowledged in AGENTS.md.",
-            })
-
+        if not git_path_ignored(repo_root, rel, gitignore_text):
+            issues.append({"type": "local_only_gitignore_gap", "file": ".gitignore", "message": f"Local-only path is not ignored: {rel}"})
+        if git_path_tracked(repo_root, rel):
+            issues.append({"type": "local_only_tracked", "file": rel, "message": "Local-only/generated path must not be tracked."})
     return issues
 
 
-def validate_guide_contracts(
-    repo_root: Path,
-    repo_map: dict[str, object],
-    governance: dict[str, object],
-) -> list[dict[str, str]]:
-    issues: list[dict[str, str]] = []
-    agents_text = read_text(repo_root / "AGENTS.md")
-    readme_text = read_text(repo_root / "README.md")
-
-    if "ai/current-plan.md" not in agents_text:
-        issues.append(
-            {
-                "type": "agents_plan_reference_missing",
-                "file": "AGENTS.md",
-                "message": "AGENTS.md must mention ai/current-plan.md when that detailed plan contract is supported.",
-            }
-        )
-
-    if "guide authority" not in agents_text.lower():
-        issues.append(
-            {
-                "type": "agents_guide_authority_missing",
-                "file": "AGENTS.md",
-                "message": "AGENTS.md must declare guide authority for role handoff.",
-            }
-        )
-
-    # Use governance.json as the single source of truth for required sections/phrases;
-    # fall back to module-level constants only if governance data is unavailable.
-    gov_sections = governance.get("required_role_sections") or list(REQUIRED_ROLE_SECTIONS)
-    for section in gov_sections:
-        if section not in agents_text:
-            issues.append(
-                {
-                    "type": "agents_required_section_missing",
-                    "file": "AGENTS.md",
-                    "message": f"AGENTS.md is missing required role section: {section}",
-                }
-            )
-
-    gov_phrases = governance.get("required_role_phrases") or list(REQUIRED_ROLE_PHRASES)
-    for phrase in gov_phrases:
-        if phrase not in agents_text:
-            issues.append(
-                {
-                    "type": "agents_required_phrase_missing",
-                    "file": "AGENTS.md",
-                    "message": f"AGENTS.md is missing required role contract phrase: {phrase}",
-                }
-            )
-
-    if "ai operating guide" not in readme_text.lower() and "read first" not in readme_text.lower():
-        issues.append(
-            {
-                "type": "readme_operating_guide_missing",
-                "file": "README.md",
-                "message": "README.md must expose a short read-first operating guide section.",
-            }
-        )
-
-    if "architect" not in readme_text.lower() or "executor" not in readme_text.lower():
-        issues.append(
-            {
-                "type": "readme_dual_role_missing",
-                "file": "README.md",
-                "message": "README.md must explicitly acknowledge the architect/executor role model.",
-            }
-        )
-
-    guide_files = repo_map.get("guide-files", {})
-    if isinstance(guide_files, dict):
-        for rel_path in guide_files.values():
-            if isinstance(rel_path, str) and not (repo_root / rel_path).exists():
-                issues.append(
-                    {
-                        "type": "guide_file_missing",
-                        "file": "ai/repo-map.json",
-                        "message": f"guide-files references a missing file: {rel_path}",
-                    }
-                )
-
-    return issues
-
-
-def build_service_contracts(
-    registry: dict[str, str],
-    class_lookup: dict[str, dict[str, object]],
-    file_index: dict[str, dict[str, object]],
-) -> tuple[list[dict[str, object]], list[dict[str, str]], list[dict[str, str]], list[dict[str, object]]]:
-    service_contracts = []
+def build_service_contracts(registry: dict[str, str], class_lookup: dict[str, dict[str, object]], file_index: dict[str, dict[str, object]]) -> tuple[list[dict[str, object]], list[dict[str, str]], list[dict[str, str]], list[dict[str, object]]]:
+    service_contracts: list[dict[str, object]] = []
     registry_issues: list[dict[str, str]] = []
     service_call_issues: list[dict[str, str]] = []
     public_api_candidates: list[dict[str, object]] = []
     service_calls_by_key: defaultdict[str, set[str]] = defaultdict(set)
-
     for meta in file_index.values():
-        for service_key, method_name in meta["service_calls"]:
+        for service_key, method_name in meta.get("service_calls", []):
             service_calls_by_key[service_key].add(method_name)
-
     for service_key, class_name in registry.items():
         class_meta = class_lookup.get(class_name)
         referenced_methods = sorted(service_calls_by_key.get(service_key, set()))
         declared_methods = resolve_declared_methods(class_name, class_lookup) if class_meta else []
-        service_contracts.append(
-            {
-                "service": service_key,
-                "class": class_name,
-                "class_file": class_meta["file"] if class_meta else "",
-                "referenced_methods": referenced_methods,
-                "declared_methods": declared_methods,
-            }
-        )
+        service_contracts.append({
+            "service": service_key,
+            "class": class_name,
+            "class_file": class_meta["file"] if class_meta else "",
+            "referenced_methods": referenced_methods,
+            "declared_methods": declared_methods,
+        })
         if not class_meta:
-            registry_issues.append(
-                {
-                    "type": "registry_class_missing",
-                    "service": service_key,
-                    "class": class_name,
-                    "message": "Service registry points to a class that was not found in the repo.",
-                }
-            )
+            registry_issues.append({"type": "registry_class_missing", "file": "platforms/windows/library/bootstrap.ahk", "message": f"Service {service_key} points to missing class {class_name}."})
             continue
         declared = set(declared_methods)
         for method_name in referenced_methods:
             if method_name not in declared:
-                service_call_issues.append(
-                    {
-                        "type": "service_method_missing",
-                        "service": service_key,
-                        "class": class_name,
-                        "method": method_name,
-                        "message": "A services.* call points to a method that the registered class does not expose.",
-                    }
-                )
-
-        public_only_methods = [
-            method_name
-            for method_name in declared_methods
-            if not method_name.startswith("_")
-            and method_name not in {"__new"}
-            and method_name not in referenced_methods
-        ]
+                service_call_issues.append({"type": "service_method_missing", "file": str(class_meta["file"]), "message": f"services.{service_key}.{method_name} has no declared method on {class_name}."})
+        public_only_methods = [method for method in declared_methods if not method.startswith("_") and method != "__new" and method not in referenced_methods]
         if public_only_methods:
-            public_api_candidates.append(
-                {
-                    "service": service_key,
-                    "class": class_name,
-                    "methods": public_only_methods,
-                    "reason": "Public service methods are exposed but have no services.* callers.",
-                }
-            )
-
+            public_api_candidates.append({"service": service_key, "class": class_name, "methods": public_only_methods, "reason": "Public service methods have no services.* callers."})
     for service_key in sorted(service_calls_by_key):
         if service_key not in registry:
-            service_call_issues.append(
-                {
-                    "type": "service_key_missing",
-                    "service": service_key,
-                    "class": "",
-                    "method": "",
-                    "message": "A services.* call references a service key not in keyflowServiceRegistry().",
-                }
-            )
-
-    service_contracts.sort(key=lambda item: item["service"])
+            service_call_issues.append({"type": "service_key_missing", "file": "platforms/windows", "message": f"services.{service_key} is called but not registered."})
+    service_contracts.sort(key=lambda item: str(item["service"]))
     return service_contracts, registry_issues, service_call_issues, public_api_candidates
 
 
 def collect_public_service_calls(file_index: dict[str, dict[str, object]]) -> list[dict[str, object]]:
-    public_calls = []
+    public_calls: list[dict[str, object]] = []
     for repo_path, meta in sorted(file_index.items()):
-        if not meta["service_calls"]:
-            continue
-        public_calls.append(
-            {
-                "file": repo_path,
-                "calls": sorted({f"{service}.{method}" for service, method in meta["service_calls"]}),
-            }
-        )
+        calls = meta.get("service_calls", [])
+        if calls:
+            public_calls.append({"file": repo_path, "calls": sorted({f"{service}.{method}" for service, method in calls})})
     return public_calls
 
 
-def detect_dead_candidates(
-    file_index: dict[str, dict[str, object]],
-    registry: dict[str, str],
-    token_counter: Counter[str],
-) -> dict[str, list[dict[str, object]]]:
+def detect_dead_candidates(file_index: dict[str, dict[str, object]], registry: dict[str, str], token_counter: Counter[str]) -> dict[str, list[dict[str, object]]]:
     registered_classes = {name.lower() for name in registry.values()}
-    class_candidates = []
+    class_candidates: list[dict[str, object]] = []
     for repo_path, meta in file_index.items():
         if "/library/automation/" not in repo_path:
             continue
-        for class_name in meta["classes"]:
+        classes = meta.get("classes", {})
+        if not isinstance(classes, dict):
+            continue
+        for class_name in classes:
             if class_name.lower() in registered_classes:
                 continue
             if token_counter[class_name.lower()] <= 1 or class_name in KNOWN_DEAD_CLASSES:
-                class_candidates.append(
-                    {
-                        "file": repo_path,
-                        "class": class_name,
-                        "reason": "Class is defined but not registered in keyflowServiceRegistry() and has no external callers.",
-                    }
-                )
-
-    constant_candidates = []
-    for constant_name in KNOWN_DEAD_CONSTANTS:
-        if token_counter[constant_name.lower()] <= 1:
-            constant_candidates.append(
-                {
-                    "constant": constant_name,
-                    "reason": "Constant is declared but not referenced by any service or hotkey.",
-                }
-            )
-
+                class_candidates.append({"file": repo_path, "class": class_name, "reason": "Class is defined but not registered and has no external callers."})
+    constant_candidates = [
+        {"constant": name, "reason": "Constant is declared but not referenced."}
+        for name in KNOWN_DEAD_CONSTANTS if token_counter[name.lower()] <= 1
+    ]
     return {
-        "dead_class_candidates": sorted(class_candidates, key=lambda item: item["file"]),
+        "dead_class_candidates": sorted(class_candidates, key=lambda item: str(item["file"])),
         "dead_constant_candidates": constant_candidates,
     }
 
 
 def scan_assignment_candidates(repo_root: Path, token_counter: Counter[str]) -> list[dict[str, str]]:
-    candidates = []
-    for rel_path in (
-        "platforms/windows/library/config/constants-core.ahk",
-    ):
-        path = repo_root / rel_path
-        for name in RE_ASSIGN.findall(read_text(path)):
-            if token_counter[name.lower()] <= 1:
-                candidates.append(
-                    {
-                        "file": rel_path,
-                        "symbol": name,
-                        "reason": "Assignment appears to be declared but not referenced elsewhere.",
-                    }
-                )
-    return candidates
+    path = repo_root / "platforms/windows/library/config/constants-core.ahk"
+    if not path.exists():
+        return []
+    return [
+        {"file": to_repo_path(path, repo_root), "symbol": name, "reason": "Assignment appears to be declared but not referenced elsewhere."}
+        for name in RE_ASSIGN.findall(read_text(path)) if token_counter[name.lower()] <= 1
+    ]
 
 
 def scan_group_candidates(repo_root: Path, token_counter: Counter[str]) -> list[dict[str, str]]:
-    rules_path = repo_root / "platforms/windows/library/config/constants-core.ahk"
-    text = read_text(rules_path)
-    candidates = []
+    path = repo_root / "platforms/windows/library/config/constants-core.ahk"
+    if not path.exists():
+        return []
+    text = read_text(path)
+    candidates: list[dict[str, str]] = []
     for group_name in sorted(set(RE_GROUP_ADD.findall(text))):
         if token_counter[group_name.lower()] <= 1:
-            candidates.append(
-                {
-                    "symbol": group_name,
-                    "reason": "Window group is defined but not referenced elsewhere.",
-                }
-            )
+            candidates.append({"symbol": group_name, "reason": "Window group is defined but not referenced elsewhere."})
     for target_name in sorted(set(RE_APP_TARGET.findall(text))):
         if token_counter[target_name.lower()] <= 1:
-            candidates.append(
-                {
-                    "symbol": target_name,
-                    "reason": "Activation target is defined but not referenced elsewhere.",
-                }
-            )
+            candidates.append({"symbol": target_name, "reason": "Activation target is defined but not referenced elsewhere."})
     return candidates
 
 
-RE_HOTIF_OPEN = re.compile(r"^\s*#[Hh]ot[Ii]f\b(?!\s*$)", re.MULTILINE)
-RE_HOTIF_CLOSE = re.compile(r"^\s*#[Hh]ot[Ii]f\s*$", re.MULTILINE)
-
-
 def scan_hotkey_counts(hotkeys_dir: Path, repo_root: Path) -> dict[str, int]:
-    """Count hotkey definitions per group/file across all hotkey modules."""
-    RE_HOTKEY_DEF = re.compile(r"^[^;\s][^:]*::{$", re.MULTILINE)
+    hotkey_def = re.compile(r"^[^;\s][^:]*::{$", re.MULTILINE)
     counts: dict[str, int] = {}
+    if not hotkeys_dir.exists():
+        return counts
     for path in sorted(hotkeys_dir.rglob("*.ahk")):
-        rel = to_repo_path(path, repo_root)
-        text = read_text(path)
-        n = len(RE_HOTKEY_DEF.findall(text))
-        if n > 0:
-            counts[rel] = n
+        count = len(hotkey_def.findall(read_text(path)))
+        if count:
+            counts[to_repo_path(path, repo_root)] = count
     return counts
 
 
 def scan_unclosed_hotif(hotkeys_dir: Path, repo_root: Path) -> list[dict[str, object]]:
-    """Detect #hotif scope leaks: files that open a conditional #hotif but are
-    themselves #Include-d by an aggregator without a trailing bare #hotif.
-    In AHK v2 the scope from the last #hotif in a file carries into any
-    subsequent code in the same include chain — so aggregator files (those
-    that #Include other hotkey files) MUST end with a bare #hotif.
-    Leaf hotkey files are exempt: each one is self-contained.
-    """
-    RE_INCLUDE_LINE = re.compile(r'^\s*#Include', re.MULTILINE)
-    issues = []
+    include_line = re.compile(r"^\s*#Include", re.MULTILINE)
+    issues: list[dict[str, object]] = []
+    if not hotkeys_dir.exists():
+        return issues
     for path in sorted(hotkeys_dir.rglob("*.ahk")):
         text = read_text(path)
         opens = len(RE_HOTIF_OPEN.findall(text))
-        if opens == 0:
+        if not opens or not include_line.search(text):
             continue
         closes = len(RE_HOTIF_CLOSE.findall(text))
-        is_aggregator = bool(RE_INCLUDE_LINE.search(text))
-        if is_aggregator and opens > closes:
+        if opens > closes:
             issues.append({
+                "type": "unclosed_hotif",
                 "file": to_repo_path(path, repo_root),
-                "open_count": opens,
-                "close_count": closes,
-                "message": f"Aggregator file has #hotif opened {opens}x but closed {closes}x — scope leaks into included files.",
+                "message": f"Aggregator has #HotIf opened {opens}x but closed {closes}x.",
             })
     return issues
 
 
 def scan_forbidden_references(repo_root: Path) -> list[dict[str, object]]:
-    findings = []
+    findings: list[dict[str, object]] = []
     for path in sorted(repo_root.rglob("*")):
         if not path.is_file():
             continue
         rel_path = to_repo_path(path, repo_root)
-        if rel_path in FORBIDDEN_SCAN_EXACT_PATHS:
-            continue
-        if any(rel_path.startswith(prefix) for prefix in FORBIDDEN_SCAN_EXCLUDED_PREFIXES):
+        if rel_path in FORBIDDEN_SCAN_EXACT_PATHS or any(rel_path.startswith(prefix) for prefix in FORBIDDEN_SCAN_EXCLUDED_PREFIXES):
             continue
         if path.suffix.lower() not in {".ahk", ".ini", ".ps1", ".json", ".txt"}:
             continue
         text = read_text(path)
         for issue_type, pattern in FORBIDDEN_REFERENCE_PATTERNS:
             for match in pattern.finditer(text):
-                findings.append(
-                    {
-                        "type": issue_type,
-                        "file": rel_path,
-                        "match": match.group(0),
-                        "message": "Retired internal reference detected.",
-                    }
-                )
+                findings.append({"type": issue_type, "file": rel_path, "match": match.group(0), "message": "Retired internal reference detected."})
     return findings
 
 
-def compute_ai_readiness(
-    issues: list,
-    dead_candidates: dict,
-    forbidden_references: list,
-) -> int:
-    """AI-first maintenance readiness score (0–100). 100 = fully clean.
-    Deductions: -10 per unresolved issue, -5 per dead class candidate,
-    -5 per forbidden reference. Cannot go below 0."""
-    score = 100
-    score -= len(issues) * 10
-    score -= len(dead_candidates.get("dead_class_candidates", [])) * 5
-    score -= len(forbidden_references) * 5
-    return max(0, score)
-
-
-RE_LUA_DOFILE = re.compile(r'dofile\(scriptDir\s*\.\.\s*"([^"]+)"\)')
-
-
-def validate_macos_runtime(repo_root: Path) -> list[dict[str, object]]:
-    """Validate Hammerspoon routing and generated-binding ownership."""
-    macos_dir = repo_root / "platforms/macos/hammerspoon"
-    init_file = macos_dir / "init.lua"
+def validate_macos_runtime(repo_root: Path, macos_entry_rel: str) -> list[dict[str, object]]:
+    init_file = repo_root / macos_entry_rel
     if not init_file.exists():
-        return []
-
+        return [{"type": "macos_entrypoint_missing", "file": macos_entry_rel, "message": "Hammerspoon entrypoint is missing."}]
+    macos_dir = init_file.parent
     issues: list[dict[str, object]] = []
     text = read_text(init_file)
     required_runtime_ownership = {
-        'package.loaded["keyflow.runtime"] = Runtime':
-            "Hammerspoon runtime must retain its owned objects across garbage collection.",
-        "Runtime.appWatcher = hs.application.watcher.new":
-            "Hammerspoon application watcher must have an explicit runtime owner.",
-        "Runtime.keyWatcher = hs.eventtap.new":
-            "Global and overlay bindings must have an explicit keyboard watcher owner.",
-        "Runtime.consoleToolbar = consoleToolbar":
-            "Hammerspoon console toolbar must have an explicit runtime owner.",
-        "consoleToolbar:allowedItems()":
-            "Console toolbar item definition must be idempotent across reloads.",
-        'hs.settings.get("keyflow.consoleClearInstalled")':
-            "Console toolbar installation must persist its idempotency state.",
+        'package.loaded["keyflow.runtime"] = Runtime': "Hammerspoon runtime must retain owned objects across garbage collection.",
+        "Runtime.appWatcher = hs.application.watcher.new": "Application watcher must have an explicit runtime owner.",
+        "Runtime.keyWatcher = hs.eventtap.new": "Keyboard watcher must have an explicit runtime owner.",
+        "Runtime.consoleToolbar = consoleToolbar": "Console toolbar must have an explicit runtime owner.",
+        "consoleToolbar:allowedItems()": "Console toolbar definition must be idempotent across reloads.",
+        'hs.settings.get("keyflow.consoleClearInstalled")': "Console toolbar installation must persist idempotency state.",
     }
     for contract, message in required_runtime_ownership.items():
         if contract not in text:
-            issues.append({
-                "type": "macos_runtime_ownership_missing",
-                "file": to_repo_path(init_file, repo_root),
-                "contract": contract,
-                "message": message,
-            })
-
+            issues.append({"type": "macos_runtime_ownership_missing", "file": macos_entry_rel, "contract": contract, "message": message})
     for include_value in RE_LUA_DOFILE.findall(text):
         target = (macos_dir / include_value).resolve()
         if not target.exists():
-            issues.append({
-                "type": "macos_include_missing",
-                "file": to_repo_path(init_file, repo_root),
-                "include": include_value,
-                "target": to_repo_path(target, repo_root),
-                "message": "init.lua references a dofile() target that does not exist.",
-            })
+            issues.append({"type": "macos_include_missing", "file": macos_entry_rel, "include": include_value, "target": to_repo_path(target, repo_root), "message": "init.lua references a missing dofile target."})
 
     actions_file = macos_dir / "actions.lua"
     hotstrings_file = macos_dir / "hotstrings.lua"
@@ -1211,224 +644,114 @@ def validate_macos_runtime(repo_root: Path) -> list[dict[str, object]]:
     profile_file = macos_dir / "generated/hotstring_profiles.lua"
     if not all(path.exists() for path in (actions_file, hotstrings_file, bindings_file, profile_file)):
         return issues
-
     actions_text = read_text(actions_file)
     hotstrings_text = read_text(hotstrings_file)
     bindings_text = read_text(bindings_file)
     profile_text = read_text(profile_file)
-    action_ids = set(re.findall(
-        r"(?:function\s+Actions\.|Actions\.)([A-Za-z_][A-Za-z0-9_]*)\s*(?:=|\()",
-        actions_text,
-    ))
-    hotstring_ids = set(re.findall(r'^\s*(hs_[A-Za-z0-9_]+)\s*=', hotstrings_text, re.MULTILINE))
+    action_ids = set(re.findall(r"(?:function\s+Actions\.|Actions\.)([A-Za-z_][A-Za-z0-9_]*)\s*(?:=|\()", actions_text))
+    hotstring_ids = set(re.findall(r"^\s*(hs_[A-Za-z0-9_]+)\s*=", hotstrings_text, re.MULTILINE))
     context_labels = set(re.findall(r'^\s*\["([^"]+)"\]\s*=', text, re.MULTILINE))
     if 'dofile(scriptDir .. "generated/hotstring_profiles.lua")' not in text:
-        issues.append({
-            "type": "macos_hotstring_profiles_not_loaded",
-            "file": to_repo_path(init_file, repo_root),
-            "message": "Hammerspoon must load the generated hotstring profile catalog.",
-        })
+        issues.append({"type": "macos_hotstring_profiles_not_loaded", "file": macos_entry_rel, "message": "Hammerspoon must load the generated hotstring profile catalog."})
     if "buildTriggers(bindings, profiles)" not in hotstrings_text:
-        issues.append({
-            "type": "macos_hotstring_profiles_not_consumed",
-            "file": to_repo_path(hotstrings_file, repo_root),
-            "message": "Hammerspoon hotstring watcher must consume generated profile data.",
-        })
+        issues.append({"type": "macos_hotstring_profiles_not_consumed", "file": to_repo_path(hotstrings_file, repo_root), "message": "Hotstring watcher must consume generated profile data."})
     if "Actions.runSapTcode = runTcode" not in actions_text:
-        issues.append({
-            "type": "macos_hotstring_sap_adapter_missing",
-            "file": to_repo_path(actions_file, repo_root),
-            "message": "Hammerspoon must expose the SAP command adapter used by generated hotstring profiles.",
-        })
+        issues.append({"type": "macos_hotstring_sap_adapter_missing", "file": to_repo_path(actions_file, repo_root), "message": "Hammerspoon must expose the SAP command adapter."})
     if "return {" not in profile_text:
-        issues.append({
-            "type": "macos_hotstring_profiles_invalid",
-            "file": to_repo_path(profile_file, repo_root),
-            "message": "Generated macOS hotstring profile catalog does not return a Lua table.",
-        })
-    bindings = re.findall(
-        r'\{id\s*=\s*"([^"]+)",\s*type\s*=\s*"([^"]+)",.*?contextLabel\s*=\s*"([^"]*)",\s*tcode\s*=\s*"([^"]*)"',
-        bindings_text,
-    )
-    bound_hotkey_ids = {
-        binding_id
-        for binding_id, binding_type, _, _ in bindings
-        if binding_type == "hotkey"
-    }
-    binding_action_prefixes = (
-        "eclipse_",
-        "global_",
-        "launcher_",
-        "sap_gui_",
-        "snipaste_",
-    )
+        issues.append({"type": "macos_hotstring_profiles_invalid", "file": to_repo_path(profile_file, repo_root), "message": "Generated macOS hotstring profile catalog must return a Lua table."})
+
+    bindings = re.findall(r'\{id\s*=\s*"([^"]+)",\s*type\s*=\s*"([^"]+)",.*?contextLabel\s*=\s*"([^"]*)",\s*tcode\s*=\s*"([^"]*)"', bindings_text)
+    bound_hotkey_ids = {binding_id for binding_id, binding_type, _, _ in bindings if binding_type == "hotkey"}
+    prefixes = ("eclipse_", "global_", "launcher_", "sap_gui_", "snipaste_")
     for action_id in sorted(action_ids):
-        if action_id.startswith(binding_action_prefixes) and action_id not in bound_hotkey_ids:
-            issues.append({
-                "type": "macos_action_without_binding",
-                "file": to_repo_path(actions_file, repo_root),
-                "action": action_id,
-                "message": "Hammerspoon action has no generated hotkey binding.",
-            })
+        if action_id.startswith(prefixes) and action_id not in bound_hotkey_ids:
+            issues.append({"type": "macos_action_without_binding", "file": to_repo_path(actions_file, repo_root), "action": action_id, "message": "Hammerspoon action has no generated hotkey binding."})
 
     runtime_contracts = {
-        'hs.eventtap.keyStroke({"cmd", "alt"}, "o")':
-            "SAP command dispatch must focus the native command field.",
-        "Hotstrings.reset()":
-            "Application changes must reset the macOS hotstring buffer.",
-        "iina-cli":
-            "Alt+P must dispatch selected media through IINA's playback CLI.",
-        "local iinaTask":
-            "Alt+P must retain the asynchronous IINA task through completion.",
-        'attributeValue("AXSelectedChildren")':
-            "Finder paths must come from its selected Accessibility elements.",
-        "Actions.snipasteIsActive":
-            "Snipaste overlay dispatch must be scoped to Snipaste.",
-        'enter = "return"':
-            "AHK Enter bindings must map to the macOS Return keycode.",
+        'hs.eventtap.keyStroke({"cmd", "alt"}, "o")': "SAP command dispatch must focus the native command field.",
+        "Hotstrings.reset()": "Application changes must reset the hotstring buffer.",
+        "iina-cli": "Alt+P must dispatch selected media through IINA's CLI.",
+        "local iinaTask": "Alt+P must retain the asynchronous IINA task through completion.",
+        'attributeValue("AXSelectedChildren")': "Finder paths must come from selected Accessibility elements.",
+        "Actions.snipasteIsActive": "Snipaste overlay dispatch must be scoped to Snipaste.",
+        'enter = "return"': "AHK Enter bindings must map to the macOS Return keycode.",
     }
-    combined_runtime_text = text + "\n" + actions_text + "\n" + hotstrings_text
+    combined = text + "\n" + actions_text + "\n" + hotstrings_text
     for contract, message in runtime_contracts.items():
-        if contract not in combined_runtime_text:
-            issues.append({
-                "type": "macos_runtime_contract_missing",
-                "file": to_repo_path(macos_dir, repo_root),
-                "contract": contract,
-                "message": message,
-            })
+        if contract not in combined:
+            issues.append({"type": "macos_runtime_contract_missing", "file": to_repo_path(macos_dir, repo_root), "contract": contract, "message": message})
 
     for binding_id, binding_type, context_label, tcode in bindings:
-        if (
-            binding_type == "hotkey"
-            and not tcode
-            and binding_id not in action_ids
-        ):
-            issues.append({
-                "type": "macos_action_missing",
-                "file": to_repo_path(actions_file, repo_root),
-                "binding": binding_id,
-                "message": "Generated macOS hotkey has no registered action.",
-            })
+        if binding_type == "hotkey" and not tcode and binding_id not in action_ids:
+            issues.append({"type": "macos_action_missing", "file": to_repo_path(actions_file, repo_root), "binding": binding_id, "message": "Generated macOS hotkey has no registered action."})
         if binding_type == "hotkey" and tcode and "Actions.runSapTcode(binding.tcode)" not in text:
-            issues.append({
-                "type": "macos_sap_tcode_adapter_missing",
-                "file": to_repo_path(init_file, repo_root),
-                "binding": binding_id,
-                "message": "Generated SAP transaction binding requires the shared macOS SAP adapter.",
-            })
-        if (
-            binding_type == "hotkey"
-            and context_label != "global"
-            and context_label not in context_labels
-        ):
-            issues.append({
-                "type": "macos_context_missing",
-                "file": to_repo_path(init_file, repo_root),
-                "binding": binding_id,
-                "context": context_label,
-                "message": "Generated macOS hotkey references an unknown application context.",
-            })
+            issues.append({"type": "macos_sap_tcode_adapter_missing", "file": macos_entry_rel, "binding": binding_id, "message": "Generated SAP binding requires the shared macOS SAP adapter."})
+        if binding_type == "hotkey" and context_label != "global" and context_label not in context_labels:
+            issues.append({"type": "macos_context_missing", "file": macos_entry_rel, "binding": binding_id, "context": context_label, "message": "Generated macOS hotkey references an unknown application context."})
         if binding_type == "hotstring" and binding_id not in hotstring_ids:
-            issues.append({
-                "type": "macos_hotstring_missing",
-                "file": to_repo_path(hotstrings_file, repo_root),
-                "binding": binding_id,
-                "message": "Generated macOS hotstring has no registered trigger.",
-            })
-
+            issues.append({"type": "macos_hotstring_missing", "file": to_repo_path(hotstrings_file, repo_root), "binding": binding_id, "message": "Generated macOS hotstring has no registered trigger."})
     for runtime_file in (init_file, actions_file, hotstrings_file):
         if "hs.timer.usleep" in read_text(runtime_file):
-            issues.append({
-                "type": "macos_blocking_sleep",
-                "file": to_repo_path(runtime_file, repo_root),
-                "message": "Hammerspoon runtime must not block its main event thread with hs.timer.usleep.",
-            })
+            issues.append({"type": "macos_blocking_sleep", "file": to_repo_path(runtime_file, repo_root), "message": "Hammerspoon runtime must not block its main event thread with hs.timer.usleep."})
     return issues
 
 
-def validate_hotkey_catalog(repo_root: Path) -> list[dict[str, object]]:
-    tool = repo_root / "ai/hotkey_sync.py"
+def validate_hotkey_catalog(repo_root: Path, tool_rel: str, source_rel: str) -> list[dict[str, object]]:
+    tool = repo_root / tool_rel
+    if not tool.exists():
+        return [{"type": "hotkey_sync_missing", "file": tool_rel, "message": "Hotkey sync validator is missing."}]
     result = subprocess.run(
-        [sys.executable, str(tool), "--check"],
-        cwd=repo_root,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        check=False,
+        [sys.executable, str(tool), "--check"], cwd=repo_root, capture_output=True, text=True,
+        encoding="utf-8", errors="replace", check=False,
     )
     if result.returncode == 0:
         return []
     detail = (result.stdout + result.stderr).strip()
-    return [{
-        "type": "hotkey_catalog_drift",
-        "file": HOTKEY_CATALOG_FILE,
-        "message": detail or "Hotkey catalog validation failed.",
-        "fix": "python ai/hotkey_sync.py --sync",
-    }]
+    return [{"type": "hotkey_catalog_drift", "file": source_rel, "message": detail or "Hotkey catalog validation failed.", "fix": f"{sys.executable} {tool_rel} --sync"}]
 
 
-def build_summary(
-    include_missing: list,
-    registry_issues: list,
-    service_call_issues: list,
-    profile_issues: list,
-    guide_contract_issues: list,
-    catalog_review_issues: list,
-    governance_issues: list,
-    local_only_contract_issues: list,
-    hotkey_catalog_issues: list,
-    macos_runtime_issues: list,
-    dead_candidates: dict,
-    profile_results: list,
-    registry: dict,
-    forbidden_references: list,
-    hotkey_counts: dict,
-    unclosed_hotif: list,
-    catalog_review_result: dict[str, object],
-    governance_result: dict[str, object],
-) -> dict[str, object]:
-    issues = include_missing + registry_issues + service_call_issues + profile_issues + guide_contract_issues + catalog_review_issues + governance_issues + local_only_contract_issues + hotkey_catalog_issues + macos_runtime_issues + unclosed_hotif + forbidden_references
-    profile_counts = {p["label"]: p.get("item_count", 0) for p in profile_results}
-    ai_readiness = compute_ai_readiness(issues, dead_candidates, forbidden_references)
+def build_summary(issues: list[dict[str, object]], registry: dict[str, str], profile_results: list[dict[str, object]], catalog_review: dict[str, object], hotkey_counts: dict[str, int], dead_candidates: dict[str, list[dict[str, object]]], forbidden_references: list[dict[str, object]], current_plan_present: bool) -> dict[str, object]:
     return {
-        "ok": len(issues) == 0,
+        "ok": not issues,
         "issue_count": len(issues),
-        "ai_readiness": ai_readiness,
-        "services": sorted(registry.keys()),
-        "profiles": profile_counts,
+        "services": sorted(registry),
+        "profiles": {str(item["label"]): item.get("item_count", 0) for item in profile_results},
         "catalog_review": {
-            "file": catalog_review_result.get("file", CATALOG_REVIEW_FILE),
-            "exists": catalog_review_result.get("exists", False),
-            "pending_human_review_count": catalog_review_result.get("pending_human_review_count", 0),
-            "verified_count": catalog_review_result.get("verified_count", 0),
-        },
-        "governance": {
-            "file": governance_result.get("file", GOVERNANCE_FILE),
-            "exists": governance_result.get("exists", False),
+            "file": catalog_review.get("file", CATALOG_REVIEW_FILE),
+            "exists": catalog_review.get("exists", False),
+            "pending_human_review_count": catalog_review.get("pending_human_review_count", 0),
+            "verified_count": catalog_review.get("verified_count", 0),
         },
         "hotkey_counts": hotkey_counts,
-        "dead_class_candidates": [c["class"] for c in dead_candidates["dead_class_candidates"]],
-        "dead_constant_candidates": [c["constant"] for c in dead_candidates["dead_constant_candidates"]],
+        "dead_class_candidates": [item["class"] for item in dead_candidates["dead_class_candidates"]],
+        "dead_constant_candidates": [item["constant"] for item in dead_candidates["dead_constant_candidates"]],
         "forbidden_reference_count": len(forbidden_references),
-        "ai_operating_guide": ["AGENTS.md", "README.md", "ai/repo-map.json", "ai/health-check.summary.json"],
+        "current_plan_present": current_plan_present,
     }
 
 
 def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
-    keyflow_entry = repo_root / "platforms/windows/keyflow.ahk"
-    bootstrap_file = repo_root / "platforms/windows/library/bootstrap.ahk"
-    repo_map_file = repo_root / "ai/repo-map.json"
-    hotkeys_dir = repo_root / "platforms/windows/hotkeys"
-    data_dir = repo_root / "platforms/windows/data"
-    bootstrap_text = read_text(bootstrap_file)
+    repo_map, repo_map_load_issues = load_repo_map(repo_root)
+    repo_map_issues = validate_repo_map(repo_root, repo_map) if repo_map else []
+    control_plane_result, control_plane_issues = validate_control_plane(repo_root, repo_map)
+    local_only_issues = validate_local_only_contract(repo_root, repo_map) if repo_map else []
 
-    repo_map: dict[str, object] = {}
-    if repo_map_file.exists():
-        try:
-            repo_map = json.loads(repo_map_file.read_text(encoding="utf-8-sig"))
-        except (json.JSONDecodeError, KeyError):
-            pass
+    routing = repo_map.get("routing", {}) if isinstance(repo_map.get("routing"), dict) else {}
+    windows_entry_rel = nested(routing, "windows", "entrypoint", default="platforms/windows/keyflow.ahk")
+    bootstrap_rel = nested(routing, "windows", "bootstrap", default="platforms/windows/library/bootstrap.ahk")
+    hotkeys_rel = nested(routing, "windows", "hotkeys", default="platforms/windows/hotkeys/")
+    data_rel = nested(routing, "windows", "catalogs", default="platforms/windows/data/")
+    macos_entry_rel = nested(routing, "macos", "entrypoint", default="platforms/macos/hammerspoon/init.lua")
+    hotkey_source_rel = nested(routing, "shared", "hotkeys", default=HOTKEY_CATALOG_FILE)
+    catalog_review_rel = nested(routing, "shared", "catalog_review", default=CATALOG_REVIEW_FILE)
+    hotkey_sync_rel = nested(routing, "validation", "hotkey_sync", default="ai/hotkey_sync.py")
+    active_work_rel = nested(routing, "conditional", "active_work", default="ai/current-plan.md")
+
+    keyflow_entry = repo_root / windows_entry_rel
+    bootstrap_file = repo_root / bootstrap_rel
+    hotkeys_dir = repo_root / hotkeys_rel
+    data_dir = repo_root / data_rel
+    bootstrap_text = read_text(bootstrap_file) if bootstrap_file.exists() else ""
 
     include_graph, include_missing = build_include_graph(keyflow_entry, repo_root)
     file_index, token_counter = parse_file_index(repo_root)
@@ -1436,132 +759,88 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
     registry = parse_registry(bootstrap_text)
     profiles = parse_hotstring_profiles(bootstrap_text)
     profile_results, profile_issues = validate_profiles(profiles, data_dir, repo_root)
-    catalog_review_result, catalog_review_issues = validate_catalog_review(repo_root, profiles)
-    governance_result, governance_issues = validate_governance_contract(repo_root, repo_map)
+    catalog_review_result, catalog_review_issues = validate_catalog_review(repo_root, catalog_review_rel, profiles)
     service_contracts, registry_issues, service_call_issues, public_api_candidates = build_service_contracts(registry, class_lookup, file_index)
-    service_call_issues.extend(
-        {
-            "type": "public_service_method_without_caller",
-            "service": candidate["service"],
-            "class": candidate["class"],
-            "methods": candidate["methods"],
-            "message": candidate["reason"],
-        }
-        for candidate in public_api_candidates
-    )
+    service_call_issues.extend({
+        "type": "public_service_method_without_caller",
+        "file": str(candidate["service"]),
+        "message": f"{candidate['class']} exposes uncalled methods: {candidate['methods']}",
+    } for candidate in public_api_candidates)
     public_calls = collect_public_service_calls(file_index)
     dead_candidates = detect_dead_candidates(file_index, registry, token_counter)
     unused_assignments = scan_assignment_candidates(repo_root, token_counter)
     unused_groups = scan_group_candidates(repo_root, token_counter)
     forbidden_references = scan_forbidden_references(repo_root)
-    repo_map_contract_issues = (
-        validate_repo_map_contracts(repo_root, repo_map, registry)
-        if repo_map
-        else []
-    )
-    guide_contract_issues = validate_guide_contracts(repo_root, repo_map, governance_result) if repo_map else []
     hotkey_counts = scan_hotkey_counts(hotkeys_dir, repo_root)
     unclosed_hotif = scan_unclosed_hotif(hotkeys_dir, repo_root)
-    local_only_contract_issues = validate_local_only_contract(repo_root, repo_map) if repo_map else []
-    hotkey_catalog_issues = validate_hotkey_catalog(repo_root)
-    macos_runtime_issues = validate_macos_runtime(repo_root)
+    hotkey_catalog_issues = validate_hotkey_catalog(repo_root, hotkey_sync_rel, hotkey_source_rel)
+    macos_runtime_issues = validate_macos_runtime(repo_root, macos_entry_rel)
+
+    issues: list[dict[str, object]] = []
+    for group in (
+        repo_map_load_issues, repo_map_issues, control_plane_issues, local_only_issues,
+        include_missing, registry_issues, service_call_issues, profile_issues,
+        catalog_review_issues, hotkey_catalog_issues, macos_runtime_issues,
+        unclosed_hotif, forbidden_references,
+    ):
+        issues.extend(group)
 
     summary = build_summary(
-        include_missing,
-        registry_issues,
-        service_call_issues,
-        profile_issues,
-        repo_map_contract_issues + guide_contract_issues,
-        catalog_review_issues,
-        governance_issues,
-        local_only_contract_issues,
-        hotkey_catalog_issues,
-        macos_runtime_issues,
-        dead_candidates,
-        profile_results,
-        registry,
-        forbidden_references,
-        hotkey_counts,
-        unclosed_hotif,
-        catalog_review_result,
-        governance_result,
+        issues, registry, profile_results, catalog_review_result, hotkey_counts,
+        dead_candidates, forbidden_references, (repo_root / active_work_rel).is_file(),
     )
-
     full = {
         "summary": summary,
-        "issues": {
-            "include_missing": include_missing,
-            "registry": registry_issues,
-            "service_calls": service_call_issues,
-            "profiles": profile_issues,
-            "guide_contracts": repo_map_contract_issues + guide_contract_issues,
-            "catalog_review": catalog_review_issues,
-            "governance": governance_issues,
-            "local_only_contract": local_only_contract_issues,
-            "hotkey_catalog": hotkey_catalog_issues,
-            "macos_runtime": macos_runtime_issues,
-            "unclosed_hotif": unclosed_hotif,
-            "forbidden_references": forbidden_references,
-        },
-        "dead_candidates": dead_candidates,
+        "issues": issues,
         "audits": {
             "unused_assignments": unused_assignments,
             "unused_groups_or_targets": unused_groups,
             "public_service_methods_without_callers": public_api_candidates,
         },
         "contracts": {
+            "repo_map": repo_map,
+            "governance": control_plane_result,
             "include_graph": include_graph,
             "service_registry": service_contracts,
             "hotstring_profiles": profile_results,
             "catalog_review": catalog_review_result,
-            "governance": governance_result,
             "public_service_calls": public_calls,
         },
         "repo": {
-            "entrypoint": to_repo_path(keyflow_entry, repo_root),
-            "bootstrap": to_repo_path(bootstrap_file, repo_root),
+            "entrypoint": windows_entry_rel,
+            "bootstrap": bootstrap_rel,
             "tool": "ai/health_check.py",
-            "standalone_scripts": [
-                "platforms/windows/hotkeys/layouts/colemak-dh.ahk"
-            ],
         },
     }
-
     return summary, full
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="AI-friendly health check for keyflow.")
+    parser = argparse.ArgumentParser(description="Mechanical health check for keyflow.")
     parser.add_argument("--repo-root", default=".", help="Repository root to inspect.")
     parser.add_argument("--output", help="Path for full JSON output.")
     parser.add_argument("--output-summary", help="Path for summary JSON output.")
     parser.add_argument("--pretty", action="store_true", help="Pretty-print JSON.")
-    parser.add_argument("--summary", action="store_true", help="Print summary only (no full JSON to stdout).")
+    parser.add_argument("--summary", action="store_true", help="Print summary only.")
     args = parser.parse_args()
 
     repo_root = Path(args.repo_root).resolve()
     indent = 2 if args.pretty else None
     summary, full = run(repo_root)
-
     if args.output_summary:
         out = Path(args.output_summary)
         if not out.is_absolute():
-            out = (repo_root / args.output_summary).resolve()
+            out = (repo_root / out).resolve()
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(summary, indent=indent, ensure_ascii=False) + "\n", encoding="utf-8")
-
     if args.output:
         out = Path(args.output)
         if not out.is_absolute():
-            out = (repo_root / args.output).resolve()
+            out = (repo_root / out).resolve()
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(full, indent=indent, ensure_ascii=False) + "\n", encoding="utf-8")
-
-    if args.summary:
-        sys.stdout.write(json.dumps(summary, indent=indent, ensure_ascii=False) + "\n")
-    else:
-        sys.stdout.write(json.dumps(full, indent=indent, ensure_ascii=False) + "\n")
-
+    payload = summary if args.summary else full
+    sys.stdout.write(json.dumps(payload, indent=indent, ensure_ascii=False) + "\n")
     return 0 if summary["ok"] else 1
 
 

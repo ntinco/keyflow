@@ -1,141 +1,54 @@
 {
-  "version": 7,
-  "purpose": "Navigation map for rapid dual-role AI maintenance of keyflow.",
-  "guide-files": {
-    "summary": "ai/health-check.summary.json",
-    "map": "ai/repo-map.json",
-    "rules": "AGENTS.md",
-    "architecture": "README.md"
+  "schema_version": "1.0",
+  "purpose": "AI-operated personal automation runtime",
+  "routing": {
+    "governance": "ai/governance.md",
+    "windows": {
+      "entrypoint": "platforms/windows/keyflow.ahk",
+      "bootstrap": "platforms/windows/library/bootstrap.ahk",
+      "services": "platforms/windows/library/automation/",
+      "hotkeys": "platforms/windows/hotkeys/",
+      "catalogs": "platforms/windows/data/"
+    },
+    "macos": {
+      "entrypoint": "platforms/macos/hammerspoon/init.lua",
+      "actions": "platforms/macos/hammerspoon/actions.lua",
+      "hotstrings": "platforms/macos/hammerspoon/hotstrings.lua",
+      "generated": "platforms/macos/hammerspoon/generated/"
+    },
+    "shared": {
+      "hotkeys": "platforms/shared/data/hotkeys.db",
+      "catalog_review": "ai/catalog-review.json"
+    },
+    "validation": {
+      "health": "ai/health_check.py",
+      "hotkey_sync": "ai/hotkey_sync.py",
+      "smoke": "ai/run_smoke.py"
+    },
+    "conditional": {
+      "active_work": "ai/current-plan.md"
+    }
   },
-  "read-order": [
+  "ownership": {
+    "human_owned": [
+      "platforms/shared/data/hotkeys.db",
+      "ai/catalog-review.json"
+    ],
+    "generated_versioned": [
+      "platforms/windows/hotkeys/",
+      "platforms/windows/data/*.json",
+      "platforms/macos/hammerspoon/generated/"
+    ],
+    "generated_local": [
+      "ai/health-check.json",
+      "ai/health-check.summary.json",
+      "ai/run-result.json",
+      "ai/run-result-macos.json"
+    ]
+  },
+  "local_only": [
+    "ai/health-check.json",
     "ai/health-check.summary.json",
-    "ai/repo-map.json",
-    "AGENTS.md",
-    "ai/current-plan.md"
-  ],
-  "plan-location": {
-    "path": "ai/current-plan.md",
-    "rule": "Sole persistent frontier and pending-action state."
-  },
-  "entrypoints": [
-    {
-      "id": "runtime",
-      "path": "platforms/windows/keyflow.ahk",
-      "role": "Main AutoHotkey entrypoint."
-    },
-    {
-      "id": "bootstrap",
-      "path": "platforms/windows/library/bootstrap.ahk",
-      "role": "Loads constants, free util functions, services, and hotstring profiles."
-    },
-    {
-      "id": "health-check",
-      "path": "ai/health_check.py",
-      "role": "Validation guard and machine-readable state generator."
-    },
-    {
-      "id": "review-check",
-      "path": "ai/review_check.py",
-      "role": "Reviewer-oriented audit for cycle closure, guide alignment, and handoff quality."
-    },
-    {
-      "id": "macos-runtime",
-      "path": "platforms/macos/hammerspoon/init.lua",
-      "role": "Hammerspoon entrypoint for application-scoped hotkeys and hotstrings."
-    }
-  ],
-  "domains": [
-    {
-      "id": "sap-automation",
-      "path": "platforms/windows/library/automation/sap.ahk",
-      "owns": [
-        "public services.sap facade",
-        "SAP GUI automation",
-        "Eclipse ABAP helpers",
-        "tcode execution"
-      ]
-    },
-    {
-      "id": "runtime-services",
-      "path": "platforms/windows/library/automation/",
-      "owns": [
-        "registered services exposed as services.*"
-      ]
-    },
-    {
-      "id": "util",
-      "path": "platforms/windows/library/util.ahk",
-      "owns": [
-        "free utility functions only"
-      ]
-    },
-    {
-      "id": "hotkeys",
-      "path": "platforms/windows/hotkeys/",
-      "owns": [
-        "generated triggers from hotkeys.db",
-        "global triggers",
-        "SAP GUI triggers",
-        "SAP Eclipse triggers",
-        "domain triggers",
-        "standalone layout script"
-      ]
-    },
-    {
-      "id": "catalogs",
-      "path": "platforms/windows/data/",
-      "owns": [
-        "versioned catalogs (autocorrect, quick-snippets, sap-transaction-catalog, sap-transaction-shortcuts, ymt-commands)",
-        "example config contracts"
-      ]
-    },
-    {
-      "id": "shared-catalogs",
-      "path": "platforms/shared/data/",
-      "owns": [
-        "human-managed hotkeys.db (drives both the Windows AHK runtime and the macOS Hammerspoon runtime)",
-        "local-only memory-vars.ini and local-paths.ini (shared across platforms, never versioned)"
-      ]
-    },
-    {
-      "id": "ai-tooling",
-      "path": "ai/",
-      "owns": [
-        "hotkey_sync.py",
-        "health_check.py",
-        "review_check.py",
-        "run_smoke.py",
-        "health-check.summary.json",
-        "health-check.json",
-        "run-result.json",
-        "run-result.example.json",
-        "repo-map.json",
-        "current-plan.md",
-        "agent-prompts.md",
-        "governance.json",
-        "catalog-review.json"
-      ]
-    },
-    {
-      "id": "macos-hammerspoon",
-      "path": "platforms/macos/hammerspoon/",
-      "owns": [
-        "init.lua entrypoint",
-        "actions.lua (hand-authored hotkey behavior)",
-        "hotstrings.lua (hs.eventtap watcher)",
-        "generated/bindings.lua (binding metadata generated from hotkeys.db)"
-      ]
-    }
-  ],
-  "runtime-api": [
-    "hotstring",
-    "launcher",
-    "sap",
-    "snipaste",
-    "windowGroup",
-    "windows"
-  ],
-  "local-only-files": [
     "ai/run-result.json",
     "ai/run-result-macos.json",
     "platforms/windows/data/local-secrets.ini",
@@ -146,7 +59,10 @@
     "storage.db",
     "platforms/windows/storage.db"
   ],
-  "standalone": [
-    "platforms/windows/hotkeys/layouts/colemak-dh.ahk"
+  "validators": [
+    "python ai/health_check.py --pretty",
+    "python ai/hotkey_sync.py --check",
+    "python ai/run_smoke.py --platform windows",
+    "python ai/run_smoke.py --platform macos"
   ]
 }

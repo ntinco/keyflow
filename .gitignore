@@ -1,8 +1,12 @@
-# AI health-check snapshots are versioned canonical artifacts.
-ahk_out.txt
-__pycache__/
+# Generated/local AI artifacts
+ai/health-check.json
+ai/health-check.summary.json
 ai/run-result.json
 ai/run-result-macos.json
+
+# Local runtime state/secrets
+ahk_out.txt
+__pycache__/
 platforms/windows/data/local-secrets.ini
 platforms/windows/data/local-startup.ini
 platforms/windows/data/rom.ini

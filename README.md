@@ -1,92 +1,85 @@
 # keyflow
 
-Personal automation workspace built on AutoHotkey v2, with a first macOS Hammerspoon slice. Optimized for fast AI maintenance, not for public packaging.
+Personal automation runtime built on AutoHotkey v2 for Windows and Hammerspoon for macOS. The repository is human-owned, AI-operated, machine-verifiable, and validated against real runtime behavior when environment-specific evidence is required.
 
-## AI operating guide
+AI maintenance starts at `AGENTS.md`. Durable AI policy lives in `ai/governance.md`; navigation and ownership live in `ai/repo-map.json`.
 
-For operational maintenance, use `ai/health-check.summary.json`, `ai/repo-map.json`, and `AGENTS.md` before changing runtime files.
-Machine-readable governance rules live in `ai/governance.json`.
-Reviewer pass: run `python ai/review_check.py --pretty --summary` after another AI finishes a cycle.
-This guide layer is intentionally dual-role: architect selects or reviews the frontier, and executor implements and validates it. One AI may perform both roles when that is simpler.
-Runtime code and the guide layer are optimized for AI maintenance; human responsibility is intent and runtime acceptance.
-
-## Architecture
+## Runtime architecture
 
 ```text
 platforms/windows/keyflow.ahk
   library/bootstrap.ahk
     library/config/constants-core.ahk
-    library/automation/ (services)
-  hotkeys/global.ahk
-  hotkeys/sap-gui.ahk
-  hotkeys/sap-eclipse.ahk
-  hotkeys/domains/productivity.ahk
+    library/automation/          # registered services
+  hotkeys/                       # generated trigger modules
 
 platforms/macos/hammerspoon/
-  init.lua                    (entrypoint)
-  actions.lua                 (non-blocking, hand-authored hotkey behavior)
-  hotstrings.lua              (hs.eventtap watcher)
-  generated/bindings.lua      (generated from the shared catalog)
+  init.lua                       # entrypoint and contextual binding runtime
+  actions.lua                    # hand-authored actions
+  hotstrings.lua                 # hotstring watcher
+  generated/                     # generated bindings/profile data
+
+platforms/shared/data/hotkeys.db # shared human-managed hotkey source
 ```
 
-Windows service surface: `hotstring` `launcher` `sap` `snipaste` `windowGroup` `windows`
+The Windows service registry currently exposes `hotstring`, `launcher`, `sap`, `snipaste`, `windowGroup`, and `windows`. `platforms/windows/library/automation/sap.ahk` is the public SAP facade for actions inside active SAP GUI/NWBC and Eclipse/ADT contexts; credential storage/session launch are outside the runtime.
 
-## Hotkey catalog
+## Source and generated contracts
 
-`platforms/shared/data/hotkeys.db` is the only human-managed source of hotkey definitions, shared by the Windows AHK runtime and the macOS Hammerspoon runtime. Humans edit it with a SQLite editor. The AHK trigger modules, `platforms/windows/hotkeys/README.md`, and `platforms/macos/hammerspoon/generated/bindings.lua` are generated AI-maintenance artifacts.
+`platforms/shared/data/hotkeys.db` is the single human-managed source for shared hotkeys and hotstring profiles. Humans may edit it with a SQLite editor.
 
-After changing the database:
+`ai/hotkey_sync.py` generates/checks:
+
+- `platforms/windows/hotkeys/*.ahk`;
+- `platforms/windows/hotkeys/README.md`;
+- `platforms/windows/data/*.json` hotstring profiles;
+- `platforms/macos/hammerspoon/generated/*.lua`.
+
+After changing the shared catalog:
 
 ```bash
 python ai/hotkey_sync.py --sync
 python ai/hotkey_sync.py --check
 ```
 
-The catalog separates implementation from intent:
+Generated artifacts may be versioned for runtime/review convenience, but they are never a second source of truth.
 
-- `platform` identifies which runtime(s) currently implement the action (`windows`, `macos`, or both).
-- `portability=portable-intent` marks behavior worth evaluating for a native macOS binding.
-- `portability=windows-only` marks behavior tied to Windows applications or APIs.
+## Validation
 
-The `action` column holds raw AHK syntax and is not transpiled; macOS behavior for `platform=macos` rows is hand-authored in `platforms/macos/hammerspoon/actions.lua` and `hotstrings.lua`, matched by row `id`.
+Mechanical repository validation:
 
-## SAP model
+```bash
+python ai/health_check.py --pretty
+python ai/hotkey_sync.py --check
+```
 
-- `platforms/windows/library/automation/sap.ahk` is the public `services.sap` facade for actions inside active SAP GUI/NWBC and Eclipse/ADT contexts. No credential storage or session launch is part of the runtime.
+When runtime wiring changes, use `ai/run_smoke.py` where the environment supports the target platform. Its result JSON is local/generated, not authority. Runtime acceptance that depends on real applications, credentials, UI state or human observation remains human-owned.
 
-## Configuration contract
+## Local configuration
 
-All machine-specific configuration is local-only. Use these versioned examples as structure references:
+Machine-specific configuration is local-only. Versioned examples provide shape only:
 
 | Example file | Purpose |
 |---|---|
 | `platforms/shared/data/local-paths.example.ini` | Machine paths and ABAP workspace hints |
 | `platforms/windows/data/local-startup.example.ini` | Runtime environment and SAP delays |
 
-Local-only files that must never be committed:
+Local secrets/state must not be committed. The complete routing/boundary list is in `ai/repo-map.json`.
 
-`local-secrets.ini` · `local-startup.ini` · `rom.ini` · `storage.db` · `ai/run-result.json` · `ai/run-result-macos.json`
+## Windows onboarding
 
-`platforms/shared/data/`: `memory-vars.ini` · `local-paths.ini` (local-only, shared across the Windows and macOS runtimes).
-
-## Onboarding — Windows
-
-1. Install AutoHotkey v2.
-2. Copy each `*.example.*` file to its local counterpart when needed.
-3. Run `python ai/health_check.py --pretty --summary`.
+1. Install AutoHotkey v2, or use the bundled runtime where appropriate.
+2. Copy required `*.example.*` files to their local counterparts and fill local values.
+3. Run `python ai/health_check.py --pretty`.
 4. Launch `platforms/windows/keyflow.ahk`.
 
-## Onboarding — macOS
+## macOS onboarding
 
-1. Install Hammerspoon.
-2. Symlink the repo into Hammerspoon's config dir, e.g. `ln -s <repo>/platforms/macos/hammerspoon ~/.hammerspoon/keyflow`.
-3. In `~/.hammerspoon/init.lua`, add: `dofile(hs.configdir .. "/keyflow/init.lua")`.
-4. Reload Hammerspoon and check the console for `keyflow: loaded ... contextual binding(s), watchers active`. Keyflow owns the console Clear button.
+1. Install Hammerspoon and required local tools used by the actions you enable.
+2. Symlink `platforms/macos/hammerspoon` into the Hammerspoon config, for example `~/.hammerspoon/keyflow`.
+3. Load it from `~/.hammerspoon/init.lua` with `dofile(hs.configdir .. "/keyflow/init.lua")`.
+4. Reload Hammerspoon and perform the relevant runtime acceptance checks in `ai/current-plan.md` when that active frontier exists.
 
-## Current model
+## Human acceptance boundary
 
-This is a summary; `AGENTS.md` → `Current model` is authoritative for governance-enforced detail.
-
-- Objective counts (services, hotkeys, profiles) live in `ai/health-check.summary.json`.
-- The macOS slice covers SAP GUI, Eclipse/ADT, hotstrings, Finder/Spotlight launcher actions, and Snipaste capture handoff. Spotlight delegates through Finder, Alt+P sends selected media to IINA's bundled CLI, and Snipaste Command+F1/Enter share an ImageMagick-backed clipboard flow. Overlay keys pass through outside their focused UI. Contextual hotkeys are active only in their target application, and delayed SAP steps stop when SAP GUI loses focus.
-- No credential-provider, session-launch, or hotkey-usage-tracking dependency exists in either runtime.
+Static checks can prove repository structure, catalog drift, include/service references, generated/source consistency, and syntax where tooling is available. They cannot prove focus behavior, SAP GUI semantics, Finder/Spotlight accessibility behavior, Snipaste handoff, or other environment-dependent interaction without executing against the real runtime.

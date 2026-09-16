@@ -1,9 +1,0 @@
-{
-  "tool": "ai/run_smoke.py",
-  "command": "platforms/windows/tools/exe/AutoHotkey64.exe /ErrorStdOut=CP65001 platforms/windows/keyflow.ahk",
-  "timestamp_utc": "2026-06-29T15:34:12Z",
-  "outcome": "launched",
-  "exit_code": null,
-  "stderr_lines": [],
-  "notes": "Process launched and did not exit within 4s timeout — no immediate parse errors detected. Manual verification required for full runtime behaviour."
-}
