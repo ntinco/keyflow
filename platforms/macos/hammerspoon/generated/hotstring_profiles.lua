@@ -447,7 +447,6 @@ return {
     {trigger = "pdto,", value = "Por definir.", immediate = true},
     {trigger = "tbd,", value = "To be defined.", immediate = true},
     {trigger = "wip,", value = "Work in progress.", immediate = true},
-    {trigger = "ok,", value = "De acuerdo, queda anotado.", immediate = true},
     {trigger = "rev,", value = "Pendiente de revisión.", immediate = true},
     {trigger = "urg,", value = "URGENTE:", immediate = true},
     {trigger = "sig,", value = "Con gusto te ayudo, ¿en qué consiste?", immediate = true},

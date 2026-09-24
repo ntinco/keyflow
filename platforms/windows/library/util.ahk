@@ -3,15 +3,6 @@ utilIsWindow(id) {
   return !((s & 0x08000000) || !(s & 0x10000000)) && !(WinGetExStyle(id) & 0x00000080)
 }
 
-utilKeyClear(key := "") {
-  key := key ? key : A_Thishotkey
-  key := StrReplace(key, "::", "")
-  key := StrReplace(key, ":*:", "")
-  key := StrReplace(key, ":*b0:", "")
-  key := StrReplace(key, ":X*b0:", "")
-  return StrReplace(key, "$<", "")
-}
-
 utilIsExit(noExit := "") {
   return !noExit && (InStr(A_Thishotkey, ":*") || InStr(A_Thishotkey, "::"))
 }

@@ -32,6 +32,3 @@ services.windows.resizeHeight()
 xbutton2::{
 services.snipaste.copyPaste("{printscreen}",snipasteTargets)
 }
-$^!+a::{
-reload()
-}

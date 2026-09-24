@@ -23,7 +23,6 @@ loadCorePathConstants() {
   dataDir := resolveDataDir(pathScript)
   memoryVarsIniFile := pathScriptOnelevelup "\shared\data\memory-vars.ini"
   localPathsFile := localPathsFilePath(pathScriptOnelevelup)
-  pathAbapWorkspace := pathConfigValue(localPathsFile, "pathAbapWorkspace", "")
   fileEverythingCli := pathConfigValue(localPathsFile, "fileEverythingCli", pathScript "\tools\exe\everything\es.exe")
 }
 
@@ -61,10 +60,6 @@ loadCoreApplicationConstants() {
   titleSnipaste := "Snipper - Snipaste"
   titleWhatsapp := "WhatsApp"
   titleWrite := "LibreOffice Writer"
-}
-
-appConfigValue(localConfigFile, key, defaultValue := "") {
-  return IniRead(localConfigFile, "apps", key, defaultValue)
 }
 
 loadCoreRuleConstants() {

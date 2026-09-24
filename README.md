@@ -61,7 +61,7 @@ Machine-specific configuration is local-only. Versioned examples provide shape o
 
 | Example file | Purpose |
 |---|---|
-| `platforms/shared/data/local-paths.example.ini` | Machine paths and ABAP workspace hints |
+| `platforms/shared/data/local-paths.example.ini` | Machine paths (e.g. Everything CLI override) |
 
 Local secrets/state must not be committed. The complete routing/boundary list is in `ai/repo-map.json`.
 

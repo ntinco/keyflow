@@ -108,6 +108,17 @@ Actions.global_alt_e = function()
   })
 end
 
+-- Mirrors WindowsService.resizeHeight: keep x/width, span the usable height.
+Actions.global_win_esc = function()
+  local window = hs.window.focusedWindow()
+  if not window or not window:isStandard() or window:isFullScreen() then return end
+  local screen = window:screen():frame()
+  local frame = window:frame()
+  frame.y = screen.y
+  frame.h = screen.h
+  window:setFrame(frame, 0)
+end
+
 local function isFrontSap()
   local front = hs.application.frontmostApplication()
   return front and (

@@ -17,7 +17,7 @@ package.loaded["keyflow.runtime"] = Runtime
 local function parseAhkKey(ahkKey)
   local mods = {}
   local key = ahkKey
-  local keyAliases = {enter = "return"}
+  local keyAliases = {enter = "return", esc = "escape"}
   key = key:gsub("^~", "")
   local prefixMap = {["^"] = "ctrl", ["+"] = "shift", ["!"] = "alt", ["#"] = "cmd"}
   while #key > 0 and prefixMap[key:sub(1, 1)] do

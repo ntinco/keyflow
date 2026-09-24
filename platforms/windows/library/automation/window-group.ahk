@@ -12,7 +12,7 @@ class WindowGroupService {
 
     windows := this.cachedWindows
     if this.cachedWindows.Length = 0
-      this._collectWindows(rules, &windows, name)
+      this._collectWindows(rules, &windows)
     this.cachedWindows := windows
     this._activate(&windows, name)
     this.cachedWindows := windows
@@ -45,7 +45,7 @@ class WindowGroupService {
     }
   }
 
-  _collectWindows(rules, &windows, lastNumber) {
+  _collectWindows(rules, &windows) {
     correl := 0
 
     managers := WinGetList(, , "Program Manager",)
@@ -86,14 +86,8 @@ class WindowGroupService {
 
       if matchedPattern
         windows.Push(this._windowInfo(exe, classLocal, title, id, matchedGroup, matchedPattern, correl))
-      else if StrLen(lastNumber) > 2
-        windows.Push(this._windowInfo(exe, classLocal, title, id, "zzz", exe, correl))
       else
-      {
-        windows.Push(this._windowInfo(exe, classLocal, title, id, lastNumber, exe, correl))
-        if windows.Length = lastNumber
-          return
-      }
+        windows.Push(this._windowInfo(exe, classLocal, title, id, "zzz", exe, correl))
     }
   }
 

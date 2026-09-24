@@ -21,7 +21,14 @@ Complete human runtime acceptance of the current macOS Hammerspoon slice and its
 6. In Finder and Spotlight, verify F12 with a disposable text file and Alt+P with a media file selected from any directory.
 7. Launch the Windows runtime once and confirm the generated `platforms/windows/data/*.json` profiles still autocorrect/paste and run SAP transactions as before.
 8. On macOS, verify SAP transaction codes run only while SAP GUI is frontmost.
-9. Verify Snipaste Command+F1 starts capture, Enter returns the processed image to the originating application, and Teams pastes automatically. MouseFwd remains intentionally manual on macOS.
+9. Verify Snipaste Command+F1 starts capture, Enter returns the processed image to the originating application, and Teams pastes automatically. MouseFwd is configured outside keyflow on macOS.
+10. On macOS, confirm Cmd+Esc stretches the focused window to the full usable screen height, keeping its x/width.
+
+## Known parity gaps (deliberately deferred)
+
+- F12 on macOS lacks the Windows `YM` post-paste step (3 s wait + Ctrl+F3); pending implementation.
+- macOS hotstrings are case-sensitive; Windows matches case-insensitively and conforms case.
+- Alt+P on macOS opens any selection in IINA; Windows filters media paths and uses AIMP.
 
 ## Active design constraints
 

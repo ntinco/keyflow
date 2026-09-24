@@ -58,11 +58,6 @@
       "immediate": true
     },
     {
-      "trigger": "ok,",
-      "value": "De acuerdo, queda anotado.",
-      "immediate": true
-    },
-    {
       "trigger": "rev,",
       "value": "Pendiente de revisión.",
       "immediate": true
