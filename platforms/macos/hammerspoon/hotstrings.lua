@@ -96,11 +96,6 @@ local function hasWordCharacterBefore(buffer, pattern, terminator)
   return preceding:match("[%w_]") ~= nil
 end
 
-local function isImmediatePersonName(trigger, value)
-  return trigger:match("^[a-z]+$")
-    and value:match("^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+$")
-end
-
 local function captureClipboard()
   return {
     data = hs.pasteboard.readAllData(),
@@ -145,11 +140,51 @@ local function pasteText(text)
   end)
 end
 
+-- CGEventKeyboardSetUnicodeString accepts at most 20 UTF-16 units per event;
+-- 10 code points stays under that even for surrogate pairs.
+local UNICODE_CHUNK = 10
+
+local function postUnicodeText(text)
+  local chunk = {}
+  local function flush()
+    if #chunk == 0 then return end
+    local str = table.concat(chunk)
+    for _, isDown in ipairs({true, false}) do
+      local event = hs.eventtap.event.newKeyEvent({}, "a", isDown)
+      event:setUnicodeString(str)
+      event:setProperty(
+        hs.eventtap.event.properties.eventSourceUserData,
+        SYNTHETIC_EVENT_MARKER
+      )
+      event:post()
+    end
+    chunk = {}
+  end
+  for _, codepoint in utf8.codes(text) do
+    chunk[#chunk + 1] = utf8.char(codepoint)
+    if #chunk == UNICODE_CHUNK then flush() end
+  end
+  flush()
+end
+
 local function fireReplacement(trigger, replacement, terminator, visibleCount)
   for _ = 1, visibleCount do
     postSyntheticKey({}, "delete")
   end
-  pasteText(replacement .. (terminator or ""))
+  -- Return/Tab must be re-sent as real keys, not as typed characters.
+  local terminatorKey = ({["\r"] = "return", ["\t"] = "tab"})[terminator or ""]
+  local text = replacement .. (terminatorKey and "" or (terminator or ""))
+  -- Typing directly avoids the clipboard round-trip (slow, and a fast next
+  -- keystroke could be lost around Cmd+V). Multi-line blocks still paste so
+  -- editors do not auto-indent each typed newline.
+  if text:find("\n", 1, true) then
+    pasteText(text)
+  else
+    postUnicodeText(text)
+  end
+  if terminatorKey then
+    postSyntheticKey({}, terminatorKey)
+  end
   if trigger.moveCursorUpAfter then
     hs.timer.doAfter(0.05, function()
       postSyntheticKey({}, "up")
@@ -198,9 +233,8 @@ local function buildTriggers(bindings, profiles)
       local mode = profile.mode
       triggers[#triggers + 1] = {
         pattern = entry.trigger,
-        immediate = mode == "sap-command"
-          or entry.immediate
-          or (mode == "replace" and isImmediatePersonName(entry.trigger, value)),
+        -- SAP commands always wait for an ending character, matching Windows.
+        immediate = mode ~= "sap-command" and entry.immediate,
         contextLabel = profile.contextLabel,
         profileID = profile.id,
         replacement = function()

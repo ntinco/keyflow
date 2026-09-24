@@ -31,6 +31,19 @@ local SNIPASTE_PASTE_TARGETS = {
 local launcherTargetApp
 local snipasteTargetApp
 local iinaTask
+-- hs.task objects held only by locals can be garbage-collected mid-run.
+local runningTasks = {}
+
+local function startTask(path, callback, args)
+  local task
+  task = hs.task.new(path, function(...)
+    runningTasks[task] = nil
+    if callback then callback(...) end
+  end, args)
+  if not task or not task:start() then return nil end
+  runningTasks[task] = true
+  return task
+end
 
 local function isLauncherApp(app)
   local bundleID = app and app:bundleID()
@@ -409,14 +422,12 @@ local function withMagick(callback)
     callback(magickPath)
     return
   end
-  local task = hs.task.new("/bin/zsh", function(exitCode, output)
+  local task = startTask("/bin/zsh", function(exitCode, output)
     local path = exitCode == 0 and output:match("^%s*(.-)%s*$") or ""
     if path ~= "" then magickPath = path end
     callback(magickPath)
   end, {"-lc", "command -v magick"})
-  if task then
-    task:start()
-  else
+  if not task then
     callback(nil)
   end
 end
@@ -448,7 +459,7 @@ local function resizeSnipasteImage(image, targetApp)
       return
     end
 
-    local task = hs.task.new(executable, function(exitCode)
+    local task = startTask(executable, function(exitCode)
       local resized = exitCode == 0 and hs.image.imageFromPath(outputPath) or nil
       if resized then
         hs.pasteboard.writeObjects(resized)
@@ -459,7 +470,7 @@ local function resizeSnipasteImage(image, targetApp)
       os.remove(outputPath)
       completeSnipaste(targetApp)
     end, {inputPath, "-resize", "80%", outputPath})
-    if not task or not task:start() then
+    if not task then
       os.remove(inputPath)
       os.remove(outputPath)
       hs.printf("keyflow: Snipaste ImageMagick task did not start")
@@ -473,8 +484,8 @@ Actions.global_snipaste_capture = function()
   currentSnipasteTarget()
   local appPath = hs.application.pathForBundleID(APP_BUNDLE_IDS.snipaste)
   local executable = appPath and appPath .. "/Contents/MacOS/Snipaste"
-  local task = executable and hs.task.new(executable, nil, {"snip"})
-  if not task or not task:start() then
+  local task = executable and startTask(executable, nil, {"snip"})
+  if not task then
     hs.printf("keyflow: Snipaste capture did not start")
   end
 end

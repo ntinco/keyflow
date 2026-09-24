@@ -22,7 +22,7 @@
         if !trigger
           continue
 
-        hotstringOptions := this._resolveHotstringOptions(mode, trigger, value, entry)
+        hotstringOptions := this._resolveHotstringOptions(mode, entry)
         if this._isSapInputMode(mode)
           hotstring(hotstringOptions . trigger, this._submitSapTcode.Bind(value, profileLabel))
         else
@@ -41,28 +41,14 @@
     services.sap.runTcode(hotstringValue)
   }
 
-  _resolveHotstringOptions(mode, trigger := "", value := "", entry := "") {
+  _resolveHotstringOptions(mode, entry) {
+    ; SAP triggers wait for an ending character so words typed in SAP fields
+    ; (e.g. "datos" vs "da") do not navigate away.
     if this._isSapInputMode(mode)
-      return ":X*b0:"
-    if (mode = "autocorrectImmediate")
+      return ":Xb0:"
+    if (mode = "autocorrect" and entry.Has("immediate") and entry["immediate"])
       return ":*:"
-    if (mode = "autocorrect" and entry is Map and entry.Has("immediate"))
-      return entry["immediate"] ? ":*:" : "::"
-    if (mode = "autocorrect" and this._isImmediatePersonName(trigger, value))
-      return ":*:"
-    if (mode = "autocorrect")
-      return "::"
     return "::"
-  }
-
-  _isImmediatePersonName(trigger, value) {
-    if !(trigger is String) || !(value is String)
-      return false
-    if (trigger = "" or value = "")
-      return false
-    if !RegExMatch(trigger, "^[a-z]+$")
-      return false
-    return RegExMatch(value, "^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+$")
   }
 
   _isSapInputMode(mode) {

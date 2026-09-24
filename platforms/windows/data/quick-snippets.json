@@ -4,63 +4,78 @@
   "items": [
     {
       "trigger": "bd,",
-      "value": "Buen día,"
+      "value": "Buen día,",
+      "immediate": true
     },
     {
       "trigger": "bt,",
-      "value": "Buenas tardes,"
+      "value": "Buenas tardes,",
+      "immediate": true
     },
     {
       "trigger": "bn,",
-      "value": "Buenas noches,"
+      "value": "Buenas noches,",
+      "immediate": true
     },
     {
       "trigger": "slds,",
-      "value": "Saludos,"
+      "value": "Saludos,",
+      "immediate": true
     },
     {
       "trigger": "att,",
-      "value": "Atentamente,"
+      "value": "Atentamente,",
+      "immediate": true
     },
     {
       "trigger": "sp,",
-      "value": "summary in prompt"
+      "value": "summary in prompt",
+      "immediate": true
     },
     {
       "trigger": "ntt,",
-      "value": "NTT DATA"
+      "value": "NTT DATA",
+      "immediate": true
     },
     {
       "trigger": "fyi,",
-      "value": "Para tu información / FYI:"
+      "value": "Para tu información / FYI:",
+      "immediate": true
     },
     {
       "trigger": "pdto,",
-      "value": "Por definir."
+      "value": "Por definir.",
+      "immediate": true
     },
     {
       "trigger": "tbd,",
-      "value": "To be defined."
+      "value": "To be defined.",
+      "immediate": true
     },
     {
       "trigger": "wip,",
-      "value": "Work in progress."
+      "value": "Work in progress.",
+      "immediate": true
     },
     {
       "trigger": "ok,",
-      "value": "De acuerdo, queda anotado."
+      "value": "De acuerdo, queda anotado.",
+      "immediate": true
     },
     {
       "trigger": "rev,",
-      "value": "Pendiente de revisión."
+      "value": "Pendiente de revisión.",
+      "immediate": true
     },
     {
       "trigger": "urg,",
-      "value": "URGENTE:"
+      "value": "URGENTE:",
+      "immediate": true
     },
     {
       "trigger": "sig,",
-      "value": "Con gusto te ayudo, ¿en qué consiste?"
+      "value": "Con gusto te ayudo, ¿en qué consiste?",
+      "immediate": true
     }
   ]
 }

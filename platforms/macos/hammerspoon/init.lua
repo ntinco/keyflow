@@ -113,8 +113,20 @@ local function eventContextIsActive(contextLabel)
 end
 
 Runtime.keyWatcher = hs.eventtap.new(
-  {hs.eventtap.event.types.keyDown},
+  {
+    hs.eventtap.event.types.keyDown,
+    hs.eventtap.event.types.tapDisabledByTimeout,
+    hs.eventtap.event.types.tapDisabledByUserInput,
+  },
   function(event)
+    local eventType = event:getType()
+    if eventType == hs.eventtap.event.types.tapDisabledByTimeout
+        or eventType == hs.eventtap.event.types.tapDisabledByUserInput then
+      hs.printf("keyflow: key watcher disabled (type %d); restarting", eventType)
+      hs.timer.doAfter(0, function() Runtime.keyWatcher:start() end)
+      return false
+    end
+
     local flags = event:getFlags()
     local keyCode = event:getKeyCode()
     for _, binding in ipairs(eventBindings) do

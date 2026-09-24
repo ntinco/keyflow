@@ -1,5 +1,5 @@
 ﻿class LauncherService {
-  supportedPasteExtensionsPattern := "i)(txt|abap|md|ahk)"
+  supportedPasteExtensionsPattern := "i)\.(txt|abap|md|ahk)$"
 
   _isMediaPath(filename) {
     return InStr(filename, "music") or InStr(filename, "audio") or InStr(filename, "video")

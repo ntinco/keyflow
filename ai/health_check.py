@@ -414,9 +414,11 @@ def validate_repo_map(repo_root: Path, repo_map: dict[str, object]) -> list[dict
 
 def validate_control_plane(repo_root: Path, repo_map: dict[str, object]) -> tuple[dict[str, object], list[dict[str, str]]]:
     issues: list[dict[str, str]] = []
-    if not (repo_root / "AGENTS.md").is_file():
+    # Compare real directory entries: Path.exists() is case-insensitive on macOS/Windows.
+    root_names = {entry.name for entry in repo_root.iterdir()}
+    if "AGENTS.md" not in root_names:
         issues.append({"type": "agents_missing", "file": "AGENTS.md", "message": "AGENTS.md cold-start contract is missing."})
-    if (repo_root / "agents.md").exists():
+    if "agents.md" in root_names:
         issues.append({"type": "agents_wrong_case", "file": "agents.md", "message": "Lowercase agents.md must not coexist with AGENTS.md."})
     if not (repo_root / "README.md").is_file():
         issues.append({"type": "readme_missing", "file": "README.md", "message": "README.md is missing."})
