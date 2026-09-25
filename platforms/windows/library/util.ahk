@@ -34,7 +34,9 @@ utilPaste(data) {
   A_Clipboard := data
   ClipWait(0.5)
   Send("^v")
-  Sleep(50)
+  ; Some apps read the clipboard well after Ctrl+V; restoring too early pastes
+  ; the user's previous clipboard instead (macOS waits 0.5 s).
+  Sleep(300)
   A_Clipboard := clipboardsaved
 }
 
