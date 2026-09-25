@@ -1,4 +1,4 @@
-﻿class SnipasteService {
+class SnipasteService {
   copyPaste(key, snipasteTargets := []) {
     A_Clipboard := ""
     Sleep(100)
@@ -9,8 +9,8 @@
     }
     WinWaitClose(titleSnipaste)
 
-    If !this._hasImageInClipboard()
-      Exit()
+    if !this._hasImageInClipboard()
+      return
 
     sleep(100)
     MouseGetPos(, , &_mid)
@@ -19,8 +19,8 @@
     title := exe := ""
     try exe := WinGetProcessName(id)
     try title := wingettitle(id)
-    If instr(exe, mouseExe) or !title
-      Exit()
+    if InStr(exe, mouseExe) or !title
+      return
 
     WinActivate(title)
     WinWaitActive(title, , 3)
@@ -40,9 +40,6 @@
         break
       }
     }
-
-    If utilIsExit()
-      Exit()
   }
 
   _lastEditorActive(snipasteTargets := []) {

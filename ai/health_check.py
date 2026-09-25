@@ -249,9 +249,6 @@ def scan_unincluded_ahk_files(repo_root: Path, include_graph: list[dict[str, obj
     return issues
 
 
-BOOTSTRAP_MODES_BY_CATALOG_MODE = {"replace": {"autocorrect"}, "sap-command": {"sapTransaction", "ymtCommand"}}
-
-
 def validate_bootstrap_profiles(repo_root: Path, catalog_rel: str, profiles: list[dict[str, str]], bootstrap_rel: str) -> list[dict[str, object]]:
     """keyflowHotstringProfiles() must load exactly the active Windows profiles of hotkeys.db."""
     try:
@@ -278,8 +275,8 @@ def validate_bootstrap_profiles(repo_root: Path, catalog_rel: str, profiles: lis
         issues.append({"type": "bootstrap_profile_inactive", "file": bootstrap_rel, "profile": label, "message": "Loaded hotstring profile is inactive or not targeted to Windows in hotkeys.db."})
     for label in sorted(set(loaded) & set(expected)):
         profile = loaded[label]
-        if profile["mode"] not in BOOTSTRAP_MODES_BY_CATALOG_MODE.get(expected[label], set()):
-            issues.append({"type": "bootstrap_profile_mode_mismatch", "file": bootstrap_rel, "profile": label, "message": f"Windows mode {profile['mode']} does not implement catalog mode {expected[label]}."})
+        if profile["mode"] != expected[label]:
+            issues.append({"type": "bootstrap_profile_mode_mismatch", "file": bootstrap_rel, "profile": label, "message": f"Windows mode {profile['mode']} differs from catalog mode {expected[label]}."})
         if expected[label] == "sap-command" and not profile["group"]:
             issues.append({"type": "bootstrap_profile_group_missing", "file": bootstrap_rel, "profile": label, "message": "SAP command profiles must be scoped to a window group."})
     return issues

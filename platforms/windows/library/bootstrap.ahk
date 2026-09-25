@@ -1,4 +1,4 @@
-﻿#Requires AutoHotkey v2.0
+#Requires AutoHotkey v2.0
 ; Load application constants before any service class runs.
 #Include config\constants-core.ahk
 
@@ -27,11 +27,11 @@ keyflowServiceRegistry() {
 
 keyflowHotstringProfiles() {
   return [
-    {label: "autocorrect", group: "", mode: "autocorrect"},
-    {label: "quick-snippets", group: "", mode: "autocorrect"},
-    {label: "sap-transaction-shortcuts", group: "group_sap_runtime_windows", mode: "sapTransaction"},
-    {label: "sap-transaction-catalog", group: "group_sap_runtime_windows", mode: "sapTransaction"},
-    {label: "ymt-commands", group: "group_sap_runtime_windows", mode: "ymtCommand"},
+    {label: "autocorrect", group: "", mode: "replace"},
+    {label: "quick-snippets", group: "", mode: "replace"},
+    {label: "sap-transaction-shortcuts", group: "group_sap_runtime_windows", mode: "sap-command"},
+    {label: "sap-transaction-catalog", group: "group_sap_runtime_windows", mode: "sap-command"},
+    {label: "ymt-commands", group: "group_sap_runtime_windows", mode: "sap-command"},
   ]
 }
 

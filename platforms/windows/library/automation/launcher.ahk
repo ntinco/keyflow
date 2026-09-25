@@ -1,21 +1,19 @@
-﻿class LauncherService {
+class LauncherService {
   supportedPasteExtensionsPattern := "i)\.(txt|abap|md|ahk)$"
 
   _isMediaPath(filename) {
     return InStr(filename, "music")
   }
 
-  dismissLauncherUi(shortWait := true) {
-    If winactive(exeEverything)
+  _dismissLauncherUi() {
+    if WinActive(exeEverything)
     {
       Sleep(50)
       Send("^{w}")
     }
-
-    if winactive(exeSwitcheroo) or WinActive(exeFlowlauncher)
+    else if WinActive(exeFlowlauncher)
       Send("{esc}")
-
-    Sleep(shortWait ? 10 : 500)
+    Sleep(10)
   }
 
   openSelectedMedia() {
@@ -28,7 +26,7 @@
       utilTooltip("Alt+P: not a media file", filename)
       return
     }
-    this.dismissLauncherUi()
+    this._dismissLauncherUi()
     this._incrementRunCount(filename)
     utilRunCommand('aimpportable "' filename '"')
   }
@@ -37,18 +35,18 @@
     files := this._readSelectedFiles()
     pastedAny := false
 
-    this.dismissLauncherUi()
+    this._dismissLauncherUi()
 
-    Loop Parse, files, "`n", "`r"
+    loop parse, files, "`n", "`r"
     {
-      selectedFile := A_Loopfield
+      selectedFile := A_LoopField
       if !this._isPasteableTextFile(selectedFile)
         continue
       if !FileExist(selectedFile)
         continue
 
       this._incrementRunCount(selectedFile)
-      utilPaste(Fileread(selectedFile), True)
+      utilPaste(FileRead(selectedFile))
       pastedAny := true
     }
 
@@ -80,9 +78,9 @@
   }
 
   _waitAfterPaste() {
-    ; "YM" matches any window titled with the YMT workspace prefix
-    ; (see constants-core.ahk); that app needs a long settle delay before Ctrl+F3.
-    If WinActive("YM")
+    ; "YM" matches windows titled with the YMT workspace prefix; that app
+    ; needs a long settle delay before Ctrl+F3.
+    if WinActive("YM")
     {
       Sleep 3000
       Send("^{f3}")

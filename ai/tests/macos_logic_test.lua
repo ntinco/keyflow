@@ -114,7 +114,6 @@ hs = {
     readAllData = function()
       return pasteboard.contents and {text = pasteboard.contents} or {}
     end,
-    getContents = function() return pasteboard.contents end,
     setContents = function(text) pasteboard.contents = text end,
     writeAllData = function(data) pasteboard.contents = data.text end,
     clearContents = function() pasteboard.contents = nil end,

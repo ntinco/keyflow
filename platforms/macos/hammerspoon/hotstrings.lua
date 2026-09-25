@@ -86,14 +86,6 @@ local function isTerminator(char)
   return END_CHARS[char] == true
 end
 
-local function isFrontSap()
-  local front = hs.application.frontmostApplication()
-  return front and (
-    front:bundleID() == "com.sap.platin"
-    or front:name() == "SAPGUI"
-  )
-end
-
 -- Like AHK without the ? option: no trigger inside a word. Bytes >= 0x80 are
 -- parts of non-ASCII letters (ñ, á), which count as word characters too.
 local function hasWordCharacterBefore(buffer, pattern, terminator)
@@ -184,12 +176,6 @@ local function resetBuffer()
   bufferAppPID = front and front:pid() or nil
 end
 
-local function triggerMatchesContext(trigger)
-  return trigger.contextLabel == "global"
-    or trigger.contextLabel == ""
-    or (trigger.contextLabel == "sap-gui-session" and isFrontSap())
-end
-
 local function buildTriggers(bindings, profiles)
   local triggers = {}
 
@@ -222,7 +208,7 @@ local function buildTriggers(bindings, profiles)
           return value
         end,
         run = mode == "sap-command" and function(actions)
-          actions.runSapTcode(value, profile.id)
+          actions.runSapTcode(value)
         end or nil,
       }
     end
@@ -265,6 +251,11 @@ function Hotstrings.start(actions, bindings, profiles)
 
   log = log or hs.logger.new("keyflow.hotstrings", "warning")
   local triggers = buildTriggers(bindings, profiles)
+  local function triggerMatchesContext(trigger)
+    return trigger.contextLabel == "global"
+      or trigger.contextLabel == ""
+      or (trigger.contextLabel == "sap-gui-session" and actions.isFrontSap())
+  end
   eventWatcher = hs.eventtap.new({
     hs.eventtap.event.types.keyDown,
     hs.eventtap.event.types.leftMouseDown,
@@ -318,12 +309,13 @@ function Hotstrings.start(actions, bindings, profiles)
       findMatch(triggers, buffer, chars, triggerMatchesContext)
     if not trigger then return false end
     if trigger.run then
+      -- The ending character is swallowed (return true), like AHK's O option.
       if actions.shouldSubmitExistingSapCatalogTcode(trigger.profileID) then
         hs.timer.doAfter(0, function()
           postSyntheticKey({}, "return")
         end)
         buffer = ""
-        return false
+        return true
       end
       for _ = 1, visibleCount do
         postSyntheticKey({}, "delete")

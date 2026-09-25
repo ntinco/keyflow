@@ -11,10 +11,7 @@ local pending
 local restoreTimer
 
 function Clipboard.capture()
-  return {
-    data = hs.pasteboard.readAllData(),
-    text = hs.pasteboard.getContents(),
-  }
+  return {data = hs.pasteboard.readAllData()}
 end
 
 function Clipboard.restore(snapshot)

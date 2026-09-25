@@ -55,6 +55,9 @@ ClipWait(1)
 check(";; keeps the preceding character", typeAndRead("x `;;"), "x ñ")
 check(";; restores the clipboard", A_Clipboard, "keyflow-selftest-clipboard")
 check(";; fires inside a word", typeAndRead("ma;;ana"), "mañana")
+blockLines := StrSplit(typeAndRead("*+x"), "`n", "`r")
+check("SAP comment block leaves the cursor on the middle line",
+  blockLines.Length = 3 ? blockLines[2] : "(" blockLines.Length " lines)", "x")
 typingGui.Destroy()
 
 ; Win+Esc ------------------------------------------------------------------
@@ -104,7 +107,7 @@ for result in results
   report .= result.status "  " result.name (result.detail ? "`n      " result.detail : "") "`n"
 }
 report .= "`nManual checks still needed: SAP (Alt+4…0 in a data field, SAP hotstrings, =ED_OPTIONS),"
-  . " F12 (.txt pastes, .exe ignored), Alt+P with a media path containing spaces."
+  . " F12 in Everything (.txt pastes, .exe ignored), Alt+P in Everything on a music path."
 A_Clipboard := report
 MsgBox(report "`n`nThis report was copied to the clipboard.", "keyflow self-test",
   failures ? "Icon!" : "Iconi")

@@ -8,34 +8,20 @@ loadCoreConstants() {
 loadCoreBaseConstants() {
   global
   constDayEs := FormatTime(, "dd.MM.yy")
-  tab := "{tab}"
-  enter := "{enter}"
-  EnvSet("YMT", "ym.lnk")
-  sapDelayPollMs := 100
+  sapDelayMs := 100
 }
 
 loadCorePathConstants() {
   global
-  SplitPath(A_LineFile, , &pathScript)
-  SplitPath(pathScript, , &pathScript)
-  SplitPath(pathScript, , &pathScript)
-  SplitPath(pathScript, , &pathScriptOnelevelup)
-  dataDir := resolveDataDir(pathScript)
-  memoryVarsIniFile := pathScriptOnelevelup "\shared\data\memory-vars.ini"
-  localPathsFile := localPathsFilePath(pathScriptOnelevelup)
-  fileEverythingCli := pathConfigValue(localPathsFile, "fileEverythingCli", pathScript "\tools\exe\everything\es.exe")
-}
-
-resolveDataDir(pathScript) {
-  return pathScript "\data\"
-}
-
-localPathsFilePath(pathScriptOnelevelup) {
-  return pathScriptOnelevelup "\shared\data\local-paths.ini"
-}
-
-pathConfigValue(localPathsFile, key, defaultValue := "") {
-  return IniRead(localPathsFile, "paths", key, defaultValue)
+  ; library\config -> platforms\windows -> platforms
+  SplitPath(A_LineFile, , &pathWindows)
+  SplitPath(pathWindows, , &pathWindows)
+  SplitPath(pathWindows, , &pathWindows)
+  SplitPath(pathWindows, , &pathPlatforms)
+  dataDir := pathWindows "\data\"
+  memoryVarsIniFile := pathPlatforms "\shared\data\memory-vars.ini"
+  localPathsFile := pathPlatforms "\shared\data\local-paths.ini"
+  fileEverythingCli := IniRead(localPathsFile, "paths", "fileEverythingCli", pathWindows "\tools\exe\everything\es.exe")
 }
 
 loadCoreApplicationConstants() {
@@ -49,7 +35,6 @@ loadCoreApplicationConstants() {
   exeOnenote := "ahk_exe ONENOTE.EXE"
   exeOutlook := "ahk_exe OUTLOOK.EXE"
   exeLibreOfficeBinary := "ahk_exe soffice.bin"
-  exeSwitcheroo := "ahk_exe switcheroo.exe"
   exeWinword := "ahk_exe WINWORD.EXE"
   exeWordpad := "ahk_exe wordpad.exe"
   ; Window class matches both Everything64.exe and Everything.exe builds.

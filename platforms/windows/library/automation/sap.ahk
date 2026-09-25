@@ -1,39 +1,18 @@
 class SapService {
-  ; symbol: trigger's "+"/"-". "+/-" = one line; *+/*- = {..} block frame,
-  ; cursor left on the blank line between open/close.
+  ; symbol is the trigger's "+" or "-". A line is `"+SIGNATURE`; a block is a
+  ; *+{ ... *+} frame with the cursor left on the blank line between.
   insertCommentLine(symbol := "-") {
-    this._insertCommentLine(symbol)
+    utilPaste(Chr(34) symbol this._codeSignature())
   }
 
   insertCommentBlock(symbol := "-") {
-    this._insertCommentBlock(symbol)
-  }
-
-  _insertCommentLine(symbol) {
-    utilPaste(this._buildCodeCommentLine(symbol))
-  }
-
-  _insertCommentBlock(symbol) {
-    utilPaste(this._buildCommentMarkup(symbol))
+    signature := this._codeSignature()
+    utilPaste("*" symbol "{" signature "`r`n`r`n*" symbol "}" signature)
     Send("{Up}")
   }
 
-  _buildCodeSignature() {
-    commentUser := utilResolveMemoryValue("sap_comment_user")
-    if !commentUser || (commentUser = "sap_comment_user")
-      commentUser := "NTP"
-    return commentUser " " constDayEs
-  }
-
-  _buildCodeCommentLine(symbol) {
-    return Chr(34) symbol this._buildCodeSignature()
-  }
-
-  _buildCommentMarkup(symbol) {
-    signature := this._buildCodeSignature()
-    openLine := "*" symbol "{" signature
-    closeLine := "*" symbol "}" signature
-    return openLine "`r`n`r`n" closeLine
+  _codeSignature() {
+    return utilMemoryValue("sap_comment_user", "NTP") " " constDayEs
   }
 
   isTextInputActive(winTitle := "A") {
@@ -46,60 +25,43 @@ class SapService {
     catch
       return false
 
-    return InStr(focusedControl, "edit") || InStr(focusedControl, "richedit")
+    return InStr(focusedControl, "edit")
   }
 
   runTcode(tcode) {
-    normalizedTcode := this._normalizeTcodeForSap(tcode)
-    if !normalizedTcode
+    command := this._normalizeTcode(tcode)
+    if !command
       return
 
-    this._submitTcodeButton(normalizedTcode)
+    ; Ctrl+/ focuses the SAP GUI command field so a data field is never
+    ; overwritten when the hotkey fires elsewhere (macOS uses Cmd+Alt+O).
+    Send("^/")
+    Sleep(sapDelayMs)
+    Send("^a")
+    utilPaste(command)
+    Send("{enter}")
   }
 
   promptAndOpenAbapObject() {
     Send("^+a")
-    Sleep(this._resolveOperationDelayMs())
-    utilPaste("zpm*", true)
+    Sleep(sapDelayMs)
+    utilPaste("zpm*")
   }
 
   promptAndSearchAbapObject() {
     Send("^o")
   }
 
-  _normalizeTcodeForSap(tcode) {
-    normalizedTcode := Trim(tcode)
-    if !normalizedTcode
+  ; Mirrors normalizeTcode in platforms/macos/hammerspoon/actions.lua.
+  _normalizeTcode(tcode) {
+    command := Trim(tcode)
+    if !command
       return ""
-
-    if InStr(normalizedTcode, "/") = 1
-      return normalizedTcode
-
+    if InStr(command, "/") = 1
+      return command
     ; "=" OK-codes are already complete commands; "/n" would break them.
-    if InStr(normalizedTcode, "=") = 1
-      return StrUpper(normalizedTcode)
-
-    if RegExMatch(normalizedTcode, "i)^ymt(\.|$)")
-      return "YMT"
-
-    return StrUpper(normalizedTcode)
+    if InStr(command, "=") = 1
+      return StrUpper(command)
+    return "/n" StrUpper(command)
   }
-
-  _submitTcodeButton(tcode) {
-    ; Ctrl+/ focuses the SAP GUI command field so a data field is never
-    ; overwritten when the hotkey fires elsewhere (macOS uses Cmd+Alt+O).
-    Send("^/")
-    Sleep(this._resolveOperationDelayMs())
-    Send("^a")
-    commandText := (InStr(tcode, "/") = 1 || InStr(tcode, "=") = 1) ? tcode : "/n" tcode
-    utilPaste(commandText, true)
-    Send("{enter}")
-  }
-
-  _resolveOperationDelayMs() {
-    if IsNumber(sapDelayPollMs)
-      return sapDelayPollMs + 0
-    return 100
-  }
-
 }

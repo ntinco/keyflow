@@ -10,10 +10,11 @@ class WindowGroupService {
   activateGroup(rules := [], name := "") {
     this._captureCurrentWindowContext()
 
+    ; The window list is cached while Alt stays held so repeated presses
+    ; rotate through the same snapshot.
     windows := this.cachedWindows
-    if this.cachedWindows.Length = 0
+    if windows.Length = 0
       this._collectWindows(rules, &windows)
-    this.cachedWindows := windows
     this._activate(&windows, name)
     this.cachedWindows := windows
   }
@@ -45,9 +46,9 @@ class WindowGroupService {
     }
   }
 
+  ; rules: [group, pattern] pairs; pattern is an ahk_exe/ahk_class spec or a
+  ; title fragment (see appActivationTargets in constants-core.ahk).
   _collectWindows(rules, &windows) {
-    correl := 0
-
     managers := WinGetList(, , "Program Manager",)
     for manager in managers
     {
@@ -65,29 +66,22 @@ class WindowGroupService {
       matchedGroup := ""
       for rule in rules
       {
-        rulePattern := this._rulePattern(rule)
-        ruleGroup := this._ruleGroup(rule)
-
-        if !rulePattern
-          continue
-
-        currentMatch := ""
+        ruleGroup := rule[1], rulePattern := rule[2]
         if InStr(rulePattern, exe)
-          currentMatch := matchedPattern := exe
+          matchedPattern := exe
         else if InStr(rulePattern, classLocal)
-          currentMatch := matchedPattern := classLocal
+          matchedPattern := classLocal
         else if InStr(title, rulePattern)
-          currentMatch := matchedPattern := rulePattern
-
-        if currentMatch
-          matchedGroup := ruleGroup "," matchedGroup
+          matchedPattern := rulePattern
+        else
+          continue
+        matchedGroup := ruleGroup "," matchedGroup
       }
-      correl += 1
 
       if matchedPattern
-        windows.Push(this._windowInfo(exe, classLocal, title, id, matchedGroup, matchedPattern, correl))
+        windows.Push({id: id, group: matchedGroup, match: matchedPattern})
       else
-        windows.Push(this._windowInfo(exe, classLocal, title, id, "zzz", exe, correl))
+        windows.Push({id: id, group: "zzz", match: exe})
     }
   }
 
@@ -127,44 +121,6 @@ class WindowGroupService {
 
   _isGroupMatch(win, name) {
     return InStr(win.group, name) or InStr(name, win.match)
-  }
-
-  _windowInfo(exe, className, title, id, group, match, index) {
-    return {
-      exe: exe,
-      className: className,
-      title: title,
-      id: id,
-      group: group,
-      match: match,
-      index: index
-    }
-  }
-
-  _ruleGroup(rule) {
-    if (Type(rule) = "Object")
-    {
-      if rule.HasOwnProp("group")
-        return rule.group
-      if rule.HasOwnProp("name")
-        return rule.name
-    }
-
-    try return rule[1]
-    return ""
-  }
-
-  _rulePattern(rule) {
-    if (Type(rule) = "Object")
-    {
-      if rule.HasOwnProp("pattern")
-        return rule.pattern
-      if rule.HasOwnProp("match")
-        return rule.match
-    }
-
-    try return rule[2]
-    return ""
   }
 
   _captureCurrentWindowContext() {

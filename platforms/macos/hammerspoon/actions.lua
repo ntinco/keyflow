@@ -141,14 +141,17 @@ Actions.global_win_esc = function()
   window:setFrame(frame, 0)
 end
 
-local function isFrontSap()
+function Actions.isFrontSap()
   local front = hs.application.frontmostApplication()
   return front and (
     front:bundleID() == APP_BUNDLE_IDS.sap
     or front:name() == "SAPGUI"
   )
 end
+local isFrontSap = Actions.isFrontSap
 
+-- The catalog trigger is the tcode itself: in SAP Easy Access, submit what
+-- was typed instead of pasting /n<tcode> (same as Windows).
 function Actions.shouldSubmitExistingSapCatalogTcode(profileID)
   if profileID ~= "sap-transaction-catalog" then return false end
   local window = hs.window.frontmostWindow()
@@ -190,9 +193,6 @@ local function lastSnipasteTargetWindow()
   end
 end
 
-local captureClipboard = Clipboard.capture
-local restoreClipboard = Clipboard.restore
-
 Actions.eclipse_backtick = function()
   if not isFrontApp(APP_BUNDLE_IDS.eclipse) then return end
   hs.eventtap.keyStroke({"cmd", "shift"}, "a")
@@ -233,6 +233,7 @@ function Actions.cancelSapRun()
   sapRunToken = sapRunToken + 1
 end
 
+-- Mirrors SapService._normalizeTcode in platforms/windows/library/automation/sap.ahk.
 local function normalizeTcode(tcode)
   local normalized = tcode:match("^%s*(.-)%s*$")
   if normalized:sub(1, 1) == "/" then
@@ -245,13 +246,8 @@ local function normalizeTcode(tcode)
   return "/n" .. normalized:upper()
 end
 
-local function runTcode(tcode, profileID)
+local function runTcode(tcode)
   if not isFrontSap() then return end
-  if Actions.shouldSubmitExistingSapCatalogTcode(profileID) then
-    hs.eventtap.keyStroke({}, "return")
-    return
-  end
-
   Actions.cancelSapRun()
   local token = sapRunToken
 
@@ -325,7 +321,7 @@ local function withFinderPaths(sourceBundleID, targetApp, clipboard, callback)
     elseif readAttempts < 20 and isFrontApp(APP_BUNDLE_IDS.finder) then
       hs.timer.doAfter(0.1, readSelection)
     else
-      restoreClipboard(clipboard)
+      Clipboard.restore(clipboard)
       if targetApp then targetApp:activate() end
     end
   end
@@ -346,7 +342,7 @@ local function withSpotlightPaths(targetApp, clipboard, callback)
     elseif finderAttempts < 20 then
       hs.timer.doAfter(0.1, copyFromFinder)
     else
-      restoreClipboard(clipboard)
+      Clipboard.restore(clipboard)
       if targetApp then targetApp:activate() end
       hs.printf("keyflow: spotlight Finder handoff timed out")
     end
@@ -359,7 +355,7 @@ end
 local function withLauncherPaths(callback)
   local sourceBundleID = Actions.launcherSourceBundleID()
   local targetApp = currentLauncherTarget()
-  local clipboard = captureClipboard()
+  local clipboard = Clipboard.capture()
   if sourceBundleID == APP_BUNDLE_IDS.finder then
     withFinderPaths(sourceBundleID, targetApp, clipboard, callback)
   elseif sourceBundleID == APP_BUNDLE_IDS.spotlight then
@@ -369,7 +365,7 @@ end
 
 local function withRestoredTarget(targetApp, clipboard, callback)
   if not targetApp or not targetApp:activate() then
-    restoreClipboard(clipboard)
+    Clipboard.restore(clipboard)
     return
   end
 
@@ -382,7 +378,7 @@ local function withRestoredTarget(targetApp, clipboard, callback)
     elseif attempts < 20 then
       hs.timer.doAfter(0.1, waitForTarget)
     else
-      restoreClipboard(clipboard)
+      Clipboard.restore(clipboard)
       hs.printf("keyflow: launcher target restore timed out")
     end
   end
@@ -402,7 +398,7 @@ Actions.launcher_f12 = function()
       end
     end
     if #contents == 0 then
-      restoreClipboard(clipboard)
+      Clipboard.restore(clipboard)
       return
     end
     withRestoredTarget(targetApp, clipboard, function()
@@ -413,7 +409,7 @@ end
 
 Actions.launcher_alt_p = function()
   withLauncherPaths(function(paths, clipboard)
-    restoreClipboard(clipboard)
+    Clipboard.restore(clipboard)
     -- `open -b` hands files to the running IINA (honoring its reuse-window
     -- preference); iina-cli always spawns a new player instance.
     local args = {"-b", APP_BUNDLE_IDS.iina}
