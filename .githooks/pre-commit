@@ -1,25 +1,27 @@
 #!/bin/sh
-# shared: gen-box/shared/githooks/pre-commit sha256:4832c4766fea (edit it in gen-box, then run tools/contract_sync.py in gen-box)
+# shared: gen-box/shared/githooks/pre-commit sha256:1fce298be314 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
 # Shared pre-commit hook for the workspace repositories. Enable once per clone with
 # `git config core.hooksPath .githooks` (tools/link_workspace.py in gen-box points it at gen-box/shared/githooks).
-# The repository's .githooks/pre-commit.conf sets `check` (the health check command) and optionally `exclude`
+# The staged .githooks/pre-commit.conf sets `check` (the health check command) and optionally `exclude`
 # (one top-level path the check never reads); an executable .githooks/pre-commit.local runs after the check.
 # The check runs on the staged tree (the index), so unstaged edits cannot hide what the commit contains.
 set -eu
 top=$(git rev-parse --show-toplevel)
 cd "$top"
-if [ ! -f .githooks/pre-commit.conf ]; then
-    echo "pre-commit: .githooks/pre-commit.conf is missing; commit aborted" >&2
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+staged="$work/tree"
+# The settings come from the index too, so the command that runs is the one being committed.
+if ! git show :.githooks/pre-commit.conf > "$work/pre-commit.conf" 2>/dev/null; then
+    echo "pre-commit: .githooks/pre-commit.conf is not staged; commit aborted" >&2
     exit 1
 fi
 check='' exclude=''
-. ./.githooks/pre-commit.conf
+. "$work/pre-commit.conf"
 if [ -z "$check" ]; then
     echo "pre-commit: .githooks/pre-commit.conf sets no check command; commit aborted" >&2
     exit 1
 fi
-staged=$(mktemp -d)
-trap 'rm -rf "$staged"' EXIT
 if [ -n "$exclude" ]; then
     git ls-files -z --cached -- ":(exclude)$exclude" |
         git checkout-index -z --stdin --ignore-skip-worktree-bits --prefix="$staged/"
@@ -36,7 +38,7 @@ if ! out=$(cd "$staged" && WORKSPACE_ROOT=$(dirname "$top") sh -c "$check" 2>&1)
     echo "pre-commit: health check failed on the staged tree; commit aborted" >&2
     exit 1
 fi
-# Not exec: the EXIT trap must still remove the staged snapshot.
+# Not exec: the EXIT trap must still remove the snapshot.
 if [ -x .githooks/pre-commit.local ]; then
     ./.githooks/pre-commit.local
 fi
