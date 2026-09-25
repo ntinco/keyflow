@@ -1,9 +1,9 @@
 #!/bin/sh
-# shared: gen-box/shared/githooks/pre-commit sha256:1fce298be314 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
+# shared: gen-box/shared/githooks/pre-commit sha256:8f6f2e883e50 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
 # Shared pre-commit hook for the workspace repositories. Enable once per clone with
 # `git config core.hooksPath .githooks` (tools/link_workspace.py in gen-box points it at gen-box/shared/githooks).
 # The staged .githooks/pre-commit.conf sets `check` (the health check command) and optionally `exclude`
-# (one top-level path the check never reads); an executable .githooks/pre-commit.local runs after the check.
+# (one top-level path the check never reads) and `local` (an executable repository hook run after the check).
 # The check runs on the staged tree (the index), so unstaged edits cannot hide what the commit contains.
 set -eu
 top=$(git rev-parse --show-toplevel)
@@ -16,7 +16,7 @@ if ! git show :.githooks/pre-commit.conf > "$work/pre-commit.conf" 2>/dev/null; 
     echo "pre-commit: .githooks/pre-commit.conf is not staged; commit aborted" >&2
     exit 1
 fi
-check='' exclude=''
+check='' exclude='' local=''
 . "$work/pre-commit.conf"
 if [ -z "$check" ]; then
     echo "pre-commit: .githooks/pre-commit.conf sets no check command; commit aborted" >&2
@@ -38,7 +38,11 @@ if ! out=$(cd "$staged" && WORKSPACE_ROOT=$(dirname "$top") sh -c "$check" 2>&1)
     echo "pre-commit: health check failed on the staged tree; commit aborted" >&2
     exit 1
 fi
-# Not exec: the EXIT trap must still remove the snapshot.
-if [ -x .githooks/pre-commit.local ]; then
-    ./.githooks/pre-commit.local
+if [ -n "$local" ]; then
+    if [ ! -f "$local" ] || [ ! -x "$local" ]; then
+        echo "pre-commit: $local is not an executable file; commit aborted" >&2
+        exit 1
+    fi
+    # Not exec: the EXIT trap must still remove the snapshot.
+    "./$local"
 fi

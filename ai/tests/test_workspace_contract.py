@@ -1,4 +1,4 @@
-# shared: gen-box/shared/test_workspace_contract.py sha256:a0e9f949526a (edit it in gen-box, then run tools/contract_sync.py in gen-box)
+# shared: gen-box/shared/test_workspace_contract.py sha256:fe0d1a9fc3f1 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
 """Workspace contract check (gen-box/shared/workspace_contract.py) on this repository and on broken copies of it."""
 from __future__ import annotations
 
@@ -17,7 +17,8 @@ _path = ROOT / next(target for target, source in SHARED.items() if source == "sh
 _spec = importlib.util.spec_from_file_location("workspace_contract", _path)
 MODULE = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(MODULE)
-FIXTURE_FILES = MODULE.BOOT_FILES + (".githooks/pre-commit.conf", *SHARED)
+_LOCAL = MODULE.LOCAL.findall((ROOT / ".githooks/pre-commit.conf").read_text(encoding="utf-8"))
+FIXTURE_FILES = MODULE.BOOT_FILES + (".githooks/pre-commit.conf", *_LOCAL, *SHARED)
 
 
 class WorkspaceContractTests(unittest.TestCase):
@@ -103,6 +104,27 @@ class WorkspaceContractTests(unittest.TestCase):
         (master / source).unlink()
         self.assertEqual(MODULE.problems(self.root),
                          [f"gen-box/{source} is missing from {master}: update that checkout or drop the mapping"])
+
+    def test_vendored_hook_must_stay_executable(self):
+        target = next(t for t, s in SHARED.items() if s == "shared/githooks/pre-commit")
+        (self.root / target).chmod(0o644)
+        self.assertEqual(MODULE.problems(self.root),
+                         [f"{target} must be executable: run tools/contract_sync.py in gen-box"])
+
+    def test_mappings_stay_inside_the_repository(self):
+        repo_map = self.root / "ai/repo-map.json"
+        data = json.loads(repo_map.read_text(encoding="utf-8"))
+        data["shared_files"]["../escape.py"] = "shared/workspace_contract.py"
+        repo_map.write_text(json.dumps(data), encoding="utf-8")
+        self.assertEqual(MODULE.problems(self.root), [
+            "shared_files maps '../escape.py' to 'shared/workspace_contract.py': "
+            "use a path inside the repository and a gen-box/shared source"])
+
+    def test_declared_local_hook_must_exist(self):
+        with (self.root / ".githooks/pre-commit.conf").open("a", encoding="utf-8") as handle:
+            handle.write('local=".githooks/missing.local"\n')
+        self.assertEqual(MODULE.problems(self.root), [
+            ".githooks/missing.local is declared in .githooks/pre-commit.conf but is not an executable file"])
 
     def test_claude_md_must_only_import_agents(self):
         (self.root / "CLAUDE.md").write_text("@AGENTS.md\nExtra rule.\n", encoding="utf-8")

@@ -1,4 +1,4 @@
-# shared: gen-box/shared/workspace_contract.py sha256:416777a10b2d (edit it in gen-box, then run tools/contract_sync.py in gen-box)
+# shared: gen-box/shared/workspace_contract.py sha256:8fad589972f4 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
 """Workspace contract checks shared by the six repositories; the master copy is gen-box/shared/workspace_contract.py.
 
 problems(root) lists what breaks the workspace contract in the repository at root: the contract block or a file
@@ -18,6 +18,7 @@ from pathlib import Path
 
 BLOCK = re.compile(r"<!-- workspace-contract sha256:(\S+) -->\n(.*?)<!-- /workspace-contract -->", re.DOTALL)
 CHECK = re.compile(r"^check=(?:\"\s*[^\"\s][^\"]*\"|'\s*[^'\s][^']*'|[^\s\"'#]\S*)", re.MULTILINE)
+LOCAL = re.compile(r"^local=[\"']?([^\"'\s]+)", re.MULTILINE)
 MARKER = re.compile(r"# shared: gen-box/(\S+) sha256:([0-9a-f]{12})\b[^\n]*\n")
 SOURCES = (
     "shared/workspace_contract.py",
@@ -96,6 +97,9 @@ def vendored_problems(root: Path, shared: dict, master: Path | None) -> list[str
     problems: list[str] = []
     for target, source in sorted(shared.items()):
         path = root / target
+        if source not in SOURCES or Path(target).is_absolute() or ".." in Path(target).parts:
+            problems.append(f"shared_files maps {target!r} to {source!r}: use a path inside the repository and a gen-box/shared source")
+            continue
         if not path.is_file():
             problems.append(f"{target} is missing: {SYNC}")
             continue
@@ -104,6 +108,8 @@ def vendored_problems(root: Path, shared: dict, master: Path | None) -> list[str
             problems.append(f"{target} is not a vendored copy of gen-box/{source}: {SYNC}")
         elif digest(parsed[2]) != parsed[1]:
             problems.append(f"{target} edited here: edit gen-box/{source} and {SYNC}")
+        elif parsed[2].startswith("#!") and not path.stat().st_mode & 0o111:
+            problems.append(f"{target} must be executable: {SYNC}")
         elif master is not None and not (master / source).is_file():
             problems.append(f"gen-box/{source} is missing from {master}: update that checkout or drop the mapping")
         elif master is not None and read(master / source) != parsed[2]:
@@ -123,8 +129,12 @@ def problems(root: Path) -> list[str]:
         found.append("ai/repo-map.json must name one pending_acceptance path")
     if read(root / "CLAUDE.md").strip() != "@AGENTS.md":
         found.append("CLAUDE.md must exist and contain only @AGENTS.md")
-    if not CHECK.search(read(root / ".githooks/pre-commit.conf")):
+    conf = read(root / ".githooks/pre-commit.conf")
+    if not CHECK.search(conf):
         found.append(".githooks/pre-commit.conf must set check=\"<health check command>\" for the shared hook")
+    for local in LOCAL.findall(conf):
+        if not (root / local).is_file() or not (root / local).stat().st_mode & 0o111:
+            found.append(f"{local} is declared in .githooks/pre-commit.conf but is not an executable file")
     shared = repo_map.get("shared_files")
     if not isinstance(shared, dict) or not shared:
         found.append("ai/repo-map.json must map shared_files (vendored path -> gen-box source)")
