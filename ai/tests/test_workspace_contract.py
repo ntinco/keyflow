@@ -1,4 +1,4 @@
-# shared: gen-box/shared/test_workspace_contract.py sha256:51b6bebaab0c (edit it in gen-box, then run tools/contract_sync.py in gen-box)
+# shared: gen-box/shared/test_workspace_contract.py sha256:1dd33b0d4dc3 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
 """Workspace contract check (gen-box/shared/workspace_contract.py) on this repository and on broken copies of it."""
 from __future__ import annotations
 
@@ -158,6 +158,14 @@ class WorkspaceContractTests(unittest.TestCase):
     def test_settings_file_is_required(self):
         (self.root / MODULE.SETTINGS).unlink()
         self.assertEqual(MODULE.problems(self.root), [".claude/settings.json is missing"])
+
+    def test_settings_must_be_a_json_object(self):
+        path = self.root / MODULE.SETTINGS
+        path.write_text("{", encoding="utf-8")
+        [problem] = MODULE.problems(self.root)
+        self.assertTrue(problem.startswith(".claude/settings.json is not valid JSON: "), problem)
+        path.write_text("[]", encoding="utf-8")
+        self.assertEqual(MODULE.problems(self.root), [".claude/settings.json must hold a JSON object"])
 
     def test_settings_must_deny_every_secret_path(self):
         self.edit_settings(lambda data: data["permissions"]["deny"].remove("Edit(~/.ssh/**)"))

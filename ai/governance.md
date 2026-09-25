@@ -100,7 +100,7 @@ Turn every confirmed finding into a mechanical guard when feasible: a pure-logic
 - On Windows, `platforms/windows/tools/selftest.ahk` produces runtime evidence for hotstrings and window geometry; extend it when a Windows behavior can be checked without real apps.
 - Never claim a check or runtime behavior that was not executed or observed.
 
-<!-- workspace-contract sha256:f84b065a99ba -->
+<!-- workspace-contract sha256:4a5131b7c70b -->
 ## Workspace contract
 
 Identical in the six repositories under `~/gh/`. The master copy is the one in
@@ -167,7 +167,8 @@ Cold start (`AGENTS.md`, `CLAUDE.md`, `ai/governance.md`, `ai/repo-map.json`) st
 `cold_start_token_budget`; raise it only with the reason in the commit. CI compares each repository with gen-box when
 the `GEN_BOX_TOKEN` secret is set.
 `gen-box/tools/secret_guard.py` is the Claude Code PreToolUse hook (matcher `Bash`) that extends the Read/Edit deny
-list to shell commands; the human wires it in `.claude/settings.json`.
+list to shell commands; the human wires it in `.claude/settings.json`, and the contract check requires it there with
+the 22 secret deny rules.
 Hooks and validators execute repository code: run them only on branches the human or their agents wrote, and review an
 outside contribution in CI or a disposable environment first. `CLAUDE.md` only imports `AGENTS.md`; it is never a
 second authority.

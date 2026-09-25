@@ -1,4 +1,4 @@
-# shared: gen-box/shared/workspace_contract.py sha256:79b73506e002 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
+# shared: gen-box/shared/workspace_contract.py sha256:9f624d0d4875 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
 """Workspace contract checks shared by the six repositories; the master copy is gen-box/shared/workspace_contract.py.
 
 problems(root) lists what breaks the workspace contract in the repository at root: the contract block or a file
@@ -112,7 +112,12 @@ def settings_problems(root: Path) -> list[str]:
     """The secret deny rules and the secret_guard PreToolUse hook that every .claude/settings.json carries."""
     if not (root / SETTINGS).is_file():
         return [f"{SETTINGS} is missing"]
-    settings = load_json(root / SETTINGS)
+    try:
+        settings = json.loads(read(root / SETTINGS))
+    except json.JSONDecodeError as exc:
+        return [f"{SETTINGS} is not valid JSON: {exc}"]
+    if not isinstance(settings, dict):
+        return [f"{SETTINGS} must hold a JSON object"]
     permissions = settings.get("permissions")
     deny = permissions.get("deny") if isinstance(permissions, dict) else None
     deny = deny if isinstance(deny, list) else []
