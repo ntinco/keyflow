@@ -52,7 +52,8 @@ loadCoreApplicationConstants() {
   exeSwitcheroo := "ahk_exe switcheroo.exe"
   exeWinword := "ahk_exe WINWORD.EXE"
   exeWordpad := "ahk_exe wordpad.exe"
-  exeEverything := "ahk_exe Everything64.exe"
+  ; Window class matches both Everything64.exe and Everything.exe builds.
+  exeEverything := "ahk_class EVERYTHING"
   exeFlowlauncher := "ahk_exe Flow.Launcher.exe"
   exeMsTeams := "ahk_exe ms-teams.exe"
   exeVscode := "ahk_exe Code.exe"
@@ -85,8 +86,6 @@ loadCoreRuleConstants() {
   appActivationTargets.Push(["apps_sap_workspace", exeEclipse])
 
   GroupAdd("group_launcher", exeEverything)
-  ; Everything 1.4 32-bit and portable builds run as Everything.exe.
-  GroupAdd("group_launcher", "ahk_exe Everything.exe")
   GroupAdd("group_launcher", exeFlowlauncher)
   GroupAdd("group_sap_gui_windows", classSapGuiSession)
   GroupAdd("group_sap_gui_windows", exeNwbc)
