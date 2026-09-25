@@ -670,10 +670,10 @@ def validate_macos_runtime(repo_root: Path, macos_entry_rel: str) -> list[dict[s
             issues.append({"type": "macos_action_without_binding", "file": to_repo_path(actions_file, repo_root), "action": action_id, "message": "Hammerspoon action has no generated hotkey binding."})
 
     runtime_contracts = {
-        'hs.eventtap.keyStroke({"cmd", "alt"}, "o")': "SAP command dispatch must focus the native command field.",
+        'hs.eventtap.keyStroke({"cmd", "alt"}, "o"': "SAP command dispatch must focus the native command field.",
         "Hotstrings.reset()": "Application changes must reset the hotstring buffer.",
-        "iina-cli": "Alt+P must dispatch selected media through IINA's CLI.",
-        "local iinaTask": "Alt+P must retain the asynchronous IINA task through completion.",
+        '"-b", APP_BUNDLE_IDS.iina': "Alt+P must hand media to the running IINA through LaunchServices.",
+        "runningTasks[task] = true": "Asynchronous hs.task objects must be retained through completion.",
         'attributeValue("AXSelectedChildren")': "Finder paths must come from selected Accessibility elements.",
         "Actions.snipasteIsActive": "Snipaste overlay dispatch must be scoped to Snipaste.",
         'enter = "return"': "AHK Enter bindings must map to the macOS Return keycode.",

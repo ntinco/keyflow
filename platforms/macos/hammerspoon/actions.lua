@@ -14,23 +14,15 @@ local APP_BUNDLE_IDS = {
   vscode = "com.microsoft.VSCode",
 }
 
-local SNIPASTE_RESIZE_TARGETS = {
-  ["com.microsoft.onenote.mac"] = true,
-  ["com.microsoft.teams2"] = true,
-  ["com.microsoft.Outlook"] = true,
-  ["md.obsidian"] = true,
-  ["net.whatsapp.WhatsApp"] = true,
-  ["notion.id"] = true,
-  ["org.libreoffice.script"] = true,
-}
-
 local SNIPASTE_PASTE_TARGETS = {
   ["com.microsoft.teams2"] = true,
 }
 
+-- hs.eventtap.keyStroke blocks for its delay (default 200 ms) between down/up.
+local KEYSTROKE_DELAY = 20000
+
 local launcherTargetApp
 local snipasteTargetApp
-local iinaTask
 -- hs.task objects held only by locals can be garbage-collected mid-run.
 local runningTasks = {}
 
@@ -70,39 +62,59 @@ local function isFrontApp(bundleID)
   return front and front:bundleID() == bundleID
 end
 
-local function focusNextRunningWindow(bundleIDs)
+local function focusNextRunningWindow(label, bundleIDs)
+  local wanted = {}
+  for _, bundleID in ipairs(bundleIDs) do wanted[bundleID] = true end
+
   local windows = {}
-  for _, bundleID in ipairs(bundleIDs) do
+  for bundleID in pairs(wanted) do
     for _, app in ipairs(hs.application.applicationsForBundleID(bundleID) or {}) do
       for _, window in ipairs(app:allWindows()) do
-        if window:isStandard() then
+        -- SAP GUI (Java) windows may not report a standard subrole; accept
+        -- any titled window of document size instead.
+        local frame = window:frame()
+        if window:isStandard()
+            or ((window:title() or "") ~= "" and frame.w >= 200 and frame.h >= 150) then
           windows[#windows + 1] = window
         end
       end
     end
   end
-  if #windows == 0 then return false end
-
-  local front = hs.window.frontmostWindow()
-  local nextIndex = 1
-  for index, window in ipairs(windows) do
-    if window:id() == (front and front:id()) then
-      nextIndex = index % #windows + 1
-      break
-    end
+  hs.printf("keyflow: %s windows=%d", label, #windows)
+  if #windows == 0 then
+    hs.alert.show("Windows not open: " .. label)
+    return
   end
-  return windows[nextIndex]:focus()
+
+  -- Front-to-back order; minimized/other-Space windows sort last.
+  local zIndex = {}
+  for index, window in ipairs(hs.window.orderedWindows()) do
+    zIndex[window:id()] = index
+  end
+  table.sort(windows, function(left, right)
+    return (zIndex[left:id()] or math.huge) < (zIndex[right:id()] or math.huge)
+  end)
+
+  -- Outside the group, jump to its most recent window; inside it, raise the
+  -- back-most one so repeated presses visit every window.
+  local focused = hs.window.focusedWindow()
+  local target = windows[1]
+  if focused and focused:id() == windows[1]:id() then
+    target = windows[#windows]
+  end
+  if target:isMinimized() then target:unminimize() end
+  target:focus()
 end
 
 Actions.global_alt_d = function()
-  focusNextRunningWindow({
+  focusNextRunningWindow("IDE", {
     APP_BUNDLE_IDS.cursor,
     APP_BUNDLE_IDS.vscode,
   })
 end
 
 Actions.global_alt_e = function()
-  focusNextRunningWindow({
+  focusNextRunningWindow("SAP", {
     APP_BUNDLE_IDS.sap,
     APP_BUNDLE_IDS.eclipse,
   })
@@ -159,11 +171,16 @@ function Actions.snipasteIsActive()
   return app and app:bundleID() == APP_BUNDLE_IDS.snipaste
 end
 
-local function currentSnipasteTarget()
-  local front = hs.application.frontmostApplication()
-  if front and front:bundleID() ~= APP_BUNDLE_IDS.snipaste then
-    snipasteTargetApp = front
+-- Capture usually starts outside keyflow (mouse button bound in Snipaste),
+-- so the origin is the last app that lost focus to Snipaste.
+function Actions.rememberSnipasteTarget(app)
+  if app and app:bundleID() ~= APP_BUNDLE_IDS.snipaste then
+    snipasteTargetApp = app
   end
+end
+
+local function currentSnipasteTarget()
+  Actions.rememberSnipasteTarget(hs.application.frontmostApplication())
   return snipasteTargetApp
 end
 
@@ -213,7 +230,7 @@ local function pasteText(text, savedClipboard, targetApp)
     front and front:bundleID() or "none",
     #text
   )
-  hs.eventtap.keyStroke({"cmd"}, "v", 200000, targetApp)
+  hs.eventtap.keyStroke({"cmd"}, "v", KEYSTROKE_DELAY, targetApp)
   hs.timer.doAfter(0.5, function()
     restoreClipboard(savedClipboard)
   end)
@@ -230,6 +247,10 @@ local function normalizeTcode(tcode)
   if normalized:sub(1, 1) == "/" then
     return normalized
   end
+  -- "=" OK-codes are already complete commands; "/n" would break them.
+  if normalized:sub(1, 1) == "=" then
+    return normalized:upper()
+  end
   return "/n" .. normalized:upper()
 end
 
@@ -243,16 +264,16 @@ local function runTcode(tcode, profileID)
   Actions.cancelSapRun()
   local token = sapRunToken
 
-  hs.eventtap.keyStroke({"cmd", "alt"}, "o")
-  hs.timer.doAfter(0.3, function()
+  hs.eventtap.keyStroke({"cmd", "alt"}, "o", KEYSTROKE_DELAY)
+  hs.timer.doAfter(0.2, function()
     if token == sapRunToken and isFrontSap() then
-      hs.eventtap.keyStroke({"cmd"}, "a")
+      hs.eventtap.keyStroke({"cmd"}, "a", KEYSTROKE_DELAY)
       hs.timer.doAfter(0.05, function()
         if token == sapRunToken and isFrontSap() then
           pasteText(normalizeTcode(tcode))
-          hs.timer.doAfter(0.25, function()
+          hs.timer.doAfter(0.15, function()
             if token == sapRunToken and isFrontSap() then
-              hs.eventtap.keyStroke({}, "return")
+              hs.eventtap.keyStroke({}, "return", KEYSTROKE_DELAY)
             end
           end)
         end
@@ -400,94 +421,39 @@ end
 Actions.launcher_alt_p = function()
   withLauncherPaths(function(paths, clipboard)
     restoreClipboard(clipboard)
-    local appPath = hs.application.pathForBundleID(APP_BUNDLE_IDS.iina)
-    local cliPath = appPath and appPath .. "/Contents/MacOS/iina-cli"
-    if not cliPath then
-      hs.printf("keyflow: IINA application not found")
-      return
-    end
-    local args = {"--no-stdin"}
+    -- `open -b` hands files to the running IINA (honoring its reuse-window
+    -- preference); iina-cli always spawns a new player instance.
+    local args = {"-b", APP_BUNDLE_IDS.iina}
     for _, path in ipairs(paths) do args[#args + 1] = path end
-    iinaTask = hs.task.new(cliPath, function(exitCode, _, errorOutput)
+    local task = startTask("/usr/bin/open", function(exitCode, _, errorOutput)
       hs.printf(
-        "keyflow: IINA CLI finished exit=%d error=%s",
+        "keyflow: IINA open finished exit=%d error=%s",
         exitCode,
         (errorOutput or ""):match("^%s*(.-)%s*$")
       )
-      iinaTask = nil
     end, args)
-    if not iinaTask or not iinaTask:start() then
-      iinaTask = nil
-      hs.printf("keyflow: IINA CLI did not start")
+    if not task then
+      hs.printf("keyflow: IINA open did not start")
       return
     end
-    hs.printf("keyflow: IINA CLI started paths=%d", #paths)
+    hs.printf("keyflow: IINA open started paths=%d", #paths)
   end)
 end
 
-local magickPath
 local snipasteRunToken = 0
 
-local function withMagick(callback)
-  if magickPath then
-    callback(magickPath)
-    return
-  end
-  local task = startTask("/bin/zsh", function(exitCode, output)
-    local path = exitCode == 0 and output:match("^%s*(.-)%s*$") or ""
-    if path ~= "" then magickPath = path end
-    callback(magickPath)
-  end, {"-lc", "command -v magick"})
-  if not task then
-    callback(nil)
-  end
-end
-
 local function completeSnipaste(targetApp)
+  hs.printf(
+    "keyflow: Snipaste return target=%s",
+    targetApp and targetApp:bundleID() or "none"
+  )
   if not targetApp then return end
   targetApp:activate()
   if SNIPASTE_PASTE_TARGETS[targetApp:bundleID()] then
     hs.timer.doAfter(0.15, function()
-      hs.eventtap.keyStroke({"cmd"}, "v", 200000, targetApp)
+      hs.eventtap.keyStroke({"cmd"}, "v", KEYSTROKE_DELAY, targetApp)
     end)
   end
-end
-
-local function resizeSnipasteImage(image, targetApp)
-  if not targetApp or not SNIPASTE_RESIZE_TARGETS[targetApp:bundleID()] then
-    completeSnipaste(targetApp)
-    return
-  end
-
-  withMagick(function(executable)
-    local temporaryDirectory = hs.fs.temporaryDirectory()
-    local token = tostring(hs.timer.absoluteTime())
-    local inputPath = temporaryDirectory .. "keyflow-snipaste-" .. token .. ".png"
-    local outputPath = temporaryDirectory .. "keyflow-snipaste-" .. token .. "-80.png"
-    if not executable or not image:saveToFile(inputPath, true, "png") then
-      hs.printf("keyflow: Snipaste ImageMagick unavailable")
-      completeSnipaste(targetApp)
-      return
-    end
-
-    local task = startTask(executable, function(exitCode)
-      local resized = exitCode == 0 and hs.image.imageFromPath(outputPath) or nil
-      if resized then
-        hs.pasteboard.writeObjects(resized)
-      else
-        hs.printf("keyflow: Snipaste ImageMagick failed (%d)", exitCode)
-      end
-      os.remove(inputPath)
-      os.remove(outputPath)
-      completeSnipaste(targetApp)
-    end, {inputPath, "-resize", "80%", outputPath})
-    if not task then
-      os.remove(inputPath)
-      os.remove(outputPath)
-      hs.printf("keyflow: Snipaste ImageMagick task did not start")
-      completeSnipaste(targetApp)
-    end
-  end)
 end
 
 Actions.global_snipaste_capture = function()
@@ -501,10 +467,10 @@ Actions.global_snipaste_capture = function()
   end
 end
 
+-- Context (Snipaste focused) is checked by the key watcher before dispatch;
+-- by the time this runs the passthrough Enter may already have closed it.
 Actions.snipaste_enter = function()
-  if not Actions.snipasteIsActive() then return end
-
-  local targetApp = currentSnipasteTarget()
+  local targetApp = snipasteTargetApp
   local initialChangeCount = hs.pasteboard.changeCount()
   snipasteRunToken = snipasteRunToken + 1
   local token = snipasteRunToken
@@ -514,9 +480,8 @@ Actions.snipaste_enter = function()
     if token ~= snipasteRunToken then return end
     attempts = attempts + 1
     if hs.pasteboard.changeCount() ~= initialChangeCount then
-      local image = hs.pasteboard.readImage()
-      if image then
-        resizeSnipasteImage(image, targetApp)
+      if hs.pasteboard.readImage() then
+        completeSnipaste(targetApp)
         return
       end
     end

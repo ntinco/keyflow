@@ -4,11 +4,11 @@
   "items": [
     {
       "trigger": "da",
-      "value": "da"
+      "value": "=da"
     },
     {
       "trigger": "ta",
-      "value": "ta"
+      "value": "=ta"
     },
     {
       "trigger": "d3",

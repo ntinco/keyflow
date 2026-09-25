@@ -77,6 +77,10 @@ class SapService {
     if InStr(normalizedTcode, "/") = 1
       return normalizedTcode
 
+    ; "=" OK-codes are already complete commands; "/n" would break them.
+    if InStr(normalizedTcode, "=") = 1
+      return StrUpper(normalizedTcode)
+
     if RegExMatch(normalizedTcode, "i)^ymt(\.|$)")
       return "YMT"
 
@@ -85,7 +89,7 @@ class SapService {
 
   _submitTcodeButton(tcode) {
     Send("^a")
-    commandText := InStr(tcode, "/") = 1 ? tcode : "/n" tcode
+    commandText := (InStr(tcode, "/") = 1 || InStr(tcode, "=") = 1) ? tcode : "/n" tcode
     utilPaste(commandText, true)
     Send("{enter}")
   }

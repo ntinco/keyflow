@@ -672,8 +672,8 @@ return {
     {trigger = "zele", value = "zele", immediate = false},
   }},
   {id = "ymt-commands", mode = "sap-command", contextLabel = "sap-gui-session", entries = {
-    {trigger = "da", value = "da", immediate = false},
-    {trigger = "ta", value = "ta", immediate = false},
+    {trigger = "da", value = "=da", immediate = false},
+    {trigger = "ta", value = "=ta", immediate = false},
     {trigger = "d3", value = "d3", immediate = false},
     {trigger = "d4", value = "d4", immediate = false},
     {trigger = "dz", value = "dz", immediate = false},
