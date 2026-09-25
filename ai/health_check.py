@@ -37,6 +37,7 @@ FORBIDDEN_REFERENCE_PATTERNS = (
 )
 FORBIDDEN_SCAN_EXCLUDED_PREFIXES = (".git/", ".axet-code/", "ai/__pycache__/")
 FORBIDDEN_SCAN_EXACT_PATHS = {
+    ".git",
     "ai/health-check.json",
     "ai/health-check.summary.json",
     "ai/health_check.py",

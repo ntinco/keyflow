@@ -1,11 +1,13 @@
 """Workspace contract check: shared block unedited, pending-acceptance place, CLAUDE.md pointer, hook."""
 from __future__ import annotations
 
+import os
 import shutil
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "ai"))
@@ -33,7 +35,7 @@ class WorkspaceContractTests(unittest.TestCase):
                              ["workspace contract edited here: edit it in gen-box and run tools/contract_sync.py"])
 
     def test_contract_must_match_gen_box_master(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.dict(os.environ, {"WORKSPACE_ROOT": tmp}):
             root = self.copy_repo(str(Path(tmp) / "repo"))
             source = (root / "ai/governance.md").read_text(encoding="utf-8")
             master = Path(tmp) / "gen-box/ai/governance.md"
