@@ -46,6 +46,16 @@
           }
         ]
       }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/../gen-box/tools/link_workspace.py\" \"$CLAUDE_PROJECT_DIR/..\" 2>/dev/null || true"
+          }
+        ]
+      }
     ]
   }
 }
