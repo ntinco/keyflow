@@ -46,8 +46,10 @@
   _resolveHotstringOptions(mode, entry) {
     ; SAP triggers wait for an ending character so words typed in SAP fields
     ; (e.g. "datos" vs "da") do not navigate away.
+    ; O swallows the ending character: with b0 alone Enter reaches SAP, which
+    ; runs the raw trigger before /n<tcode> is pasted (macOS swallows it too).
     if this._isSapInputMode(mode)
-      return ":Xb0:"
+      return ":XOb0:"
     if (mode = "autocorrect" and entry.Has("immediate") and entry["immediate"])
       return ":*:"
     return "::"

@@ -1,8 +1,11 @@
 ﻿class LauncherService {
   supportedPasteExtensionsPattern := "i)\.(txt|abap|md|ahk)$"
 
+  mediaExtensionsPattern := "i)\.(mp3|m4a|aac|flac|wav|ogg|opus|wma|mp4|m4v|mkv|avi|mov|wmv|webm|flv)$"
+
   _isMediaPath(filename) {
-    return InStr(filename, "music") or InStr(filename, "audio") or InStr(filename, "video")
+    return (filename ~= this.mediaExtensionsPattern)
+      or InStr(filename, "music") or InStr(filename, "audio") or InStr(filename, "video")
   }
 
   dismissLauncherUi(shortWait := true) {
@@ -23,12 +26,14 @@
     ; the quoted command line.
     filename := Trim(StrSplit(utilClipboardRead("^+c", 0.3), "`n", "`r")[1])
 
-    if this._isMediaPath(filename)
+    if !this._isMediaPath(filename)
     {
-      this.dismissLauncherUi()
-      this._incrementRunCount(filename)
-      utilRunCommand('aimpportable "' filename '"')
+      utilTooltip("Alt+P: not a media file", filename)
+      return
     }
+    this.dismissLauncherUi()
+    this._incrementRunCount(filename)
+    utilRunCommand('aimpportable "' filename '"')
   }
 
   pasteSelectedFiles() {
