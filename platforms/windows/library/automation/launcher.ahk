@@ -9,10 +9,13 @@
   }
 
   dismissLauncherUi(shortWait := true) {
-    If winactive(exeEverything)
+    ; Close the window directly instead of sending Ctrl+W, which can be lost
+    ; while the Ctrl+Shift+C copy is still releasing; then wait until the
+    ; window behind it is active so the paste lands there.
+    if WinActive(exeEverything)
     {
-      Sleep(50)
-      Send("^{w}")
+      WinClose(exeEverything)
+      WinWaitNotActive(exeEverything, , 1)
     }
 
     if winactive(exeSwitcheroo) or WinActive(exeFlowlauncher)
