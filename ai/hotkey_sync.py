@@ -773,6 +773,8 @@ def generate_macos_bindings(entries: list[dict[str, object]]) -> str:
             f'tcode = "{_lua_str(tcode)}", '
             f'label = "{_lua_str(str(entry["label"]))}"'
             + (f', immediate = {"true" if "*" in str(entry["options"] or "") else "false"}' if entry["type"] == "hotstring" else "")
+            # AHK "?" option: fires even right after a letter (inside a word).
+            + (', insideWord = true' if entry["type"] == "hotstring" and "?" in str(entry["options"] or "") else "")
             + "},"
         )
     lines.append("}")

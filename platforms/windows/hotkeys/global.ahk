@@ -2,7 +2,7 @@
 ; Human source: platforms/shared/data/hotkeys.db
 ; Regenerate: python ai/hotkey_sync.py --sync
 
-:*:;;::{
+:*?:;;::{
 utilPaste("ñ")
 }
 :*:"+::{

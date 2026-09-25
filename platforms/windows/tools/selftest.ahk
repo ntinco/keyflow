@@ -54,9 +54,7 @@ A_Clipboard := "keyflow-selftest-clipboard"
 ClipWait(1)
 check(";; keeps the preceding character", typeAndRead("x `;;"), "x ñ")
 check(";; restores the clipboard", A_Clipboard, "keyflow-selftest-clipboard")
-; Informational: whether AHK fires ;; right after a letter decides the macOS
-; word-boundary rule for non-alphanumeric triggers.
-addResult("info: 'ma;;' inside a word", "INFO", "typed [ma;;] got [" typeAndRead("ma;;") "]")
+check(";; fires inside a word", typeAndRead("ma;;ana"), "mañana")
 typingGui.Destroy()
 
 ; Win+Esc ------------------------------------------------------------------

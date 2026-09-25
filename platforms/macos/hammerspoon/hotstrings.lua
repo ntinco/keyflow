@@ -200,6 +200,7 @@ local function buildTriggers(bindings, profiles)
         id = binding.id,
         pattern = binding.key,
         immediate = binding.immediate,
+        insideWord = binding.insideWord,
         contextLabel = binding.contextLabel,
         replacement = behavior.replacement,
         moveCursorUpAfter = behavior.moveCursorUpAfter,
@@ -240,14 +241,15 @@ local function findMatch(triggers, typed, chars, contextIsActive)
     if contextIsActive(trigger) then
       if trigger.immediate
           and typed:sub(-#trigger.pattern) == trigger.pattern
-          and not hasWordCharacterBefore(typed, trigger.pattern) then
+          and (trigger.insideWord or not hasWordCharacterBefore(typed, trigger.pattern)) then
         -- The last trigger character was swallowed, never typed.
         return trigger, utf8.len(trigger.pattern) - 1, nil
       end
       if not trigger.immediate and isTerminator(chars) then
         local match = trigger.pattern .. chars
         if typed:sub(-#match) == match
-            and not hasWordCharacterBefore(typed, trigger.pattern, chars) then
+            and (trigger.insideWord
+              or not hasWordCharacterBefore(typed, trigger.pattern, chars)) then
           return trigger, utf8.len(trigger.pattern), chars
         end
       end

@@ -16,7 +16,7 @@ return {
   {id = "hs_sap_block_plus", type = "hotstring", key = "*+", contextLabel = "", tcode = "", label = "SAP insert comment block (+)", immediate = true},
   {id = "hs_sap_comment_minus", type = "hotstring", key = "\"-", contextLabel = "", tcode = "", label = "SAP insert comment line (-)", immediate = true},
   {id = "hs_sap_comment_plus", type = "hotstring", key = "\"+", contextLabel = "", tcode = "", label = "SAP insert comment line (+)", immediate = true},
-  {id = "hs_semicolons", type = "hotstring", key = ";;", contextLabel = "", tcode = "", label = "Type ñ", immediate = true},
+  {id = "hs_semicolons", type = "hotstring", key = ";;", contextLabel = "", tcode = "", label = "Type ñ", immediate = true, insideWord = true},
   {id = "launcher_alt_p", type = "hotkey", key = "!p", contextLabel = "launcher", tcode = "", label = "Open selected media"},
   {id = "launcher_f12", type = "hotkey", key = "f12", contextLabel = "launcher", tcode = "", label = "Paste selected files"},
   {id = "sap_gui_alt_0", type = "hotkey", key = "!0", contextLabel = "sap-gui-session", tcode = "SE80", label = "SE80 object navigator"},

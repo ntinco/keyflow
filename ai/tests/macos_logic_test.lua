@@ -52,7 +52,8 @@ expectEqual(Dispatch.find(bindings, 122, {cmd = true, shift = true}, nothing), n
 -- Hotstring matching --------------------------------------------------------
 local triggers = Hotstrings.buildTriggers(
   {
-    {id = "hs_semicolons", type = "hotstring", key = ";;", immediate = true, contextLabel = "global"},
+    {id = "hs_semicolons", type = "hotstring", key = ";;", immediate = true, insideWord = true,
+      contextLabel = "global"},
     {id = "hs_unknown", type = "hotstring", key = "zz", immediate = true, contextLabel = "global"},
   },
   {
@@ -94,6 +95,10 @@ expectEqual(count, 2, "visible count uses characters, not bytes")
 trigger, count = match(" ;;")
 expectEqual(trigger and trigger.id, "hs_semicolons", "special hotstring fires")
 expectEqual(count, 1, ";; erases only the first ;")
+trigger, count = match("ma;;")
+expectEqual(trigger and trigger.id, "hs_semicolons", ";; fires inside a word (AHK ? option)")
+expectEqual(count, 1, ";; inside a word erases only the first ;")
+expectEqual(match("mabd,"), nil, "triggers without ? still respect word boundaries")
 
 expectEqual(match("da", inSap), nil, "SAP commands never fire immediately")
 trigger, count, terminator = match("da ", inSap)
