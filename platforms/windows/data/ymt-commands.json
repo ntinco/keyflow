@@ -12,19 +12,19 @@
     },
     {
       "trigger": "d3",
-      "value": "d3"
+      "value": "=d3"
     },
     {
       "trigger": "d4",
-      "value": "d4"
+      "value": "=d4"
     },
     {
       "trigger": "dz",
-      "value": "dz"
+      "value": "=dz"
     },
     {
       "trigger": "sc",
-      "value": "sc"
+      "value": "=sc"
     }
   ]
 }

@@ -133,8 +133,14 @@ Runtime.keyWatcher = hs.eventtap.new(
       if keyCode == binding.keyCode
           and matchesModifiers(flags, binding.mods) then
         if not eventContextIsActive(binding.contextLabel) then return false end
-        -- Run outside the tap callback so slow actions cannot time out the tap.
-        hs.timer.doAfter(0, binding.action)
+        -- Run outside the tap callback so slow actions cannot time out the
+        -- tap. Passthrough actions stay synchronous: they must snapshot state
+        -- before the target app handles the key (e.g. Snipaste Enter).
+        if binding.passthrough then
+          binding.action()
+        else
+          hs.timer.doAfter(0, binding.action)
+        end
         return not binding.passthrough
       end
     end
@@ -202,7 +208,6 @@ Runtime.appWatcher = hs.application.watcher.new(function(_, eventType, app)
   end
   if eventType == hs.application.watcher.deactivated then
     Actions.rememberLauncherTarget(app)
-    Actions.rememberSnipasteTarget(app)
   end
   if eventType == hs.application.watcher.deactivated
       and matchesApp(app, CONTEXT_APPS["sap-gui-session"]) then

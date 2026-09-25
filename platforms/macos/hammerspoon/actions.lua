@@ -14,15 +14,23 @@ local APP_BUNDLE_IDS = {
   vscode = "com.microsoft.VSCode",
 }
 
-local SNIPASTE_PASTE_TARGETS = {
-  ["com.microsoft.teams2"] = true,
+-- Mirrors Windows snipasteTargets: after capture, return to the most recent
+-- open window of these apps; paste = also send Cmd+V.
+local SNIPASTE_TARGETS = {
+  ["com.microsoft.onenote.mac"] = {},
+  ["com.microsoft.Outlook"] = {},
+  ["com.microsoft.teams2"] = {paste = true},
+  ["com.microsoft.Word"] = {},
+  ["md.obsidian"] = {},
+  ["net.whatsapp.WhatsApp"] = {},
+  ["notion.id"] = {},
+  ["org.libreoffice.script"] = {},
 }
 
 -- hs.eventtap.keyStroke blocks for its delay (default 200 ms) between down/up.
 local KEYSTROKE_DELAY = 20000
 
 local launcherTargetApp
-local snipasteTargetApp
 -- hs.task objects held only by locals can be garbage-collected mid-run.
 local runningTasks = {}
 
@@ -171,17 +179,13 @@ function Actions.snipasteIsActive()
   return app and app:bundleID() == APP_BUNDLE_IDS.snipaste
 end
 
--- Capture usually starts outside keyflow (mouse button bound in Snipaste),
--- so the origin is the last app that lost focus to Snipaste.
-function Actions.rememberSnipasteTarget(app)
-  if app and app:bundleID() ~= APP_BUNDLE_IDS.snipaste then
-    snipasteTargetApp = app
+local function lastSnipasteTargetWindow()
+  for _, window in ipairs(hs.window.orderedWindows()) do
+    local app = window:application()
+    if app and SNIPASTE_TARGETS[app:bundleID()] then
+      return window
+    end
   end
-end
-
-local function currentSnipasteTarget()
-  Actions.rememberSnipasteTarget(hs.application.frontmostApplication())
-  return snipasteTargetApp
 end
 
 local function captureClipboard()
@@ -442,23 +446,24 @@ end
 
 local snipasteRunToken = 0
 
-local function completeSnipaste(targetApp)
+local function completeSnipaste()
+  local window = lastSnipasteTargetWindow()
+  local app = window and window:application()
   hs.printf(
     "keyflow: Snipaste return target=%s",
-    targetApp and targetApp:bundleID() or "none"
+    app and app:bundleID() or "none"
   )
-  if not targetApp then return end
-  targetApp:activate()
-  if SNIPASTE_PASTE_TARGETS[targetApp:bundleID()] then
+  if not window then return end
+  window:focus()
+  if SNIPASTE_TARGETS[app:bundleID()].paste then
     hs.timer.doAfter(0.15, function()
-      hs.eventtap.keyStroke({"cmd"}, "v", KEYSTROKE_DELAY, targetApp)
+      hs.eventtap.keyStroke({"cmd"}, "v", KEYSTROKE_DELAY, app)
     end)
   end
 end
 
 Actions.global_snipaste_capture = function()
   hs.printf("keyflow: Snipaste capture requested")
-  currentSnipasteTarget()
   local appPath = hs.application.pathForBundleID(APP_BUNDLE_IDS.snipaste)
   local executable = appPath and appPath .. "/Contents/MacOS/Snipaste"
   local task = executable and startTask(executable, nil, {"snip"})
@@ -467,10 +472,8 @@ Actions.global_snipaste_capture = function()
   end
 end
 
--- Context (Snipaste focused) is checked by the key watcher before dispatch;
--- by the time this runs the passthrough Enter may already have closed it.
+-- Context (Snipaste focused) is checked by the key watcher before dispatch.
 Actions.snipaste_enter = function()
-  local targetApp = snipasteTargetApp
   local initialChangeCount = hs.pasteboard.changeCount()
   snipasteRunToken = snipasteRunToken + 1
   local token = snipasteRunToken
@@ -481,7 +484,7 @@ Actions.snipaste_enter = function()
     attempts = attempts + 1
     if hs.pasteboard.changeCount() ~= initialChangeCount then
       if hs.pasteboard.readImage() then
-        completeSnipaste(targetApp)
+        completeSnipaste()
         return
       end
     end

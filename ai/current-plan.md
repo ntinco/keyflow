@@ -7,20 +7,18 @@ Complete human runtime acceptance of the current macOS Hammerspoon slice and its
 ## Implemented state relevant to continuation
 
 - `platforms/shared/data/hotkeys.db` is the shared human-managed source for Windows and macOS hotkeys/hotstrings; `ai/hotkey_sync.py` generates the platform artifacts and checks drift.
-- The macOS runtime covers contextual SAP GUI/Eclipse hotkeys, shared hotstrings, Finder/Spotlight launcher actions, IINA dispatch via LaunchServices, Snipaste return-to-origin, window-group rotation, and Cmd+Esc height stretch.
+- The macOS runtime covers contextual SAP GUI/Eclipse hotkeys, shared hotstrings, Finder/Spotlight launcher actions, IINA dispatch via LaunchServices, Snipaste return to the most recent allowed target, window-group rotation, and Cmd+Esc height stretch.
 - SAP transaction hotkeys use the portable `sap-tcode:<code>` action where shared intent is required; platform adapters execute the behavior.
 - macOS hotstring replacement types single-line text as unicode key events (multi-line blocks still paste and restore the clipboard), excludes synthetic events from its trigger buffer, respects word boundaries, and waits for an ending character unless an entry is marked `immediate`.
 - SAP commands starting with `/` or `=` are sent as-is; others get the `/n` prefix.
 
 ## Pending human verification
 
-macOS acceptance on 2026-09-24 passed hotstrings, SAP tcode hotkeys/hotstrings, SAP Easy Access, SAP-only scoping, Eclipse keys and context isolation, SAP comment hotstrings, Finder/Spotlight F12, and Cmd+Esc. Remaining:
+macOS acceptance on 2026-09-24 passed hotstrings, SAP tcode hotkeys/hotstrings (fast), `=` OK-codes, SAP Easy Access, SAP-only scoping, Eclipse keys and context isolation, Alt+D/Alt+E rotation, SAP comment hotstrings, Finder/Spotlight F12, Alt+P reusing the IINA window, and Cmd+Esc. Remaining:
 
-1. macOS: Alt+D rotates every VS Code/Cursor window and Alt+E every SAP GUI/Eclipse window (reworked to z-order rotation; console logs `keyflow: IDE|SAP windows=N`).
-2. macOS: Alt+5 runs `=ED_OPTIONS` without `/n`; `da`/`ta` + space send `=DA`/`=TA`; SAP tcode dispatch feels faster (keystroke delay 200 ms → 20 ms, shorter settle timers).
-3. macOS: after a Snipaste capture started with the mouse side button, Enter returns to the originating app, and Teams pastes automatically (console logs `keyflow: Snipaste return target=…`).
-4. macOS: Alt+P reuses the open IINA window (`open -b` instead of `iina-cli`).
-5. Windows (no machine available yet): launch once; confirm profiles load without JSON errors, autocorrect/snippets/SAP transactions work, `=ED_OPTIONS` and `=DA`/`=TA` are sent without `/n`, and F12 pastes `.txt` but ignores `.exe`.
+1. macOS: all `ymt-commands` (`da`, `ta`, `d3`, `d4`, `dz`, `sc`) + space send `=<code>`.
+2. macOS: after a Snipaste capture (mouse side button), Enter focuses the most recent open window among the allowed targets (Word, OneNote, Outlook, Teams, Obsidian, WhatsApp, Notion, LibreOffice), skipping non-target apps such as SAP; Teams also pastes. Console logs `keyflow: Snipaste return target=…`.
+3. Windows (no machine available yet): launch once; confirm profiles load without JSON errors, autocorrect/snippets/SAP transactions work, `=ED_OPTIONS` and `=<ymt code>` are sent without `/n`, and F12 pastes `.txt` but ignores `.exe`.
 
 ## Known parity gaps (deliberately deferred)
 
