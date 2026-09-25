@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from __future__ import annotations
 
 import argparse
@@ -391,7 +391,7 @@ def validate_catalog_review(repo_root: Path, review_rel: str, profiles: list[dic
                     "type": "catalog_review_stale",
                     "file": review_rel,
                     "message": f"Catalog {catalog_id} content changed since its last human review.",
-                    "fix": f"After the human confirms the content: python ai/hotkey_sync.py --mark-reviewed {catalog_id}",
+                    "fix": f"After the human confirms the content: python3 ai/hotkey_sync.py --mark-reviewed {catalog_id}",
                 })
     for missing_id in sorted(set(expected_catalogs) - seen_ids):
         issues.append({"type": "catalog_review_entry_missing", "file": review_rel, "message": f"Active catalog missing from review contract: {missing_id}"})
@@ -415,7 +415,7 @@ def load_repo_map(repo_root: Path) -> tuple[dict[str, object], list[dict[str, st
 
 def validate_repo_map(repo_root: Path, repo_map: dict[str, object]) -> list[dict[str, str]]:
     issues: list[dict[str, str]] = []
-    expected_keys = {"schema_version", "purpose", "routing", "ownership", "local_only", "validators"}
+    expected_keys = {"schema_version", "purpose", "routing", "ownership", "local_only", "validators", "platform_validators", "pending_acceptance"}
     if set(repo_map) != expected_keys:
         issues.append({
             "type": "repo_map_top_level_shape",
@@ -852,13 +852,9 @@ def validate_macos_runtime(repo_root: Path, macos_entry_rel: str) -> list[dict[s
     for contract, message in runtime_contracts.items():
         if not re.search(contract, combined):
             issues.append({"type": "macos_runtime_contract_missing", "file": to_repo_path(macos_dir, repo_root), "contract": contract, "message": message})
-    # Clipboard writes outside clipboard.lua bypass the overlap-safe restore.
     for module_file, module_text in ((actions_file, actions_text), (hotstrings_file, hotstrings_text)):
-        code = strip_lua_comments(module_text)
-        if 'require("keyflow.clipboard")' not in code:
+        if 'require("keyflow.clipboard")' not in strip_lua_comments(module_text):
             issues.append({"type": "macos_clipboard_not_shared", "file": to_repo_path(module_file, repo_root), "message": "Module must use the shared keyflow.clipboard instance."})
-        if re.search(r"hs\.pasteboard\.(?:setContents|writeAllData|clearContents)\(", code):
-            issues.append({"type": "macos_clipboard_bypass", "file": to_repo_path(module_file, repo_root), "message": "Clipboard writes must go through clipboard.lua so overlapping pastes restore correctly."})
 
     for binding_id, binding_type, context_label, tcode in bindings:
         if binding_type == "hotkey" and not tcode and binding_id not in action_ids:
@@ -872,9 +868,25 @@ def validate_macos_runtime(repo_root: Path, macos_entry_rel: str) -> list[dict[s
     bound_hotstring_ids = {binding_id for binding_id, binding_type, _, _ in bindings if binding_type == "hotstring"}
     for hotstring_id in sorted(hotstring_ids - bound_hotstring_ids):
         issues.append({"type": "macos_hotstring_without_binding", "file": to_repo_path(hotstrings_file, repo_root), "binding": hotstring_id, "message": "Hammerspoon special hotstring has no generated binding."})
-    for runtime_file in (init_file, actions_file, hotstrings_file):
-        if "hs.timer.usleep" in read_text(runtime_file):
-            issues.append({"type": "macos_blocking_sleep", "file": to_repo_path(runtime_file, repo_root), "message": "Hammerspoon runtime must not block its main event thread with hs.timer.usleep."})
+    issues.extend(scan_macos_modules(repo_root, init_file, text))
+    return issues
+
+
+def scan_macos_modules(repo_root: Path, init_file: Path, init_text: str) -> list[dict[str, object]]:
+    """Rules for every Lua module, so a new module cannot slip past checks written per file."""
+    issues: list[dict[str, object]] = []
+    macos_dir = init_file.parent
+    loaded = set(RE_LUA_DOFILE.findall(strip_lua_comments(init_text)))
+    for module_file in sorted(macos_dir.rglob("*.lua")):
+        rel = to_repo_path(module_file, repo_root)
+        code = strip_lua_comments(read_text(module_file))
+        if module_file != init_file and module_file.relative_to(macos_dir).as_posix() not in loaded:
+            issues.append({"type": "macos_module_not_loaded", "file": rel, "message": "init.lua does not dofile this module, so Hammerspoon never runs it."})
+        if "hs.timer.usleep" in code:
+            issues.append({"type": "macos_blocking_sleep", "file": rel, "message": "Hammerspoon runtime must not block its main event thread with hs.timer.usleep."})
+        # Clipboard writes outside clipboard.lua bypass the overlap-safe restore.
+        if module_file.name != "clipboard.lua" and re.search(r"hs\.pasteboard\.(?:setContents|writeAllData|clearContents)\(", code):
+            issues.append({"type": "macos_clipboard_bypass", "file": rel, "message": "Clipboard writes must go through clipboard.lua so overlapping pastes restore correctly."})
     return issues
 
 
@@ -912,11 +924,64 @@ def build_summary(issues: list[dict[str, object]], registry: dict[str, str], pro
     }
 
 
+WORKSPACE_CONTRACT = re.compile(r"<!-- workspace-contract sha256:(\S+) -->\n(.*?)<!-- /workspace-contract -->", re.DOTALL)
+
+
+def workspace_contract_problems(root: Path) -> list[str]:
+    """The shared workspace contract block is present once and unedited, and the rules it sets are wired."""
+    problems: list[str] = []
+    governance = root / "ai/governance.md"
+    source = governance.read_text(encoding="utf-8").replace("\r\n", "\n") if governance.is_file() else ""
+    blocks = WORKSPACE_CONTRACT.findall(source)
+    if len(blocks) != 1:
+        problems.append(f"ai/governance.md needs one workspace contract block, found {len(blocks)}")
+    elif hashlib.sha256(blocks[0][1].encode("utf-8")).hexdigest()[:12] != blocks[0][0]:
+        problems.append("workspace contract edited here: edit it in gen-box and run tools/contract_sync.py")
+    try:
+        pending = json.loads((root / "ai/repo-map.json").read_text(encoding="utf-8")).get("pending_acceptance")
+    except (OSError, json.JSONDecodeError):
+        pending = None
+    if not isinstance(pending, str) or not pending.strip():
+        problems.append("ai/repo-map.json must name one pending_acceptance path")
+    claude = root / "CLAUDE.md"
+    if not claude.is_file() or claude.read_text(encoding="utf-8").strip() != "@AGENTS.md":
+        problems.append("CLAUDE.md must exist and contain only @AGENTS.md")
+    if not (root / ".githooks/pre-commit").is_file():
+        problems.append(".githooks/pre-commit is missing")
+    return problems
+
+
+def validate_workspace_contract(repo_root: Path) -> list[dict[str, object]]:
+    return [{"type": "workspace_contract", "file": GOVERNANCE_FILE, "message": problem} for problem in workspace_contract_problems(repo_root)]
+
+
+BRIEF_ISSUE_LIMIT = 20
+
+
+def brief(summary: dict[str, object], issues: list[dict[str, object]]) -> str:
+    """Short default report: status, counts, then one line per issue."""
+    review = summary["catalog_review"]
+    profiles = ", ".join(f"{name} {count}" for name, count in summary["profiles"].items())
+    lines = [
+        f"HEALTH {'OK' if summary['ok'] else 'FAIL'}: {summary['issue_count']} issue(s)",
+        f"  services {len(summary['services'])}; profiles: {profiles}",
+        f"  catalog review: {review['verified_count']} verified, {review['pending_human_review_count']} pending human review",
+    ]
+    if summary["current_plan_present"]:
+        lines.append("  ai/current-plan.md present: pending human acceptance")
+    for issue in issues[:BRIEF_ISSUE_LIMIT]:
+        lines.append(f"  - {issue.get('type')} {issue.get('file', '')}: {issue.get('message', '')}")
+    if len(issues) > BRIEF_ISSUE_LIMIT:
+        lines.append(f"  ... {len(issues) - BRIEF_ISSUE_LIMIT} more; rerun with --json")
+    return "\n".join(lines)
+
+
 def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
     repo_map, repo_map_load_issues = load_repo_map(repo_root)
     repo_map_issues = validate_repo_map(repo_root, repo_map) if repo_map else []
     control_plane_result, control_plane_issues = validate_control_plane(repo_root, repo_map)
     local_only_issues = validate_local_only_contract(repo_root, repo_map) if repo_map else []
+    workspace_issues = validate_workspace_contract(repo_root)
 
     routing = repo_map.get("routing", {}) if isinstance(repo_map.get("routing"), dict) else {}
     windows_entry_rel = nested(routing, "windows", "entrypoint", default="platforms/windows/keyflow.ahk")
@@ -966,7 +1031,7 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
 
     issues: list[dict[str, object]] = []
     for group in (
-        repo_map_load_issues, repo_map_issues, control_plane_issues, local_only_issues,
+        repo_map_load_issues, repo_map_issues, control_plane_issues, local_only_issues, workspace_issues,
         include_missing, registry_issues, service_call_issues, profile_issues,
         catalog_review_issues, hotkey_catalog_issues, macos_runtime_issues,
         unclosed_hotif, forbidden_references, unused_code_issues, ahk_risk_issues,
@@ -1008,8 +1073,9 @@ def main() -> int:
     parser.add_argument("--repo-root", default=".", help="Repository root to inspect.")
     parser.add_argument("--output", help="Path for full JSON output.")
     parser.add_argument("--output-summary", help="Path for summary JSON output.")
-    parser.add_argument("--pretty", action="store_true", help="Pretty-print JSON.")
-    parser.add_argument("--summary", action="store_true", help="Print summary only.")
+    parser.add_argument("--json", action="store_true", help="Print the full JSON instead of the short report.")
+    parser.add_argument("--pretty", action="store_true", help="Print the full JSON, indented.")
+    parser.add_argument("--summary", action="store_true", help="Print the summary JSON only.")
     args = parser.parse_args()
 
     repo_root = Path(args.repo_root).resolve()
@@ -1027,8 +1093,11 @@ def main() -> int:
             out = (repo_root / out).resolve()
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(full, indent=indent, ensure_ascii=False) + "\n", encoding="utf-8")
-    payload = summary if args.summary else full
-    sys.stdout.write(json.dumps(payload, indent=indent, ensure_ascii=False) + "\n")
+    if args.summary or args.json or args.pretty:
+        payload = summary if args.summary else full
+        sys.stdout.write(json.dumps(payload, indent=indent, ensure_ascii=False) + "\n")
+    else:
+        sys.stdout.write(brief(summary, full["issues"]) + "\n")
     return 0 if summary["ok"] else 1
 
 

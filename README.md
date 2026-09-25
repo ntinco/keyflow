@@ -38,8 +38,8 @@ The Windows service registry currently exposes `hotstring`, `launcher`, `sap`, `
 After changing the shared catalog:
 
 ```bash
-python ai/hotkey_sync.py --sync
-python ai/hotkey_sync.py --check
+python3 ai/hotkey_sync.py --sync
+python3 ai/hotkey_sync.py --check
 ```
 
 Generated artifacts may be versioned for runtime/review convenience, but they are never a second source of truth.
@@ -49,8 +49,8 @@ Generated artifacts may be versioned for runtime/review convenience, but they ar
 Mechanical repository validation:
 
 ```bash
-python ai/health_check.py --pretty
-python ai/hotkey_sync.py --check
+python3 ai/health_check.py            # short report; --json for everything
+python3 ai/hotkey_sync.py --check
 ```
 
 When runtime wiring changes, use `ai/run_smoke.py` where the environment supports the target platform. Its result JSON is local/generated, not authority. Runtime acceptance that depends on real applications, credentials, UI state or human observation remains human-owned.
@@ -69,7 +69,7 @@ Local secrets/state must not be committed. The complete routing/boundary list is
 
 1. Install AutoHotkey v2, or use the bundled runtime where appropriate.
 2. Copy required `*.example.*` files to their local counterparts and fill local values.
-3. Run `python ai/health_check.py --pretty`.
+3. Run `python3 ai/health_check.py` (short report; `--json` or `--pretty` for the full JSON).
 4. Launch `platforms/windows/keyflow.ahk`.
 
 ## macOS onboarding

@@ -9,3 +9,4 @@ Cold-start contract for keyflow.
 5. Runtime evidence and repository evidence outrank prior conversation memory.
 6. Never modify local-only secrets/state unless explicitly requested.
 7. Never claim Windows or macOS runtime behavior without actual runtime evidence when runtime validation is required.
+8. The `Workspace contract` section at the end of `ai/governance.md` is binding: which repository a task belongs to, what needs the human's approval (push, merge, deletion), and one branch or worktree per task.
