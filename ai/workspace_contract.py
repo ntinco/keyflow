@@ -1,4 +1,4 @@
-# shared: gen-box/shared/workspace_contract.py sha256:719fd7b48744 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
+# shared: gen-box/shared/workspace_contract.py sha256:fc17e810795e (edit it in gen-box, then run tools/contract_sync.py in gen-box)
 """Workspace contract checks shared by the six repositories; the master copy is gen-box/shared/workspace_contract.py.
 
 problems(root) lists what breaks the workspace contract in the repository at root: the contract block or a file
@@ -66,7 +66,8 @@ def gen_box(root: Path) -> Path | None:
     if (root / SOURCES[0]).is_file():
         return root
     candidate = Path(os.environ.get("WORKSPACE_ROOT") or root.resolve().parent) / "gen-box"
-    return candidate if (candidate / "ai/governance.md").is_file() else None
+    # An existing checkout is the authority even when broken, so its missing files are reported, not skipped.
+    return candidate if candidate.is_dir() else None
 
 
 def read(path: Path) -> str:

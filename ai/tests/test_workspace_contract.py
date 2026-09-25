@@ -1,4 +1,4 @@
-# shared: gen-box/shared/test_workspace_contract.py sha256:09378b743ed4 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
+# shared: gen-box/shared/test_workspace_contract.py sha256:20db21c6ffe5 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
 """Workspace contract check (gen-box/shared/workspace_contract.py) on this repository and on broken copies of it."""
 from __future__ import annotations
 
@@ -69,6 +69,12 @@ class WorkspaceContractTests(unittest.TestCase):
         master.write_text("no contract here\n", encoding="utf-8")
         self.assertEqual(MODULE.problems(self.root),
                          [f"gen-box master {master} must hold exactly one workspace contract block"])
+
+    def test_a_gen_box_checkout_without_governance_fails(self):
+        master = self.make_gen_box()
+        (master / "ai/governance.md").unlink()
+        self.assertEqual(MODULE.problems(self.root),
+                         [f"gen-box master {master / 'ai/governance.md'} must hold exactly one workspace contract block"])
 
     def test_vendored_file_edited_in_place_fails(self):
         target, source = next(iter(sorted(SHARED.items())))
