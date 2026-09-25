@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import json
 import re
+import sqlite3
 import subprocess
 import sys
 from collections import Counter, defaultdict
@@ -232,6 +233,56 @@ def resolve_declared_methods(class_name: str, class_lookup: dict[str, dict[str, 
         parent = class_meta.get("parent", "")
         current = parent if isinstance(parent, str) else ""
     return resolved
+
+
+def scan_unincluded_ahk_files(repo_root: Path, include_graph: list[dict[str, object]]) -> list[dict[str, object]]:
+    """Runtime .ahk files outside the include graph never load on Windows."""
+    reachable = {str(edge["file"]) for edge in include_graph}
+    windows_dir = repo_root / "platforms/windows"
+    issues: list[dict[str, object]] = []
+    for path in sorted(windows_dir.rglob("*.ahk")):
+        rel = to_repo_path(path, repo_root)
+        # tools/ holds standalone scripts launched on their own.
+        if rel.startswith("platforms/windows/tools/") or rel in reachable:
+            continue
+        issues.append({"type": "ahk_file_not_included", "file": rel, "message": "AutoHotkey file is not reachable from the Windows entrypoint."})
+    return issues
+
+
+BOOTSTRAP_MODES_BY_CATALOG_MODE = {"replace": {"autocorrect"}, "sap-command": {"sapTransaction", "ymtCommand"}}
+
+
+def validate_bootstrap_profiles(repo_root: Path, catalog_rel: str, profiles: list[dict[str, str]], bootstrap_rel: str) -> list[dict[str, object]]:
+    """keyflowHotstringProfiles() must load exactly the active Windows profiles of hotkeys.db."""
+    try:
+        connection = sqlite3.connect(f"file:{repo_root / catalog_rel}?mode=ro", uri=True)
+        try:
+            rows = connection.execute("SELECT id, mode, platform, active FROM hotstring_profiles").fetchall()
+        finally:
+            connection.close()
+    except sqlite3.Error as exc:
+        return [{"type": "hotstring_profiles_unreadable", "file": catalog_rel, "message": str(exc)}]
+    expected: dict[str, str] = {}
+    for profile_id, mode, platform, active in rows:
+        try:
+            platforms = json.loads(platform)
+        except (TypeError, json.JSONDecodeError):
+            continue
+        if active and isinstance(platforms, list) and "windows" in platforms:
+            expected[str(profile_id)] = str(mode)
+    issues: list[dict[str, object]] = []
+    loaded = {profile["label"]: profile for profile in profiles}
+    for profile_id in sorted(set(expected) - set(loaded)):
+        issues.append({"type": "bootstrap_profile_missing", "file": bootstrap_rel, "profile": profile_id, "message": "Active Windows hotstring profile is not loaded by keyflowHotstringProfiles()."})
+    for label in sorted(set(loaded) - set(expected)):
+        issues.append({"type": "bootstrap_profile_inactive", "file": bootstrap_rel, "profile": label, "message": "Loaded hotstring profile is inactive or not targeted to Windows in hotkeys.db."})
+    for label in sorted(set(loaded) & set(expected)):
+        profile = loaded[label]
+        if profile["mode"] not in BOOTSTRAP_MODES_BY_CATALOG_MODE.get(expected[label], set()):
+            issues.append({"type": "bootstrap_profile_mode_mismatch", "file": bootstrap_rel, "profile": label, "message": f"Windows mode {profile['mode']} does not implement catalog mode {expected[label]}."})
+        if expected[label] == "sap-command" and not profile["group"]:
+            issues.append({"type": "bootstrap_profile_group_missing", "file": bootstrap_rel, "profile": label, "message": "SAP command profiles must be scoped to a window group."})
+    return issues
 
 
 def validate_profiles(profiles: list[dict[str, str]], data_dir: Path, repo_root: Path) -> tuple[list[dict[str, object]], list[dict[str, str]]]:
@@ -845,6 +896,8 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
     hotkey_catalog_issues = validate_hotkey_catalog(repo_root, hotkey_sync_rel, hotkey_source_rel)
     macos_runtime_issues = validate_macos_runtime(repo_root, macos_entry_rel)
     unused_code_issues = scan_unused_ahk_functions(file_index, token_counter)
+    unused_code_issues.extend(scan_unincluded_ahk_files(repo_root, include_graph))
+    unused_code_issues.extend(validate_bootstrap_profiles(repo_root, hotkey_source_rel, profiles, bootstrap_rel))
     unused_code_issues.extend({"type": "unused_ahk_assignment", **item} for item in unused_assignments)
     unused_code_issues.extend({"type": "unused_ahk_group_or_target", "file": "platforms/windows/library/config/constants-core.ahk", **item} for item in unused_groups)
 

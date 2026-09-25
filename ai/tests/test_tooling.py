@@ -114,6 +114,16 @@ class CatalogEditTests(unittest.TestCase):
         self.assertEqual(self.db.read_bytes(), before)
 
 
+    def test_hotkey_requires_id(self) -> None:
+        before = self.db.read_bytes()
+        with self.assertRaises(hotkey_sync.CatalogError):
+            hotkey_sync.add_hotkey('{"file": "global", "type": "hotkey", "key": "F9", "action": "x", '
+                                   '"label": "x", "platform": ["windows"]}')
+        with self.assertRaises(hotkey_sync.CatalogError):
+            hotkey_sync.set_hotkey("global_alt_d", "active", "yes")
+        self.assertEqual(self.db.read_bytes(), before)
+
+
 class HealthCheckHelperTests(unittest.TestCase):
     def test_hash_matches_between_tools(self) -> None:
         items = [{"trigger": "bd,", "value": "Buen día,", "immediate": True}]

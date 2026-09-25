@@ -19,13 +19,15 @@
   }
 
   openSelectedMedia() {
-    filename := utilClipboardRead("^+c", 0.3)
+    ; Only the first selected path is played; a multi-line value would break
+    ; the quoted command line.
+    filename := Trim(StrSplit(utilClipboardRead("^+c", 0.3), "`n", "`r")[1])
 
     if this._isMediaPath(filename)
     {
       this.dismissLauncherUi()
       this._incrementRunCount(filename)
-      utilRunCommand("aimpportable " filename)
+      utilRunCommand('aimpportable "' filename '"')
     }
   }
 

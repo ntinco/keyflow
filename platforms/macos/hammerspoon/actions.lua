@@ -225,8 +225,14 @@ Actions.eclipse_f2 = function()
   end
 end
 
+-- Overlapping pastes (e.g. two SAP commands within the restore delay) must
+-- restore the user's clipboard, not the previous paste's text.
+local pendingClipboard
+local clipboardRestoreTimer
+
 local function pasteText(text, savedClipboard, targetApp)
-  savedClipboard = savedClipboard or captureClipboard()
+  pendingClipboard = pendingClipboard or savedClipboard or captureClipboard()
+  if clipboardRestoreTimer then clipboardRestoreTimer:stop() end
   hs.pasteboard.setContents(text)
   local front = hs.application.frontmostApplication()
   hs.printf(
@@ -235,8 +241,10 @@ local function pasteText(text, savedClipboard, targetApp)
     #text
   )
   hs.eventtap.keyStroke({"cmd"}, "v", KEYSTROKE_DELAY, targetApp)
-  hs.timer.doAfter(0.5, function()
-    restoreClipboard(savedClipboard)
+  clipboardRestoreTimer = hs.timer.doAfter(0.5, function()
+    restoreClipboard(pendingClipboard)
+    pendingClipboard = nil
+    clipboardRestoreTimer = nil
   end)
 end
 

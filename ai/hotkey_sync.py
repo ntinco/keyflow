@@ -326,6 +326,8 @@ def validate_entries(entries: list[dict[str, object]]) -> None:
     seen_orders: set[int] = set()
     for entry in entries:
         entry_id = str(entry.get("id") or "<missing-id>")
+        if not re.fullmatch(r"[a-z][a-z0-9_]*", str(entry.get("id") or "")):
+            issues.append(f"{entry_id}: id must be lower_snake_case")
         sort_order = entry.get("sort_order")
         if entry_id in seen_ids:
             issues.append(f"duplicate id: {entry_id}")
@@ -531,7 +533,10 @@ def _hotkey_column_value(field: str, value: object) -> object:
     if field == "platform":
         return value if isinstance(value, str) else json.dumps(value)
     if field in {"sort_order", "active"}:
-        return int(value)  # type: ignore[arg-type]
+        try:
+            return int(value)  # type: ignore[arg-type]
+        except (TypeError, ValueError) as exc:
+            raise CatalogError(f"{field} must be an integer") from exc
     return value
 
 

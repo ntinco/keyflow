@@ -14,10 +14,10 @@ Complete human runtime acceptance of the current macOS Hammerspoon slice and its
 
 ## Pending human verification
 
-macOS acceptance is complete (2026-09-24): hotstrings, SAP tcode hotkeys/hotstrings and `=` OK-codes including all `ymt-commands`, SAP Easy Access, SAP-only scoping, Eclipse keys and context isolation, Alt+D/Alt+E rotation, SAP comment hotstrings, Finder/Spotlight F12, Alt+P reusing the IINA window, Snipaste return to the most recent allowed target (Teams pastes), and Cmd+Esc. Remaining:
+macOS acceptance is complete (2026-09-24): hotstrings, SAP tcode hotkeys/hotstrings and `=` OK-codes including all `ymt-commands`, SAP Easy Access, SAP-only scoping, Eclipse keys and context isolation, Alt+D/Alt+E rotation, SAP comment hotstrings, Finder/Spotlight F12, Alt+P reusing the IINA window, Snipaste return to the most recent allowed target (Teams pastes), Cmd+Esc, and special-hotstring immediacy from `hotkeys.db` (`;;`, SAP comment triggers, `sp,`). Remaining:
 
-1. macOS after Hammerspoon reload: `;;`, `"+`, `"-`, `*+`, `*-` still expand immediately (special-hotstring immediacy now comes from `hotkeys.db` options instead of a hard-coded id), and `sp,` still expands (the redundant `sp` special hotstring was removed).
-2. Windows (no machine available yet): launch once; confirm profiles load without JSON errors, autocorrect/snippets/SAP transactions work, `=ED_OPTIONS` and `=<ymt code>` are sent without `/n`, SAP hotstrings wait for the ending character, and F12 pastes `.txt` but ignores `.exe`.
+1. macOS after Hammerspoon reload: copy some text, run two SAP commands quickly (e.g. Alt+6 then Alt+8), then Cmd+V pastes the original text, not a transaction code.
+2. Windows (no machine available yet): launch once; confirm profiles load without JSON errors, autocorrect/snippets/SAP transactions work, `=ED_OPTIONS` and `=<ymt code>` are sent without `/n`, SAP hotstrings wait for the ending character, F12 pastes `.txt` but ignores `.exe`, and Alt+P plays a media path that contains spaces.
 
 ## Known parity gaps (deliberately deferred)
 

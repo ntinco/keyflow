@@ -312,7 +312,7 @@ function Hotstrings.start(actions, bindings, profiles)
         if trigger.immediate
             and buffer:sub(-#trigger.pattern) == trigger.pattern
             and not hasWordCharacterBefore(buffer, trigger.pattern) then
-          local visibleCount = #trigger.pattern - 1
+          local visibleCount = utf8.len(trigger.pattern) - 1
           if trigger.run then
             if actions.shouldSubmitExistingSapCatalogTcode(trigger.profileID) then
               hs.timer.doAfter(0, function()
@@ -336,7 +336,7 @@ function Hotstrings.start(actions, bindings, profiles)
           local match = trigger.pattern .. chars
           if buffer:sub(-#match) == match
               and not hasWordCharacterBefore(buffer, trigger.pattern, chars) then
-            local visibleCount = #trigger.pattern
+            local visibleCount = utf8.len(trigger.pattern)
             if trigger.run then
               if actions.shouldSubmitExistingSapCatalogTcode(trigger.profileID) then
                 hs.timer.doAfter(0, function()

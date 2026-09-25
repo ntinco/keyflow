@@ -131,8 +131,8 @@ Runtime.keyWatcher = hs.eventtap.new(
     local keyCode = event:getKeyCode()
     for _, binding in ipairs(eventBindings) do
       if keyCode == binding.keyCode
-          and matchesModifiers(flags, binding.mods) then
-        if not eventContextIsActive(binding.contextLabel) then return false end
+          and matchesModifiers(flags, binding.mods)
+          and eventContextIsActive(binding.contextLabel) then
         -- Run outside the tap callback so slow actions cannot time out the
         -- tap. Passthrough actions stay synchronous: they must snapshot state
         -- before the target app handles the key (e.g. Snipaste Enter).
