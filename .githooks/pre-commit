@@ -6,7 +6,7 @@ top=$(git rev-parse --show-toplevel)
 cd "$top"
 staged=$(mktemp -d)
 trap 'rm -rf "$staged"' EXIT
-git checkout-index --all --prefix="$staged/"
+git checkout-index --all --ignore-skip-worktree-bits --prefix="$staged/"
 printf 'gitdir: %s\n' "$(git rev-parse --absolute-git-dir)" > "$staged/.git"
 if ! out=$(cd "$staged" && WORKSPACE_ROOT=$(dirname "$top") python3 ai/health_check.py 2>&1); then
     printf '%s\n' "$out" >&2
