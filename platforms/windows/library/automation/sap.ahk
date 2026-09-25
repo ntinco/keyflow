@@ -88,6 +88,10 @@ class SapService {
   }
 
   _submitTcodeButton(tcode) {
+    ; Ctrl+/ focuses the SAP GUI command field so a data field is never
+    ; overwritten when the hotkey fires elsewhere (macOS uses Cmd+Alt+O).
+    Send("^/")
+    Sleep(this._resolveOperationDelayMs())
     Send("^a")
     commandText := (InStr(tcode, "/") = 1 || InStr(tcode, "=") = 1) ? tcode : "/n" tcode
     utilPaste(commandText, true)

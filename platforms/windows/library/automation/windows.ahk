@@ -8,23 +8,12 @@
       Sleep(60)
     }
 
-    this._winSizes(&x, &y, &width, &height, &right, &monitorHeight)
-    targetY := -6
-    targetHeight := monitorHeight + targetY * -2 - this._taskbarHeight()
-    WinMove(x, targetY, width, targetHeight, "A")
-  }
-
-  _winSizes(&x, &y, &w, &h, &right, &monH) {
-    CoordMode("Mouse")
-    WinGetPos(&x, &y, &w, &h, "A")
-    Sleep(100)
-    utilGetMonitor(&right, &monH)
-  }
-
-  _taskbarHeight() {
-    if !WinExist("ahk_class Shell_TrayWnd")
-      return 0
-    WinGetPos(, &y1, , &h, "ahk_class Shell_TrayWnd")
-    return (y1 = A_ScreenHeight - h) ? h : 0
+    if !utilGetWorkArea(&workTop, &workBottom)
+      return
+    WinGetPos(&x, , &width, , "A")
+    ; Windows 10/11 frames carry ~6 px invisible borders; overshoot so the
+    ; visible edges meet the work area.
+    border := 6
+    WinMove(x, workTop - border, width, workBottom - workTop + border * 2, "A")
   }
 }

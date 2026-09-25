@@ -44,9 +44,7 @@ utilRunCommand(command) {
   Run(A_Comspec ' /c ' command, , "hide")
 }
 
-utilPaste(data, noExit := "", clear := "") {
-  if clear 
-    Send("{backspace}")
+utilPaste(data, noExit := "") {
   clipboardsaved := ClipboardAll()
   A_Clipboard := data
   ClipWait(0.5)
@@ -75,13 +73,16 @@ utilTooltip(msgv1, msgv2 := "", timer := 3000) {
   }
 }
 
-utilGetMonitor(&right, &bottom) {
-  static monitorDefault := 0x00000001
-  monitorH := DllCall("user32\MonitorFromWindow", "ptr", WinGetID("A"), "uint", monitorDefault)
-  monitorNow := Buffer(40, 0)
-  NumPut("uint", monitorNow.size, monitorNow, 0)
-  if (DllCall("user32\GetMonitorInfo", "ptr", monitorH, "ptr", monitorNow)) {
-    right := NumGet(monitorNow, 12, "Int")
-    bottom := NumGet(monitorNow, 16, "Int")
-  }
+; Work area (monitor minus taskbar) of the monitor holding the active window.
+utilGetWorkArea(&top, &bottom) {
+  static monitorDefaultToNearest := 0x00000002
+  monitorH := DllCall("user32\MonitorFromWindow", "ptr", WinGetID("A"), "uint", monitorDefaultToNearest, "ptr")
+  monitorInfo := Buffer(40, 0)
+  NumPut("uint", monitorInfo.size, monitorInfo, 0)
+  if !DllCall("user32\GetMonitorInfo", "ptr", monitorH, "ptr", monitorInfo)
+    return false
+  ; MONITORINFO.rcWork: left 20, top 24, right 28, bottom 32.
+  top := NumGet(monitorInfo, 24, "Int")
+  bottom := NumGet(monitorInfo, 32, "Int")
+  return true
 }

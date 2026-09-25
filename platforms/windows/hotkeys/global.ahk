@@ -3,7 +3,7 @@
 ; Regenerate: python ai/hotkey_sync.py --sync
 
 :*:;;::{
-utilPaste("ñ",,True)
+utilPaste("ñ")
 }
 :*:"+::{
 services.sap.insertCommentLine("+")
