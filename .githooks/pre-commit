@@ -1,18 +1,48 @@
 #!/bin/sh
-# Versioned hook; enable once per clone: git config core.hooksPath .githooks
-# The health check runs on the staged tree (the index), so unstaged edits cannot hide what the commit contains.
+# shared: gen-box/shared/githooks/pre-commit sha256:f33c60bd8668 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
+# Shared pre-commit hook for the workspace repositories. Enable once per clone with
+# `git config core.hooksPath .githooks` (tools/link_workspace.py in gen-box points it at gen-box/shared/githooks).
+# The staged .githooks/pre-commit.conf sets `check` (the health check command) and optionally `exclude`
+# (one top-level path the check never reads) and `local` (an executable repository hook run after the check).
+# The check runs on the staged tree (the index), so unstaged edits cannot hide what the commit contains.
 set -eu
 top=$(git rev-parse --show-toplevel)
 cd "$top"
-staged=$(mktemp -d)
-trap 'rm -rf "$staged"' EXIT
-git checkout-index --all --ignore-skip-worktree-bits --prefix="$staged/"
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+staged="$work/tree"
+# The settings come from the index too, so the command that runs is the one being committed.
+if ! git show :.githooks/pre-commit.conf > "$work/pre-commit.conf" 2>/dev/null; then
+    echo "pre-commit: .githooks/pre-commit.conf is not staged; commit aborted" >&2
+    exit 1
+fi
+check='' exclude='' local=''
+. "$work/pre-commit.conf"
+if [ -z "$check" ]; then
+    echo "pre-commit: .githooks/pre-commit.conf sets no check command; commit aborted" >&2
+    exit 1
+fi
+if [ -n "$exclude" ]; then
+    git ls-files -z --cached -- ":(exclude)$exclude" |
+        git checkout-index -z --stdin --ignore-skip-worktree-bits --prefix="$staged/"
+    mkdir -p "$staged/$exclude"
+else
+    git checkout-index --all --ignore-skip-worktree-bits --prefix="$staged/"
+fi
 printf 'gitdir: %s\n' "$(git rev-parse --absolute-git-dir)" > "$staged/.git"
 # Git exports GIT_INDEX_FILE relative to the top level; make it absolute so git inside "$staged" reads the real index.
 GIT_INDEX_FILE=$(git rev-parse --path-format=absolute --git-path index)
 export GIT_INDEX_FILE
-if ! out=$(cd "$staged" && WORKSPACE_ROOT=$(dirname "$top") python3 ai/health_check.py 2>&1); then
+if ! out=$(cd "$staged" && WORKSPACE_ROOT=$(dirname "$top") sh -c "$check" 2>&1); then
     printf '%s\n' "$out" >&2
     echo "pre-commit: health check failed on the staged tree; commit aborted" >&2
     exit 1
+fi
+if [ -n "$local" ]; then
+    # The staged copy runs, like the check; not exec, so the EXIT trap still removes the snapshot.
+    if [ ! -f "$staged/$local" ] || [ ! -x "$staged/$local" ]; then
+        echo "pre-commit: $local is not a staged executable file; commit aborted" >&2
+        exit 1
+    fi
+    (cd "$staged" && "./$local")
 fi

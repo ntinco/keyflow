@@ -4,7 +4,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import os
 import re
 import sqlite3
 import subprocess
@@ -12,6 +11,9 @@ import sys
 from collections import Counter, defaultdict
 from datetime import date
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import workspace_contract as shared_contract  # noqa: E402
 
 RE_INCLUDE = re.compile(r'^\s*#Include\s+"?([^"\r\n]+)"?', re.MULTILINE)
 RE_SERVICE_CALL = re.compile(r"services\.([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z_][A-Za-z0-9_]*)")
@@ -417,7 +419,8 @@ def load_repo_map(repo_root: Path) -> tuple[dict[str, object], list[dict[str, st
 
 def validate_repo_map(repo_root: Path, repo_map: dict[str, object]) -> list[dict[str, str]]:
     issues: list[dict[str, str]] = []
-    expected_keys = {"schema_version", "purpose", "routing", "ownership", "local_only", "validators", "platform_validators", "pending_acceptance"}
+    expected_keys = {"schema_version", "purpose", "routing", "ownership", "local_only", "validators", "platform_validators", "pending_acceptance",
+                     "shared_files", "cold_start_token_budget"}
     if set(repo_map) != expected_keys:
         issues.append({
             "type": "repo_map_top_level_shape",
@@ -926,44 +929,8 @@ def build_summary(issues: list[dict[str, object]], registry: dict[str, str], pro
     }
 
 
-WORKSPACE_CONTRACT = re.compile(r"<!-- workspace-contract sha256:(\S+) -->\n(.*?)<!-- /workspace-contract -->", re.DOTALL)
-
-
-def workspace_contract_problems(root: Path) -> list[str]:
-    """The shared workspace contract block is present once and unedited, and the rules it sets are wired."""
-    problems: list[str] = []
-    governance = root / "ai/governance.md"
-    source = governance.read_text(encoding="utf-8").replace("\r\n", "\n") if governance.is_file() else ""
-    blocks = WORKSPACE_CONTRACT.findall(source)
-    if len(blocks) != 1:
-        problems.append(f"ai/governance.md needs one workspace contract block, found {len(blocks)}")
-    elif hashlib.sha256(blocks[0][1].encode("utf-8")).hexdigest()[:12] != blocks[0][0]:
-        problems.append("workspace contract edited here: edit it in gen-box and run tools/contract_sync.py")
-    try:
-        pending = json.loads((root / "ai/repo-map.json").read_text(encoding="utf-8")).get("pending_acceptance")
-    except (OSError, json.JSONDecodeError):
-        pending = None
-    if not isinstance(pending, str) or not pending.strip():
-        problems.append("ai/repo-map.json must name one pending_acceptance path")
-    claude = root / "CLAUDE.md"
-    if not claude.is_file() or claude.read_text(encoding="utf-8").strip() != "@AGENTS.md":
-        problems.append("CLAUDE.md must exist and contain only @AGENTS.md")
-    if not (root / ".githooks/pre-commit").is_file():
-        problems.append(".githooks/pre-commit is missing")
-    # The local digest only catches accidental edits; the gen-box master, when checked out beside this
-    # repository (WORKSPACE_ROOT or the parent directory), is the authority.
-    master = Path(os.environ.get("WORKSPACE_ROOT") or root.resolve().parent) / "gen-box/ai/governance.md"
-    if len(blocks) == 1 and not (root / "tools/contract_sync.py").is_file() and master.is_file():
-        master_blocks = WORKSPACE_CONTRACT.findall(master.read_text(encoding="utf-8").replace("\r\n", "\n"))
-        if len(master_blocks) != 1:
-            problems.append(f"gen-box master {master} must hold exactly one workspace contract block")
-        elif master_blocks[0] != blocks[0]:
-            problems.append("workspace contract differs from the gen-box master: run tools/contract_sync.py in gen-box")
-    return problems
-
-
 def validate_workspace_contract(repo_root: Path) -> list[dict[str, object]]:
-    return [{"type": "workspace_contract", "file": GOVERNANCE_FILE, "message": problem} for problem in workspace_contract_problems(repo_root)]
+    return [{"type": "workspace_contract", "file": GOVERNANCE_FILE, "message": problem} for problem in shared_contract.problems(repo_root)]
 
 
 BRIEF_ISSUE_LIMIT = 20

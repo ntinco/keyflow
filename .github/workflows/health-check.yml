@@ -3,10 +3,14 @@ name: health-check
 on:
   push:
   pull_request:
+  schedule:
+    - cron: "23 7 * * 1"
 
 jobs:
   validate:
     runs-on: ubuntu-latest
+    env:
+      HAS_GEN_BOX: ${{ secrets.GEN_BOX_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -19,3 +23,21 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y lua5.4
       - run: lua5.4 ai/tests/macos_logic_test.lua
       - run: find platforms/macos -name '*.lua' -exec luac5.4 -p {} +
+      # Drift against gen-box: the repository is private, so this needs a read-only token in the GEN_BOX_TOKEN secret.
+      - name: Check out gen-box
+        if: env.HAS_GEN_BOX == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: ntinco/gen-box
+          token: ${{ secrets.GEN_BOX_TOKEN }}
+          path: .ci-gen-box
+          persist-credentials: false
+      - name: Compare the contract and shared files with gen-box
+        if: env.HAS_GEN_BOX == 'true'
+        run: |
+          mkdir -p "$RUNNER_TEMP/workspace"
+          mv .ci-gen-box "$RUNNER_TEMP/workspace/gen-box"
+          WORKSPACE_ROOT="$RUNNER_TEMP/workspace" python3 ai/workspace_contract.py
+      - name: Report the skipped drift check
+        if: env.HAS_GEN_BOX != 'true'
+        run: echo "::notice::GEN_BOX_TOKEN is not set; the contract and shared files were not compared with gen-box"
