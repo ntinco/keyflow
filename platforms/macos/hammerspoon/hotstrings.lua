@@ -1,6 +1,8 @@
 -- hs.eventtap hotstring watcher. Catalog data is generated from
 -- platforms/shared/data/hotkeys.db.
 
+local Clipboard = require("keyflow.clipboard")
+
 local Hotstrings = {}
 
 local function shellQuote(str)
@@ -67,17 +69,21 @@ local SPECIAL_BEHAVIORS = {
 }
 
 local MAX_BUFFER = 64
-local CLIPBOARD_RESTORE_DELAY = 0.5
 local SYNTHETIC_EVENT_MARKER = 926491
-local log = hs.logger.new("keyflow.hotstrings", "warning")
+local log
 local buffer = ""
 local bufferAppPID
 local eventWatcher
-local clipboardSnapshot
-local clipboardRestoreTimer
+
+-- AutoHotkey's default EndChars (Enter arrives as "\r"); mirrored by
+-- HOTSTRING_END_CHARS in ai/hotkey_sync.py.
+local END_CHARS = {}
+for char in ("-()[]{}':;\"/\\,.?! \t\r\n"):gmatch(".") do
+  END_CHARS[char] = true
+end
 
 local function isTerminator(char)
-  return char:match("%s") ~= nil or char:match("%p") ~= nil
+  return END_CHARS[char] == true
 end
 
 local function isFrontSap()
@@ -88,26 +94,13 @@ local function isFrontSap()
   )
 end
 
+-- Like AHK without the ? option: no trigger inside a word. Bytes >= 0x80 are
+-- parts of non-ASCII letters (ñ, á), which count as word characters too.
 local function hasWordCharacterBefore(buffer, pattern, terminator)
   local startIndex = #buffer - #pattern - #(terminator or "") + 1
   if startIndex <= 1 then return false end
   local preceding = buffer:sub(startIndex - 1, startIndex - 1)
-  return preceding:match("[%w_]") ~= nil
-end
-
-local function captureClipboard()
-  return {
-    data = hs.pasteboard.readAllData(),
-    text = hs.pasteboard.getContents(),
-  }
-end
-
-local function restoreClipboard(snapshot)
-  if snapshot.data and next(snapshot.data) then
-    hs.pasteboard.writeAllData(snapshot.data)
-  else
-    hs.pasteboard.clearContents()
-  end
+  return preceding:match("[%w_\128-\255]") ~= nil
 end
 
 local function postSyntheticKey(modifiers, key)
@@ -122,20 +115,8 @@ local function postSyntheticKey(modifiers, key)
 end
 
 local function pasteText(text)
-  if not clipboardSnapshot then
-    clipboardSnapshot = captureClipboard()
-  end
-  if clipboardRestoreTimer then
-    clipboardRestoreTimer:stop()
-  end
-
-  hs.pasteboard.setContents(text)
-  postSyntheticKey({"cmd"}, "v")
-
-  clipboardRestoreTimer = hs.timer.doAfter(CLIPBOARD_RESTORE_DELAY, function()
-    restoreClipboard(clipboardSnapshot)
-    clipboardSnapshot = nil
-    clipboardRestoreTimer = nil
+  Clipboard.paste(text, function()
+    postSyntheticKey({"cmd"}, "v")
   end)
 end
 
@@ -252,11 +233,35 @@ local function buildTriggers(bindings, profiles)
   return triggers
 end
 
+-- Returns the trigger completed by the last typed chars, the number of
+-- visible characters to erase, and the ending character (nil if immediate).
+local function findMatch(triggers, typed, chars, contextIsActive)
+  for _, trigger in ipairs(triggers) do
+    if contextIsActive(trigger) then
+      if trigger.immediate
+          and typed:sub(-#trigger.pattern) == trigger.pattern
+          and not hasWordCharacterBefore(typed, trigger.pattern) then
+        -- The last trigger character was swallowed, never typed.
+        return trigger, utf8.len(trigger.pattern) - 1, nil
+      end
+      if not trigger.immediate and isTerminator(chars) then
+        local match = trigger.pattern .. chars
+        if typed:sub(-#match) == match
+            and not hasWordCharacterBefore(typed, trigger.pattern, chars) then
+          return trigger, utf8.len(trigger.pattern), chars
+        end
+      end
+    end
+  end
+  return nil
+end
+
 function Hotstrings.start(actions, bindings, profiles)
   if eventWatcher then
     return
   end
 
+  log = log or hs.logger.new("keyflow.hotstrings", "warning")
   local triggers = buildTriggers(bindings, profiles)
   eventWatcher = hs.eventtap.new({
     hs.eventtap.event.types.keyDown,
@@ -307,62 +312,33 @@ function Hotstrings.start(actions, bindings, profiles)
     end
 
     buffer = (buffer .. chars):sub(-MAX_BUFFER)
-    for _, trigger in ipairs(triggers) do
-      if triggerMatchesContext(trigger) then
-        if trigger.immediate
-            and buffer:sub(-#trigger.pattern) == trigger.pattern
-            and not hasWordCharacterBefore(buffer, trigger.pattern) then
-          local visibleCount = utf8.len(trigger.pattern) - 1
-          if trigger.run then
-            if actions.shouldSubmitExistingSapCatalogTcode(trigger.profileID) then
-              hs.timer.doAfter(0, function()
-                postSyntheticKey({}, "return")
-              end)
-              buffer = ""
-              return false
-            end
-            for _ = 1, visibleCount do
-              postSyntheticKey({}, "delete")
-            end
-            trigger.run(actions)
-            buffer = ""
-          else
-            fireReplacement(trigger, trigger.replacement(), nil, visibleCount)
-          end
-          return true
-        end
-
-        if not trigger.immediate and isTerminator(chars) then
-          local match = trigger.pattern .. chars
-          if buffer:sub(-#match) == match
-              and not hasWordCharacterBefore(buffer, trigger.pattern, chars) then
-            local visibleCount = utf8.len(trigger.pattern)
-            if trigger.run then
-              if actions.shouldSubmitExistingSapCatalogTcode(trigger.profileID) then
-                hs.timer.doAfter(0, function()
-                  postSyntheticKey({}, "return")
-                end)
-                buffer = ""
-                return false
-              end
-              for _ = 1, visibleCount do
-                postSyntheticKey({}, "delete")
-              end
-              trigger.run(actions)
-              buffer = ""
-            else
-              fireReplacement(trigger, trigger.replacement(), chars, visibleCount)
-            end
-            return true
-          end
-        end
+    local trigger, visibleCount, terminator =
+      findMatch(triggers, buffer, chars, triggerMatchesContext)
+    if not trigger then return false end
+    if trigger.run then
+      if actions.shouldSubmitExistingSapCatalogTcode(trigger.profileID) then
+        hs.timer.doAfter(0, function()
+          postSyntheticKey({}, "return")
+        end)
+        buffer = ""
+        return false
       end
+      for _ = 1, visibleCount do
+        postSyntheticKey({}, "delete")
+      end
+      trigger.run(actions)
+      buffer = ""
+    else
+      fireReplacement(trigger, trigger.replacement(), terminator, visibleCount)
     end
-    return false
+    return true
   end)
   eventWatcher:start()
 end
 
 Hotstrings.reset = resetBuffer
+-- Pure helpers exposed for ai/tests.
+Hotstrings.buildTriggers = buildTriggers
+Hotstrings.findMatch = findMatch
 
 return Hotstrings

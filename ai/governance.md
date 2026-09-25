@@ -71,6 +71,21 @@ Other hotkey on both platforms:
 
 Special hotstring with computed output (`hs_*`): add the row with `--add-hotkey` (type `hotstring`, options `:*:` for immediate), implement Windows behavior in `action`, and add the id to `SPECIAL_BEHAVIORS` in `hotstrings.lua`.
 
+## Review recipe
+
+Structural validators prove the pieces are wired; they do not prove behavior. Before completing any runtime change, and when the human asks for a review, check each risk below against the diff and record findings with file:line:
+
+1. Overlap and timing: two triggers within a delay/timer window (clipboard restore, SAP run tokens, `hs.timer` callbacks); state a late callback reads.
+2. Input erasure: who erases the trigger (AHK auto-erase unless `b0`; macOS `visibleCount`), and that nothing erases it twice; character vs byte counts.
+3. Dispatch and scope: a key or hotstring must fire only in its context, and an inactive match must not swallow or hide another binding.
+4. Focus and target: the action types into the intended field/window (SAP command field, Snipaste return target), including after an app switch.
+5. Paths and quoting: spaces, non-ASCII and empty selections in paths passed to shells or apps.
+6. Screen geometry: secondary monitors, taskbar/work area, maximized windows.
+7. Platform parity: the same intent has the same steps on Windows and macOS, or the difference is recorded as a deferred gap.
+8. Failure path: missing app, empty clipboard, timeout; the user's clipboard and text are left intact.
+
+Turn every confirmed finding into a mechanical guard when feasible: a pure-logic test in `ai/tests/`, a `health_check` rule, or a `hotkey_sync` validation. Otherwise add the manual check to `ai/current-plan.md`.
+
 ## Active work state
 
 `ai/current-plan.md` is optional. Keep it only while a multi-step technical frontier or pending human runtime verification genuinely needs durable continuation state. When that frontier is closed, delete the file; Git is the history.

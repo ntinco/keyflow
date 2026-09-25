@@ -730,6 +730,27 @@ def scan_unused_ahk_functions(file_index: dict[str, dict[str, object]], token_co
     return issues
 
 
+# A literal ending in a space followed by a variable: the variable (usually a
+# path) reaches the shell unquoted and breaks on spaces.
+RE_AHK_RUN_UNQUOTED = re.compile(r"""\b(?:Run|RunWait|utilRunCommand)\(\s*(['"])(?:(?!\1).)*?\s\1\s+[A-Za-z_]""")
+# Primary-monitor globals ignore secondary monitors and the taskbar.
+RE_AHK_SCREEN_GLOBAL = re.compile(r"\bA_Screen(?:Width|Height)\b")
+
+
+def scan_ahk_risks(file_index: dict[str, dict[str, object]]) -> list[dict[str, object]]:
+    issues: list[dict[str, object]] = []
+    for repo_path, meta in sorted(file_index.items()):
+        for line_number, line in enumerate(str(meta["text"]).splitlines(), start=1):
+            if line.lstrip().startswith(";"):
+                continue
+            code = line
+            if RE_AHK_RUN_UNQUOTED.search(code):
+                issues.append({"type": "ahk_run_unquoted_argument", "file": repo_path, "line": line_number, "message": "Command argument built from a variable is not quoted; paths with spaces break. Wrap it as '\"' var '\"'."})
+            if RE_AHK_SCREEN_GLOBAL.search(code) and not repo_path.endswith("library/util.ahk"):
+                issues.append({"type": "ahk_single_monitor_geometry", "file": repo_path, "line": line_number, "message": "A_ScreenWidth/A_ScreenHeight only describe the primary monitor; use utilGetWorkArea."})
+    return issues
+
+
 def validate_macos_runtime(repo_root: Path, macos_entry_rel: str) -> list[dict[str, object]]:
     init_file = repo_root / macos_entry_rel
     if not init_file.exists():
@@ -792,11 +813,22 @@ def validate_macos_runtime(repo_root: Path, macos_entry_rel: str) -> list[dict[s
         r'attributeValue\(\s*"AXSelectedChildren"\s*\)': "Finder paths must come from selected Accessibility elements.",
         r"Actions\.snipasteIsActive\(": "Snipaste overlay dispatch must be scoped to Snipaste.",
         r'enter\s*=\s*"return"': "AHK Enter bindings must map to the macOS Return keycode.",
+        r'package\.loaded\["keyflow\.clipboard"\]\s*=\s*dofile': "init.lua must preload the single shared clipboard instance.",
+        r'Dispatch\.find\(': "Key watcher must dispatch through the tested Dispatch.find.",
+        r'findMatch\(triggers,': "Hotstring watcher must match through the tested findMatch.",
     }
-    combined = "\n".join(strip_lua_comments(item) for item in (text, actions_text, hotstrings_text))
+    dispatch_text = read_text(macos_dir / "dispatch.lua") if (macos_dir / "dispatch.lua").exists() else ""
+    combined = "\n".join(strip_lua_comments(item) for item in (text, actions_text, hotstrings_text, dispatch_text))
     for contract, message in runtime_contracts.items():
         if not re.search(contract, combined):
             issues.append({"type": "macos_runtime_contract_missing", "file": to_repo_path(macos_dir, repo_root), "contract": contract, "message": message})
+    # Clipboard writes outside clipboard.lua bypass the overlap-safe restore.
+    for module_file, module_text in ((actions_file, actions_text), (hotstrings_file, hotstrings_text)):
+        code = strip_lua_comments(module_text)
+        if 'require("keyflow.clipboard")' not in code:
+            issues.append({"type": "macos_clipboard_not_shared", "file": to_repo_path(module_file, repo_root), "message": "Module must use the shared keyflow.clipboard instance."})
+        if re.search(r"hs\.pasteboard\.(?:setContents|writeAllData|clearContents)\(", code):
+            issues.append({"type": "macos_clipboard_bypass", "file": to_repo_path(module_file, repo_root), "message": "Clipboard writes must go through clipboard.lua so overlapping pastes restore correctly."})
 
     for binding_id, binding_type, context_label, tcode in bindings:
         if binding_type == "hotkey" and not tcode and binding_id not in action_ids:
@@ -897,6 +929,7 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
     macos_runtime_issues = validate_macos_runtime(repo_root, macos_entry_rel)
     unused_code_issues = scan_unused_ahk_functions(file_index, token_counter)
     unused_code_issues.extend(scan_unincluded_ahk_files(repo_root, include_graph))
+    ahk_risk_issues = scan_ahk_risks(file_index)
     unused_code_issues.extend(validate_bootstrap_profiles(repo_root, hotkey_source_rel, profiles, bootstrap_rel))
     unused_code_issues.extend({"type": "unused_ahk_assignment", **item} for item in unused_assignments)
     unused_code_issues.extend({"type": "unused_ahk_group_or_target", "file": "platforms/windows/library/config/constants-core.ahk", **item} for item in unused_groups)
@@ -906,7 +939,7 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
         repo_map_load_issues, repo_map_issues, control_plane_issues, local_only_issues,
         include_missing, registry_issues, service_call_issues, profile_issues,
         catalog_review_issues, hotkey_catalog_issues, macos_runtime_issues,
-        unclosed_hotif, forbidden_references, unused_code_issues,
+        unclosed_hotif, forbidden_references, unused_code_issues, ahk_risk_issues,
     ):
         issues.extend(group)
 

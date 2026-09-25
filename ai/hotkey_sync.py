@@ -25,7 +25,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import string
 import re
 import sqlite3
 import sys
@@ -320,6 +319,10 @@ def _sap_tcode(entry: dict[str, object]) -> str | None:
     return action.removeprefix(SAP_TCODE_ACTION_PREFIX)
 
 
+# Backspace sent by a hotstring action on top of AHK's automatic trigger erase.
+HOTSTRING_BACKSPACE_RE = re.compile(r"\{\s*(?:bs|backspace)\b", re.IGNORECASE)
+
+
 def validate_entries(entries: list[dict[str, object]]) -> None:
     issues: list[str] = []
     seen_ids: set[str] = set()
@@ -360,6 +363,12 @@ def validate_entries(entries: list[dict[str, object]]) -> None:
         action = str(entry.get("action") or "").strip()
         if not action or not str(entry.get("label") or "").strip():
             issues.append(f"{entry_id}: action and label are required")
+        options = str(entry.get("options") or "").lower()
+        if entry_type == "hotstring" and "b0" not in options and HOTSTRING_BACKSPACE_RE.search(action):
+            issues.append(
+                f"{entry_id}: hotstring already erases its trigger; sending backspace deletes user text "
+                "(use option b0 to erase manually)"
+            )
         tcode = _sap_tcode(entry)
         if tcode is not None and (
             entry_type != "hotkey" or not SAP_TCODE_RE.fullmatch(tcode)
@@ -378,8 +387,9 @@ def validate_entries(entries: list[dict[str, object]]) -> None:
         raise CatalogError("Catalog validation failed:\n- " + "\n- ".join(issues))
 
 
-# Characters that end a non-immediate hotstring on both runtimes.
-HOTSTRING_END_CHARS = set(string.punctuation) | set(string.whitespace)
+# AutoHotkey's default EndChars (keyflow never overrides them); mirrored by
+# END_CHARS in platforms/macos/hammerspoon/hotstrings.lua.
+HOTSTRING_END_CHARS = set("-()[]{}':;\"/\\,.?! \t\r\n")
 
 
 def _active_hotstring_triggers(

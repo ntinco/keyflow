@@ -7,25 +7,14 @@ end
 
 package.path = package.path .. ";" .. scriptDir .. "?.lua"
 
+package.loaded["keyflow.clipboard"] = dofile(scriptDir .. "clipboard.lua")
+local Dispatch = dofile(scriptDir .. "dispatch.lua")
 local bindings = dofile(scriptDir .. "generated/bindings.lua")
 local hotstringProfiles = dofile(scriptDir .. "generated/hotstring_profiles.lua")
 local Actions = dofile(scriptDir .. "actions.lua")
 local Hotstrings = dofile(scriptDir .. "hotstrings.lua")
 local Runtime = {hotkeysByApp = {}}
 package.loaded["keyflow.runtime"] = Runtime
-
-local function parseAhkKey(ahkKey)
-  local mods = {}
-  local key = ahkKey
-  local keyAliases = {enter = "return", esc = "escape"}
-  key = key:gsub("^~", "")
-  local prefixMap = {["^"] = "ctrl", ["+"] = "shift", ["!"] = "alt", ["#"] = "cmd"}
-  while #key > 0 and prefixMap[key:sub(1, 1)] do
-    table.insert(mods, prefixMap[key:sub(1, 1)])
-    key = key:sub(2)
-  end
-  return mods, keyAliases[key:lower()] or key
-end
 
 local CONTEXT_APPS = {
   ["launcher"] = {
@@ -63,7 +52,7 @@ for _, binding in ipairs(bindings) do
       and (binding.contextLabel == "global" or CONTEXT_APPS[binding.contextLabel]) then
     local action = actionForBinding(binding)
     if action then
-      local mods, key = parseAhkKey(binding.key)
+      local mods, key = Dispatch.parseAhkKey(binding.key)
       if binding.contextLabel == "global"
           or binding.contextLabel == "launcher"
           or binding.contextLabel == "snipaste" then
@@ -93,15 +82,6 @@ for _, binding in ipairs(bindings) do
   end
 end
 
-local function matchesModifiers(flags, expectedMods)
-  local expected = {}
-  for _, mod in ipairs(expectedMods) do expected[mod] = true end
-  for _, mod in ipairs({"cmd", "ctrl", "alt", "shift"}) do
-    if (flags[mod] == true) ~= (expected[mod] == true) then return false end
-  end
-  return true
-end
-
 local function eventContextIsActive(contextLabel)
   if contextLabel == "global" then
     return true
@@ -127,24 +107,19 @@ Runtime.keyWatcher = hs.eventtap.new(
       return false
     end
 
-    local flags = event:getFlags()
-    local keyCode = event:getKeyCode()
-    for _, binding in ipairs(eventBindings) do
-      if keyCode == binding.keyCode
-          and matchesModifiers(flags, binding.mods)
-          and eventContextIsActive(binding.contextLabel) then
-        -- Run outside the tap callback so slow actions cannot time out the
-        -- tap. Passthrough actions stay synchronous: they must snapshot state
-        -- before the target app handles the key (e.g. Snipaste Enter).
-        if binding.passthrough then
-          binding.action()
-        else
-          hs.timer.doAfter(0, binding.action)
-        end
-        return not binding.passthrough
-      end
+    local binding = Dispatch.find(
+      eventBindings, event:getKeyCode(), event:getFlags(), eventContextIsActive
+    )
+    if not binding then return false end
+    -- Run outside the tap callback so slow actions cannot time out the tap.
+    -- Passthrough actions stay synchronous: they must snapshot state before
+    -- the target app handles the key (e.g. Snipaste Enter).
+    if binding.passthrough then
+      binding.action()
+    else
+      hs.timer.doAfter(0, binding.action)
     end
-    return false
+    return not binding.passthrough
   end
 )
 Runtime.keyWatcher:start()

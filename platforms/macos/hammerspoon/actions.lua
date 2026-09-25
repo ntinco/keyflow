@@ -1,6 +1,8 @@
 -- Hand-authored actions matched by hotkeys.db id; see
 -- platforms/windows/library/automation/sap.ahk for source behavior.
 
+local Clipboard = require("keyflow.clipboard")
+
 local Actions = {}
 
 local APP_BUNDLE_IDS = {
@@ -188,20 +190,8 @@ local function lastSnipasteTargetWindow()
   end
 end
 
-local function captureClipboard()
-  return {
-    data = hs.pasteboard.readAllData(),
-    text = hs.pasteboard.getContents(),
-  }
-end
-
-local function restoreClipboard(snapshot)
-  if snapshot.data and next(snapshot.data) then
-    hs.pasteboard.writeAllData(snapshot.data)
-  else
-    hs.pasteboard.clearContents()
-  end
-end
+local captureClipboard = Clipboard.capture
+local restoreClipboard = Clipboard.restore
 
 Actions.eclipse_backtick = function()
   if not isFrontApp(APP_BUNDLE_IDS.eclipse) then return end
@@ -225,27 +215,16 @@ Actions.eclipse_f2 = function()
   end
 end
 
--- Overlapping pastes (e.g. two SAP commands within the restore delay) must
--- restore the user's clipboard, not the previous paste's text.
-local pendingClipboard
-local clipboardRestoreTimer
-
 local function pasteText(text, savedClipboard, targetApp)
-  pendingClipboard = pendingClipboard or savedClipboard or captureClipboard()
-  if clipboardRestoreTimer then clipboardRestoreTimer:stop() end
-  hs.pasteboard.setContents(text)
-  local front = hs.application.frontmostApplication()
-  hs.printf(
-    "keyflow: paste dispatched app=%s bytes=%d",
-    front and front:bundleID() or "none",
-    #text
-  )
-  hs.eventtap.keyStroke({"cmd"}, "v", KEYSTROKE_DELAY, targetApp)
-  clipboardRestoreTimer = hs.timer.doAfter(0.5, function()
-    restoreClipboard(pendingClipboard)
-    pendingClipboard = nil
-    clipboardRestoreTimer = nil
-  end)
+  Clipboard.paste(text, function()
+    local front = hs.application.frontmostApplication()
+    hs.printf(
+      "keyflow: paste dispatched app=%s bytes=%d",
+      front and front:bundleID() or "none",
+      #text
+    )
+    hs.eventtap.keyStroke({"cmd"}, "v", KEYSTROKE_DELAY, targetApp)
+  end, savedClipboard)
 end
 
 local sapRunToken = 0

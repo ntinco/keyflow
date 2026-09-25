@@ -14,6 +14,8 @@
       "entrypoint": "platforms/macos/hammerspoon/init.lua",
       "actions": "platforms/macos/hammerspoon/actions.lua",
       "hotstrings": "platforms/macos/hammerspoon/hotstrings.lua",
+      "dispatch": "platforms/macos/hammerspoon/dispatch.lua",
+      "clipboard": "platforms/macos/hammerspoon/clipboard.lua",
       "generated": "platforms/macos/hammerspoon/generated/"
     },
     "shared": {

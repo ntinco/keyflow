@@ -59,6 +59,10 @@ class HotstringConflictTests(unittest.TestCase):
         profiles = [_profile([("da", True)]), _profile([("dab", False)], mode="sap-command", context="sap-gui-session")]
         self.assertEqual(len(hotkey_sync.find_hotstring_conflicts([], profiles)), 1)
 
+    def test_end_chars_match_autohotkey_defaults(self) -> None:
+        self.assertEqual(hotkey_sync.HOTSTRING_END_CHARS, set("-()[]{}':;\"/\\,.?! \t\r\n"))
+        self.assertEqual(hotkey_sync.find_hotstring_conflicts([], [_profile([("sp", False), ("sp=", True)])]), [])
+
     def test_sap_commands_never_fire_immediately(self) -> None:
         profiles = [_profile([("da", True), ("dab", False)], mode="sap-command", context="sap-gui-session")]
         self.assertEqual(hotkey_sync.find_hotstring_conflicts([], profiles), [])
@@ -113,6 +117,12 @@ class CatalogEditTests(unittest.TestCase):
                                    '"action": "x", "label": "x", "platform": ["linux"]}')
         self.assertEqual(self.db.read_bytes(), before)
 
+    def test_hotstring_backspace_is_rejected(self) -> None:
+        before = self.db.read_bytes()
+        with self.assertRaises(hotkey_sync.CatalogError) as caught:
+            hotkey_sync.set_hotkey("hs_semicolons", "action", 'Send("{BS}ñ")')
+        self.assertIn("erases its trigger", str(caught.exception))
+        self.assertEqual(self.db.read_bytes(), before)
 
     def test_hotkey_requires_id(self) -> None:
         before = self.db.read_bytes()
@@ -142,6 +152,20 @@ class HealthCheckHelperTests(unittest.TestCase):
         tokens = Counter(token.lower() for token in health_check.re.findall(r"\b[A-Za-z_][A-Za-z0-9_]*\b", text))
         issues = health_check.scan_unused_ahk_functions({"x.ahk": {"text": text}}, tokens)
         self.assertEqual(sorted(str(issue["symbol"]) for issue in issues), ["caller", "unused"])
+
+
+class AhkRiskLintTests(unittest.TestCase):
+    def _types(self, text: str, path: str = "platforms/windows/library/automation/x.ahk") -> list[str]:
+        return [str(issue["type"]) for issue in health_check.scan_ahk_risks({path: {"text": text}})]
+
+    def test_unquoted_run_argument(self) -> None:
+        self.assertEqual(self._types('utilRunCommand("aimpportable " filename)'), ["ahk_run_unquoted_argument"])
+        self.assertEqual(self._types("utilRunCommand('aimpportable \"' filename '\"')"), [])
+        self.assertEqual(self._types('; Run("x " path)'), [])
+
+    def test_primary_monitor_geometry(self) -> None:
+        self.assertEqual(self._types("h := A_ScreenHeight - 40"), ["ahk_single_monitor_geometry"])
+        self.assertEqual(self._types("h := A_ScreenHeight", "platforms/windows/library/util.ahk"), [])
 
 
 class MacosLogicTests(unittest.TestCase):
