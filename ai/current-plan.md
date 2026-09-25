@@ -18,8 +18,8 @@ Accepted on 2026-09-24. macOS: hotstrings, SAP tcode hotkeys/hotstrings and `=` 
 
 Cleanup after acceptance (2026-09-24), pending re-test:
 
-1. Windows: run `selftest.ahk` (new check: `*+` block leaves the cursor on the middle line — `utilPaste` used to `Exit()` inside hotstrings, so the `{Up}` never ran). Then SAP: `se11` + Enter, Alt+4…0, `=ED_OPTIONS`, a `ymt-commands` trigger, Easy Access; `"+` comment line with the `sap_comment_user` signature; Alt+D/Alt+E rotation; F12/Alt+P in Everything; Snipaste Enter.
-2. macOS: reload Hammerspoon without console errors; SAP command hotstring, Easy Access submits once (the ending character is now swallowed there too), F12, Snipaste Enter.
+1. Windows: confirmed after cleanup: selftest hotstrings and Win+Esc, `se11`, SAP Alt keys, Alt+E, F12, Alt+P. Open: the human reported `"-` not working; the first selftest block check was invalid (`+` in Send is Shift). Re-run `selftest.ahk`: it now checks `"-`, `"+` and the `*+` block (cursor on the middle line — `utilPaste` used to `Exit()` inside hotstrings, so the `{Up}` never ran). Still to check: Alt+4…0 in a data field, `=ED_OPTIONS`, a `ymt-commands` trigger, Easy Access, Alt+D, Snipaste Enter.
+2. macOS: confirmed after cleanup (Hammerspoon reloads without errors; human reported OK).
 3. Win+Esc on a secondary monitor when one is connected.
 
 ## Known parity gaps (deliberately deferred)

@@ -55,9 +55,17 @@ ClipWait(1)
 check(";; keeps the preceding character", typeAndRead("x `;;"), "x ñ")
 check(";; restores the clipboard", A_Clipboard, "keyflow-selftest-clipboard")
 check(";; fires inside a word", typeAndRead("ma;;ana"), "mañana")
-blockLines := StrSplit(typeAndRead("*+x"), "`n", "`r")
+; In Send, + is Shift: type a literal plus as {+}.
+signaturePattern := "\S+ \d\d\.\d\d\.\d\d"
+for symbol in ["-", "+"]
+{
+  typed := typeAndRead(' "' (symbol = "+" ? "{+}" : symbol))
+  ok := typed ~= '^ "\' symbol signaturePattern '$'
+  addResult('SAP comment line: ' Chr(34) symbol, ok ? "PASS" : "FAIL", ok ? "" : "got [" typed "]")
+}
+blockLines := StrSplit(typeAndRead("*{+}x"), "`n", "`r")
 check("SAP comment block leaves the cursor on the middle line",
-  blockLines.Length = 3 ? blockLines[2] : "(" blockLines.Length " lines)", "x")
+  blockLines.Length = 3 ? blockLines[2] : "(" blockLines.Length " lines: " blockLines[1] ")", "x")
 typingGui.Destroy()
 
 ; Win+Esc ------------------------------------------------------------------
