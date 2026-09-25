@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import subprocess
@@ -17,6 +18,7 @@ RE_GROUP_ADD = re.compile(r'GroupAdd\("([^"]+)"')
 RE_APP_TARGET = re.compile(r'appActivationTargets\.Push\(\["([^"]+)"')
 RE_HOTIF_OPEN = re.compile(r"^\s*#[Hh]ot[Ii]f\b(?!\s*$)", re.MULTILINE)
 RE_HOTIF_CLOSE = re.compile(r"^\s*#[Hh]ot[Ii]f\s*$", re.MULTILINE)
+RE_AHK_FUNCTION_DEF = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*\([^)\n]*\)\s*\{\s*$", re.MULTILINE)
 RE_LUA_DOFILE = re.compile(r'dofile\(scriptDir\s*\.\.\s*"([^"]+)"\)')
 
 RESERVED_METHOD_NAMES = {
@@ -269,6 +271,20 @@ def validate_profiles(profiles: list[dict[str, str]], data_dir: Path, repo_root:
     return results, issues
 
 
+def catalog_items_sha256(items: object) -> str:
+    """Mirror of ai/hotkey_sync.py catalog_items_sha256."""
+    canonical = json.dumps(items, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def current_catalog_sha256(repo_root: Path, catalog_rel: str) -> str | None:
+    try:
+        payload = json.loads((repo_root / catalog_rel).read_text(encoding="utf-8-sig"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return catalog_items_sha256(payload.get("items")) if isinstance(payload, dict) else None
+
+
 def validate_catalog_review(repo_root: Path, review_rel: str, profiles: list[dict[str, str]]) -> tuple[dict[str, object], list[dict[str, str]]]:
     review_path = repo_root / review_rel
     expected_catalogs = {profile["label"]: f"platforms/windows/data/{profile['label']}.json" for profile in profiles}
@@ -322,6 +338,13 @@ def validate_catalog_review(repo_root: Path, review_rel: str, profiles: list[dic
                     date.fromisoformat(str(verified_on))
                 except ValueError:
                     issues.append({"type": "catalog_review_verified_date_invalid", "file": review_rel, "message": f"Catalog {catalog_id} has invalid verification date: {verified_on}"})
+            if expected_file and entry.get("content_sha256") != current_catalog_sha256(repo_root, expected_file):
+                issues.append({
+                    "type": "catalog_review_stale",
+                    "file": review_rel,
+                    "message": f"Catalog {catalog_id} content changed since its last human review.",
+                    "fix": f"After the human confirms the content: python ai/hotkey_sync.py --mark-reviewed {catalog_id}",
+                })
     for missing_id in sorted(set(expected_catalogs) - seen_ids):
         issues.append({"type": "catalog_review_entry_missing", "file": review_rel, "message": f"Active catalog missing from review contract: {missing_id}"})
     result["pending_human_review_count"] = pending_count
@@ -361,7 +384,7 @@ def validate_repo_map(repo_root: Path, repo_map: dict[str, object]) -> list[dict
         ("windows", "entrypoint"), ("windows", "bootstrap"), ("windows", "services"), ("windows", "hotkeys"), ("windows", "catalogs"),
         ("macos", "entrypoint"), ("macos", "actions"), ("macos", "hotstrings"), ("macos", "generated"),
         ("shared", "hotkeys"), ("shared", "catalog_review"),
-        ("validation", "health"), ("validation", "hotkey_sync"), ("validation", "smoke"),
+        ("validation", "health"), ("validation", "hotkey_sync"), ("validation", "smoke"), ("validation", "tests"),
     ]
     routing = repo_map.get("routing")
     if not isinstance(routing, dict):
@@ -617,6 +640,45 @@ def scan_forbidden_references(repo_root: Path) -> list[dict[str, object]]:
     return findings
 
 
+def strip_lua_comments(text: str) -> str:
+    """Remove Lua comments while keeping string literals intact."""
+    result: list[str] = []
+    index = 0
+    length = len(text)
+    while index < length:
+        char = text[index]
+        if char in "\"'":
+            end = index + 1
+            while end < length and text[end] != char and text[end] != "\n":
+                end += 2 if text[end] == "\\" else 1
+            result.append(text[index:end + 1])
+            index = end + 1
+        elif text.startswith("--", index):
+            long_comment = re.match(r"--\[(=*)\[", text[index:])
+            if long_comment:
+                close = text.find("]" + long_comment.group(1) + "]", index)
+                index = length if close == -1 else close + len(long_comment.group(1)) + 2
+            else:
+                newline = text.find("\n", index)
+                index = length if newline == -1 else newline
+        else:
+            result.append(char)
+            index += 1
+    return "".join(result)
+
+
+def scan_unused_ahk_functions(file_index: dict[str, dict[str, object]], token_counter: Counter[str]) -> list[dict[str, object]]:
+    issues: list[dict[str, object]] = []
+    for repo_path, meta in sorted(file_index.items()):
+        for match in RE_AHK_FUNCTION_DEF.finditer(str(meta["text"])):
+            name = match.group(1)
+            if name.startswith("__") or name.lower() in RESERVED_METHOD_NAMES:
+                continue
+            if token_counter[name.lower()] <= 1:
+                issues.append({"type": "unused_ahk_function", "file": repo_path, "symbol": name, "message": "Function or method is defined but never referenced."})
+    return issues
+
+
 def validate_macos_runtime(repo_root: Path, macos_entry_rel: str) -> list[dict[str, object]]:
     init_file = repo_root / macos_entry_rel
     if not init_file.exists():
@@ -669,18 +731,20 @@ def validate_macos_runtime(repo_root: Path, macos_entry_rel: str) -> list[dict[s
         if action_id.startswith(prefixes) and action_id not in bound_hotkey_ids:
             issues.append({"type": "macos_action_without_binding", "file": to_repo_path(actions_file, repo_root), "action": action_id, "message": "Hammerspoon action has no generated hotkey binding."})
 
+    # Regexes over comment-stripped code: tolerant to argument/whitespace
+    # changes, and a comment can no longer satisfy a contract.
     runtime_contracts = {
-        'hs.eventtap.keyStroke({"cmd", "alt"}, "o"': "SAP command dispatch must focus the native command field.",
-        "Hotstrings.reset()": "Application changes must reset the hotstring buffer.",
-        '"-b", APP_BUNDLE_IDS.iina': "Alt+P must hand media to the running IINA through LaunchServices.",
-        "runningTasks[task] = true": "Asynchronous hs.task objects must be retained through completion.",
-        'attributeValue("AXSelectedChildren")': "Finder paths must come from selected Accessibility elements.",
-        "Actions.snipasteIsActive": "Snipaste overlay dispatch must be scoped to Snipaste.",
-        'enter = "return"': "AHK Enter bindings must map to the macOS Return keycode.",
+        r'hs\.eventtap\.keyStroke\(\s*\{\s*"cmd"\s*,\s*"alt"\s*\}\s*,\s*"o"': "SAP command dispatch must focus the native command field.",
+        r"Hotstrings\.reset\(\s*\)": "Application changes must reset the hotstring buffer.",
+        r'"-b"\s*,\s*APP_BUNDLE_IDS\.iina': "Alt+P must hand media to the running IINA through LaunchServices.",
+        r"runningTasks\[\s*task\s*\]\s*=\s*true": "Asynchronous hs.task objects must be retained through completion.",
+        r'attributeValue\(\s*"AXSelectedChildren"\s*\)': "Finder paths must come from selected Accessibility elements.",
+        r"Actions\.snipasteIsActive\(": "Snipaste overlay dispatch must be scoped to Snipaste.",
+        r'enter\s*=\s*"return"': "AHK Enter bindings must map to the macOS Return keycode.",
     }
-    combined = text + "\n" + actions_text + "\n" + hotstrings_text
+    combined = "\n".join(strip_lua_comments(item) for item in (text, actions_text, hotstrings_text))
     for contract, message in runtime_contracts.items():
-        if contract not in combined:
+        if not re.search(contract, combined):
             issues.append({"type": "macos_runtime_contract_missing", "file": to_repo_path(macos_dir, repo_root), "contract": contract, "message": message})
 
     for binding_id, binding_type, context_label, tcode in bindings:
@@ -692,6 +756,9 @@ def validate_macos_runtime(repo_root: Path, macos_entry_rel: str) -> list[dict[s
             issues.append({"type": "macos_context_missing", "file": macos_entry_rel, "binding": binding_id, "context": context_label, "message": "Generated macOS hotkey references an unknown application context."})
         if binding_type == "hotstring" and binding_id not in hotstring_ids:
             issues.append({"type": "macos_hotstring_missing", "file": to_repo_path(hotstrings_file, repo_root), "binding": binding_id, "message": "Generated macOS hotstring has no registered trigger."})
+    bound_hotstring_ids = {binding_id for binding_id, binding_type, _, _ in bindings if binding_type == "hotstring"}
+    for hotstring_id in sorted(hotstring_ids - bound_hotstring_ids):
+        issues.append({"type": "macos_hotstring_without_binding", "file": to_repo_path(hotstrings_file, repo_root), "binding": hotstring_id, "message": "Hammerspoon special hotstring has no generated binding."})
     for runtime_file in (init_file, actions_file, hotstrings_file):
         if "hs.timer.usleep" in read_text(runtime_file):
             issues.append({"type": "macos_blocking_sleep", "file": to_repo_path(runtime_file, repo_root), "message": "Hammerspoon runtime must not block its main event thread with hs.timer.usleep."})
@@ -777,13 +844,16 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
     unclosed_hotif = scan_unclosed_hotif(hotkeys_dir, repo_root)
     hotkey_catalog_issues = validate_hotkey_catalog(repo_root, hotkey_sync_rel, hotkey_source_rel)
     macos_runtime_issues = validate_macos_runtime(repo_root, macos_entry_rel)
+    unused_code_issues = scan_unused_ahk_functions(file_index, token_counter)
+    unused_code_issues.extend({"type": "unused_ahk_assignment", **item} for item in unused_assignments)
+    unused_code_issues.extend({"type": "unused_ahk_group_or_target", "file": "platforms/windows/library/config/constants-core.ahk", **item} for item in unused_groups)
 
     issues: list[dict[str, object]] = []
     for group in (
         repo_map_load_issues, repo_map_issues, control_plane_issues, local_only_issues,
         include_missing, registry_issues, service_call_issues, profile_issues,
         catalog_review_issues, hotkey_catalog_issues, macos_runtime_issues,
-        unclosed_hotif, forbidden_references,
+        unclosed_hotif, forbidden_references, unused_code_issues,
     ):
         issues.extend(group)
 

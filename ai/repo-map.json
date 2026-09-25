@@ -23,7 +23,8 @@
     "validation": {
       "health": "ai/health_check.py",
       "hotkey_sync": "ai/hotkey_sync.py",
-      "smoke": "ai/run_smoke.py"
+      "smoke": "ai/run_smoke.py",
+      "tests": "ai/tests/"
     },
     "conditional": {
       "active_work": "ai/current-plan.md"
@@ -62,6 +63,7 @@
   "validators": [
     "python ai/health_check.py --pretty",
     "python ai/hotkey_sync.py --check",
+    "python -m unittest discover -s ai/tests",
     "python ai/run_smoke.py --platform windows",
     "python ai/run_smoke.py --platform macos"
   ]

@@ -64,7 +64,6 @@ local SPECIAL_BEHAVIORS = {
     replacement = function() return buildCommentMarkup("-") end,
     moveCursorUpAfter = true,
   },
-  hs_sp = {replacement = function() return "summary in prompt" end},
 }
 
 local MAX_BUFFER = 64
@@ -219,7 +218,7 @@ local function buildTriggers(bindings, profiles)
       triggers[#triggers + 1] = {
         id = binding.id,
         pattern = binding.key,
-        immediate = binding.id ~= "hs_sp",
+        immediate = binding.immediate,
         contextLabel = binding.contextLabel,
         replacement = behavior.replacement,
         moveCursorUpAfter = behavior.moveCursorUpAfter,

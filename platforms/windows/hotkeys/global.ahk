@@ -17,9 +17,6 @@ services.sap.insertCommentBlock("+")
 :*:*-::{
 services.sap.insertCommentBlock("-")
 }
-::sp::{
-utilPaste("summary in prompt",,true)
-}
 !e::{
 services.windowGroup.activateGroup(appActivationTargets,"apps_sap_workspace")
 }

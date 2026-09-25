@@ -9,36 +9,41 @@
       "id": "autocorrect",
       "file": "platforms/windows/data/autocorrect.json",
       "status": "verified",
-      "last_human_verification": "2026-06-28",
-      "notes": "Verified by human review for the current operating context."
+      "last_human_verification": "2026-09-24",
+      "notes": "Content runtime-accepted by human on macOS; baseline content hash recorded.",
+      "content_sha256": "6b88f3518cb9fbaff87e6135e51192abdc188852d114ad4cd6fc2398e3c47f28"
     },
     {
       "id": "quick-snippets",
       "file": "platforms/windows/data/quick-snippets.json",
       "status": "verified",
-      "last_human_verification": "2026-06-28",
-      "notes": "Verified by human review for the current operating context."
+      "last_human_verification": "2026-09-24",
+      "notes": "Content runtime-accepted by human on macOS; baseline content hash recorded.",
+      "content_sha256": "e602a9e82442574bb2de42af9b826411f91d4e5ceaa93468667d659bb2560dfe"
     },
     {
       "id": "sap-transaction-catalog",
       "file": "platforms/windows/data/sap-transaction-catalog.json",
       "status": "verified",
-      "last_human_verification": "2026-06-28",
-      "notes": "Verified by human review for the current operating context."
+      "last_human_verification": "2026-09-24",
+      "notes": "Content runtime-accepted by human on macOS; baseline content hash recorded.",
+      "content_sha256": "2df40644f2ed06190ac18413cc5d439443f1757f56bbd1481ed9cd4b59912772"
     },
     {
       "id": "sap-transaction-shortcuts",
       "file": "platforms/windows/data/sap-transaction-shortcuts.json",
       "status": "verified",
-      "last_human_verification": "2026-06-28",
-      "notes": "Verified by human review for the current operating context."
+      "last_human_verification": "2026-09-24",
+      "notes": "Content runtime-accepted by human on macOS; baseline content hash recorded.",
+      "content_sha256": "b11044200a7359e5bf50ac37ee479260525e80bbc6aa59cae1900ba9640a3d70"
     },
     {
       "id": "ymt-commands",
       "file": "platforms/windows/data/ymt-commands.json",
       "status": "verified",
-      "last_human_verification": "2026-06-28",
-      "notes": "Verified by human review for the current operating context."
+      "last_human_verification": "2026-09-24",
+      "notes": "Content runtime-accepted by human on macOS; baseline content hash recorded.",
+      "content_sha256": "bd5ba9011e6365f165fd1226961bb2cb6c3c00f0ab1f7205a2d77d20e8e69579"
     }
   ]
 }

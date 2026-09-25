@@ -287,6 +287,8 @@ local function runTcode(tcode, profileID)
 end
 
 Actions.runSapTcode = runTcode
+-- Pure helper exposed for ai/tests.
+Actions.normalizeTcode = normalizeTcode
 
 local PASTEABLE_EXTENSIONS = {
   abap = true,
