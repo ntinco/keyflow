@@ -8,7 +8,8 @@
       "bootstrap": "platforms/windows/library/bootstrap.ahk",
       "services": "platforms/windows/library/automation/",
       "hotkeys": "platforms/windows/hotkeys/",
-      "catalogs": "platforms/windows/data/"
+      "catalogs": "platforms/windows/data/",
+      "selftest": "platforms/windows/tools/selftest.ahk"
     },
     "macos": {
       "entrypoint": "platforms/macos/hammerspoon/init.lua",

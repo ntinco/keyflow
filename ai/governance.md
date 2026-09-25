@@ -97,4 +97,5 @@ Turn every confirmed finding into a mechanical guard when feasible: a pure-logic
 - Run `python ai/hotkey_sync.py --check` when catalog/generated ownership is relevant; health validation also performs this drift check.
 - Run `python -m unittest discover -s ai/tests` when tooling or tested runtime logic changes.
 - Run relevant static/syntax checks and `ai/run_smoke.py` when runtime wiring changes and the environment supports them.
+- On Windows, `platforms/windows/tools/selftest.ahk` produces runtime evidence for hotstrings and window geometry; extend it when a Windows behavior can be checked without real apps.
 - Never claim a check or runtime behavior that was not executed or observed.
