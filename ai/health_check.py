@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import sqlite3
 import subprocess
@@ -36,6 +37,7 @@ FORBIDDEN_REFERENCE_PATTERNS = (
 )
 FORBIDDEN_SCAN_EXCLUDED_PREFIXES = (".git/", ".axet-code/", "ai/__pycache__/")
 FORBIDDEN_SCAN_EXACT_PATHS = {
+    ".git",
     "ai/health-check.json",
     "ai/health-check.summary.json",
     "ai/health_check.py",
@@ -948,6 +950,15 @@ def workspace_contract_problems(root: Path) -> list[str]:
         problems.append("CLAUDE.md must exist and contain only @AGENTS.md")
     if not (root / ".githooks/pre-commit").is_file():
         problems.append(".githooks/pre-commit is missing")
+    # The local digest only catches accidental edits; the gen-box master, when checked out beside this
+    # repository (WORKSPACE_ROOT or the parent directory), is the authority.
+    master = Path(os.environ.get("WORKSPACE_ROOT") or root.resolve().parent) / "gen-box/ai/governance.md"
+    if len(blocks) == 1 and not (root / "tools/contract_sync.py").is_file() and master.is_file():
+        master_blocks = WORKSPACE_CONTRACT.findall(master.read_text(encoding="utf-8").replace("\r\n", "\n"))
+        if len(master_blocks) != 1:
+            problems.append(f"gen-box master {master} must hold exactly one workspace contract block")
+        elif master_blocks[0] != blocks[0]:
+            problems.append("workspace contract differs from the gen-box master: run tools/contract_sync.py in gen-box")
     return problems
 
 

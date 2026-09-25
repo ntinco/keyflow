@@ -100,12 +100,23 @@ Turn every confirmed finding into a mechanical guard when feasible: a pure-logic
 - On Windows, `platforms/windows/tools/selftest.ahk` produces runtime evidence for hotstrings and window geometry; extend it when a Windows behavior can be checked without real apps.
 - Never claim a check or runtime behavior that was not executed or observed.
 
-<!-- workspace-contract sha256:379df4eaa154 -->
+<!-- workspace-contract sha256:885e0973f8f7 -->
 ## Workspace contract
 
 Identical in the six repositories under `~/gh/`. The master copy is the one in
 `gen-box/ai/governance.md`: edit only that one, then run `python3 tools/contract_sync.py ~/gh` from `gen-box`.
 Two of the repositories are public, so this section never holds private detail.
+
+Precedence, highest first:
+
+1. The human's explicit instruction in the session. Name the rule it overrides; a lasting change is written into the file that owns the rule.
+2. This contract, for anything that crosses repositories: routing, data class, autonomy.
+3. The rest of the repository's `ai/governance.md`, for anything inside it.
+4. `ai/repo-map.json`: it locates and runs things and sets no rule.
+5. Skills and templates, always optional.
+
+`AGENTS.md` and `CLAUDE.md` only point here. When a text and a validator disagree, the failing validator is the
+current truth: fix the rule or the code, never ignore the failure.
 
 | Repo | Holds | Data class |
 |---|---|---|
@@ -143,6 +154,11 @@ declared in `ai/repo-map.json` -> `pending_acceptance`; that file may be absent 
 
 Commands: write `python3` in commands and docs. Validators that need a specific OS or application (AutoHotkey,
 Hammerspoon, PowerShell, SAP) go in `ai/repo-map.json` -> `platform_validators` and never run in CI on another platform.
-Enable the versioned hooks once per clone with `git config core.hooksPath .githooks`; the pre-commit hook runs the
-health check. `CLAUDE.md` only imports `AGENTS.md`; it is never a second authority.
+Hooks: enable the versioned hooks once per clone with `git config core.hooksPath .githooks` (a Claude Code
+SessionStart hook in `.claude/settings.json` may do it); the pre-commit hook runs the health check on the staged tree.
+`gen-box/tools/secret_guard.py` is the Claude Code PreToolUse hook (matcher `Bash`) that extends the Read/Edit deny
+list to shell commands; the human wires it in `.claude/settings.json`.
+Hooks and validators execute repository code: run them only on branches the human or their agents wrote, and review an
+outside contribution in CI or a disposable environment first. `CLAUDE.md` only imports `AGENTS.md`; it is never a
+second authority.
 <!-- /workspace-contract -->
