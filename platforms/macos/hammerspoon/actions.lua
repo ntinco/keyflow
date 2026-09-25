@@ -14,6 +14,7 @@ local APP_BUNDLE_IDS = {
   snipaste = "com.Snipaste",
   spotlight = "com.apple.Spotlight",
   vscode = "com.microsoft.VSCode",
+  terminal = "com.apple.Terminal",
 }
 
 -- Mirrors Windows snipasteTargets: after capture, return to the most recent
@@ -120,6 +121,7 @@ Actions.global_alt_d = function()
   focusNextRunningWindow("IDE", {
     APP_BUNDLE_IDS.cursor,
     APP_BUNDLE_IDS.vscode,
+    APP_BUNDLE_IDS.terminal,
   })
 end
 
