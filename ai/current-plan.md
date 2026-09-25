@@ -21,6 +21,7 @@ Cleanup after acceptance (2026-09-24), pending re-test:
 1. Windows: confirmed after cleanup: selftest hotstrings and Win+Esc, `se11`, SAP Alt keys, Alt+E, F12, Alt+P. Open: the human reported `"-` not working; the first selftest block check was invalid (`+` in Send is Shift). Re-run `selftest.ahk`: it now checks `"-`, `"+` and the `*+` block (cursor on the middle line — `utilPaste` used to `Exit()` inside hotstrings, so the `{Up}` never ran). Still to check: Alt+4…0 in a data field, `=ED_OPTIONS`, a `ymt-commands` trigger, Easy Access, Alt+D, Snipaste Enter.
 2. macOS: confirmed after cleanup (Hammerspoon reloads without errors; human reported OK).
 3. Win+Esc on a secondary monitor when one is connected.
+4. macOS host with VMware Fusion frontmost: the human reported Windows hotstrings in the guest typing `a`/`aa` (Hammerspoon replaced them on the host with unicode events on the `a` key). Hammerspoon hotstrings now pass through VMware Fusion, Parallels, UTM and Microsoft Remote Desktop. Reload Hammerspoon and check `nadia `, `"-` and `teh ` inside the Windows VM, and `teh ` still in a native Mac app.
 
 ## Known parity gaps (deliberately deferred)
 
