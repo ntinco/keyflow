@@ -36,7 +36,8 @@ typingGui := Gui("+AlwaysOnTop", "keyflow self-test")
 typingEdit := typingGui.Add("Edit", "w500 r3")
 typingGui.Show()
 
-typeAndRead(keys) {
+; keysAfter are sent once keyflow has finished reacting to keys.
+typeAndRead(keys, keysAfter := "") {
   typingEdit.Value := ""
   WinActivate(typingGui.Hwnd)
   WinWaitActive(typingGui.Hwnd, , 2)
@@ -44,6 +45,11 @@ typeAndRead(keys) {
   Sleep(150)
   Send(keys)
   Sleep(500)
+  if keysAfter
+  {
+    Send(keysAfter)
+    Sleep(200)
+  }
   return typingEdit.Value
 }
 
@@ -63,9 +69,9 @@ for symbol in ["-", "+"]
   ok := typed ~= '^ "\' symbol signaturePattern '$'
   addResult('SAP comment line: ' Chr(34) symbol, ok ? "PASS" : "FAIL", ok ? "" : "got [" typed "]")
 }
-blockLines := StrSplit(typeAndRead("*{+}x"), "`n", "`r")
+blockLines := StrSplit(typeAndRead("*{+}", "x"), "`n", "`r")
 check("SAP comment block leaves the cursor on the middle line",
-  blockLines.Length = 3 ? blockLines[2] : "(" blockLines.Length " lines: " blockLines[1] ")", "x")
+  blockLines.Length = 3 ? blockLines[2] : "(" blockLines.Length " lines)", "x")
 typingGui.Destroy()
 
 ; Win+Esc ------------------------------------------------------------------
