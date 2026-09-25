@@ -1,5 +1,5 @@
 #!/bin/sh
-# shared: gen-box/shared/githooks/pre-commit sha256:8f6f2e883e50 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
+# shared: gen-box/shared/githooks/pre-commit sha256:f33c60bd8668 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
 # Shared pre-commit hook for the workspace repositories. Enable once per clone with
 # `git config core.hooksPath .githooks` (tools/link_workspace.py in gen-box points it at gen-box/shared/githooks).
 # The staged .githooks/pre-commit.conf sets `check` (the health check command) and optionally `exclude`
@@ -39,10 +39,10 @@ if ! out=$(cd "$staged" && WORKSPACE_ROOT=$(dirname "$top") sh -c "$check" 2>&1)
     exit 1
 fi
 if [ -n "$local" ]; then
-    if [ ! -f "$local" ] || [ ! -x "$local" ]; then
-        echo "pre-commit: $local is not an executable file; commit aborted" >&2
+    # The staged copy runs, like the check; not exec, so the EXIT trap still removes the snapshot.
+    if [ ! -f "$staged/$local" ] || [ ! -x "$staged/$local" ]; then
+        echo "pre-commit: $local is not a staged executable file; commit aborted" >&2
         exit 1
     fi
-    # Not exec: the EXIT trap must still remove the snapshot.
-    "./$local"
+    (cd "$staged" && "./$local")
 fi
