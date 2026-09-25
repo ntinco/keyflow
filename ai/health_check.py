@@ -737,6 +737,28 @@ RE_AHK_RUN_UNQUOTED = re.compile(r"""\b(?:Run|RunWait|utilRunCommand)\(\s*(['"])
 RE_AHK_SCREEN_GLOBAL = re.compile(r"\bA_Screen(?:Width|Height)\b")
 
 
+def ahk_string_comment_column(line: str) -> int | None:
+    """Column of an unescaped whitespace+';' inside a quoted string.
+
+    AHK v2 treats it as the start of a comment even inside quotes, which
+    truncates the line ("Missing quote"). Escape it as `;.
+    """
+    quote = ""
+    for index, char in enumerate(line):
+        if quote:
+            if char == "`":
+                continue
+            if char == quote and (index == 0 or line[index - 1] != "`"):
+                quote = ""
+            elif char == ";" and index > 0 and line[index - 1] in " \t":
+                return index
+        elif char in "\"'":
+            quote = char
+        elif char == ";" and (index == 0 or line[index - 1] in " \t"):
+            return None
+    return None
+
+
 def scan_ahk_risks(file_index: dict[str, dict[str, object]]) -> list[dict[str, object]]:
     issues: list[dict[str, object]] = []
     for repo_path, meta in sorted(file_index.items()):
@@ -744,6 +766,8 @@ def scan_ahk_risks(file_index: dict[str, dict[str, object]]) -> list[dict[str, o
             if line.lstrip().startswith(";"):
                 continue
             code = line
+            if ahk_string_comment_column(code) is not None:
+                issues.append({"type": "ahk_semicolon_in_string", "file": repo_path, "line": line_number, "message": "' ;' inside a string starts a comment in AHK v2; write ' `;'."})
             if RE_AHK_RUN_UNQUOTED.search(code):
                 issues.append({"type": "ahk_run_unquoted_argument", "file": repo_path, "line": line_number, "message": "Command argument built from a variable is not quoted; paths with spaces break. Wrap it as '\"' var '\"'."})
             if RE_AHK_SCREEN_GLOBAL.search(code) and not repo_path.endswith("library/util.ahk"):

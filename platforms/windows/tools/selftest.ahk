@@ -52,7 +52,7 @@ check("no hotstring inside a word: 'xteh' + space", typeAndRead(" xteh "), " xte
 check("immediate snippet: 'bd,'", typeAndRead(" bd,"), " Buen día,")
 A_Clipboard := "keyflow-selftest-clipboard"
 ClipWait(1)
-check(";; keeps the preceding character", typeAndRead("x ;;"), "x ñ")
+check(";; keeps the preceding character", typeAndRead("x `;;"), "x ñ")
 check(";; restores the clipboard", A_Clipboard, "keyflow-selftest-clipboard")
 ; Informational: whether AHK fires ;; right after a letter decides the macOS
 ; word-boundary rule for non-alphanumeric triggers.

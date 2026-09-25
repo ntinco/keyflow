@@ -163,6 +163,11 @@ class AhkRiskLintTests(unittest.TestCase):
         self.assertEqual(self._types("utilRunCommand('aimpportable \"' filename '\"')"), [])
         self.assertEqual(self._types('; Run("x " path)'), [])
 
+    def test_semicolon_after_space_in_string(self) -> None:
+        self.assertEqual(self._types('x := typeAndRead("x ;;")'), ["ahk_semicolon_in_string"])
+        self.assertEqual(self._types('x := typeAndRead("x `;;")'), [])
+        self.assertEqual(self._types('x := ";;" ; comment with "quote ;"'), [])
+
     def test_primary_monitor_geometry(self) -> None:
         self.assertEqual(self._types("h := A_ScreenHeight - 40"), ["ahk_single_monitor_geometry"])
         self.assertEqual(self._types("h := A_ScreenHeight", "platforms/windows/library/util.ahk"), [])
