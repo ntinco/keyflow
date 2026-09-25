@@ -24,7 +24,9 @@
 
         hotstringOptions := this._resolveHotstringOptions(mode, entry)
         if this._isSapInputMode(mode)
-          hotstring(hotstringOptions . trigger, this._submitSapTcode.Bind(value, profileLabel))
+          ; ObjBindMethod keeps `this`; this._submitSapTcode.Bind(...) would
+          ; bind value as `this` and shift every argument by one.
+          hotstring(hotstringOptions . trigger, ObjBindMethod(this, "_submitSapTcode", value, profileLabel))
         else
           hotstring(hotstringOptions . trigger, value)
       }

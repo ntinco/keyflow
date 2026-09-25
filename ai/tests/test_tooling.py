@@ -172,6 +172,11 @@ class AhkRiskLintTests(unittest.TestCase):
         self.assertEqual(self._types('try focused := ControlGetFocus("A")'), ["ahk_focus_hwnd_as_class"])
         self.assertEqual(self._types('try focused := StrLower(ControlGetClassNN(ControlGetFocus("A")))'), [])
 
+    def test_method_bind_without_this(self) -> None:
+        self.assertEqual(self._types('f := this._submit.Bind(value, label)'), ["ahk_method_bind_without_this"])
+        self.assertEqual(self._types('f := ObjBindMethod(this, "_submit", value, label)'), [])
+        self.assertEqual(self._types('f := this._submit.Bind(this, value)'), [])
+
     def test_primary_monitor_geometry(self) -> None:
         self.assertEqual(self._types("h := A_ScreenHeight - 40"), ["ahk_single_monitor_geometry"])
         self.assertEqual(self._types("h := A_ScreenHeight", "platforms/windows/library/util.ahk"), [])
