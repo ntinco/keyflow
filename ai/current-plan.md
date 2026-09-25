@@ -14,11 +14,9 @@ Complete human runtime acceptance of the current macOS Hammerspoon slice and its
 
 ## Pending human verification
 
-macOS acceptance on 2026-09-24 passed hotstrings, SAP tcode hotkeys/hotstrings (fast), `=` OK-codes, SAP Easy Access, SAP-only scoping, Eclipse keys and context isolation, Alt+D/Alt+E rotation, SAP comment hotstrings, Finder/Spotlight F12, Alt+P reusing the IINA window, and Cmd+Esc. Remaining:
+macOS acceptance is complete (2026-09-24): hotstrings, SAP tcode hotkeys/hotstrings and `=` OK-codes including all `ymt-commands`, SAP Easy Access, SAP-only scoping, Eclipse keys and context isolation, Alt+D/Alt+E rotation, SAP comment hotstrings, Finder/Spotlight F12, Alt+P reusing the IINA window, Snipaste return to the most recent allowed target (Teams pastes), and Cmd+Esc. Remaining:
 
-1. macOS: all `ymt-commands` (`da`, `ta`, `d3`, `d4`, `dz`, `sc`) + space send `=<code>`.
-2. macOS: after a Snipaste capture (mouse side button), Enter focuses the most recent open window among the allowed targets (Word, OneNote, Outlook, Teams, Obsidian, WhatsApp, Notion, LibreOffice), skipping non-target apps such as SAP; Teams also pastes. Console logs `keyflow: Snipaste return target=…`.
-3. Windows (no machine available yet): launch once; confirm profiles load without JSON errors, autocorrect/snippets/SAP transactions work, `=ED_OPTIONS` and `=<ymt code>` are sent without `/n`, and F12 pastes `.txt` but ignores `.exe`.
+1. Windows (no machine available yet): launch once; confirm profiles load without JSON errors, autocorrect/snippets/SAP transactions work, `=ED_OPTIONS` and `=<ymt code>` are sent without `/n`, SAP hotstrings wait for the ending character, and F12 pastes `.txt` but ignores `.exe`.
 
 ## Known parity gaps (deliberately deferred)
 
