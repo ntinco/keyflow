@@ -18,17 +18,21 @@ local APP_BUNDLE_IDS = {
 }
 
 -- Mirrors Windows snipasteTargets: after capture, return to the most recent
--- open window of these apps; paste = also send Cmd+V.
+-- open window of these apps; resize = scale the clipboard image to 80% first
+-- (Windows "magick"); paste = also send Cmd+V.
 local SNIPASTE_TARGETS = {
-  ["com.microsoft.onenote.mac"] = {},
-  ["com.microsoft.Outlook"] = {},
-  ["com.microsoft.teams2"] = {paste = true},
+  ["com.microsoft.onenote.mac"] = {resize = true},
+  ["com.microsoft.Outlook"] = {resize = true},
+  ["com.microsoft.teams2"] = {resize = true, paste = true},
   ["com.microsoft.Word"] = {},
-  ["md.obsidian"] = {},
-  ["net.whatsapp.WhatsApp"] = {},
-  ["notion.id"] = {},
-  ["org.libreoffice.script"] = {},
+  ["md.obsidian"] = {resize = true},
+  ["net.whatsapp.WhatsApp"] = {resize = true},
+  ["notion.id"] = {resize = true},
+  ["org.libreoffice.script"] = {resize = true},
 }
+
+-- ImageMagick's clipboard: format is Windows-only, so macOS round-trips a file.
+local MAGICK_PATHS = {"/opt/homebrew/bin/magick", "/usr/local/bin/magick"}
 
 -- hs.eventtap.keyStroke blocks for its delay (default 200 ms) between down/up.
 local KEYSTROKE_DELAY = 20000
@@ -433,7 +437,45 @@ end
 
 local snipasteRunToken = 0
 
-local function completeSnipaste()
+local function magickPath()
+  for _, path in ipairs(MAGICK_PATHS) do
+    if hs.fs.attributes(path) then return path end
+  end
+end
+
+-- Calls done() whether or not the resize succeeded, so the return still runs.
+local function resizeClipboardImage(token, done)
+  local magick = magickPath()
+  local image = hs.pasteboard.readImage()
+  local dir = (os.getenv("TMPDIR") or "/tmp/"):gsub("/?$", "/")
+  local input = dir .. "keyflow-snipaste-in.png"
+  local output = dir .. "keyflow-snipaste-out.png"
+  if not magick or not image or not image:saveToFile(input) then
+    hs.printf("keyflow: Snipaste resize skipped")
+    return done()
+  end
+  local changeCount = hs.pasteboard.changeCount()
+  local task = startTask(magick, function(exitCode)
+    if token ~= snipasteRunToken then return end
+    local resized = exitCode == 0 and hs.image.imageFromPath(output)
+    -- Keep whatever the user copied while magick was running.
+    if resized and hs.pasteboard.changeCount() == changeCount then
+      hs.pasteboard.writeObjects(resized)
+      hs.printf("keyflow: Snipaste clipboard resized 80%%")
+    else
+      hs.printf("keyflow: Snipaste resize failed exit=%s", tostring(exitCode))
+    end
+    os.remove(input)
+    os.remove(output)
+    done()
+  end, {input, "-resize", "80%", output})
+  if not task then
+    hs.printf("keyflow: Snipaste resize did not start")
+    done()
+  end
+end
+
+local function completeSnipaste(token)
   local window = lastSnipasteTargetWindow()
   local app = window and window:application()
   hs.printf(
@@ -441,11 +483,19 @@ local function completeSnipaste()
     app and app:bundleID() or "none"
   )
   if not window then return end
-  window:focus()
-  if SNIPASTE_TARGETS[app:bundleID()].paste then
-    hs.timer.doAfter(0.15, function()
-      hs.eventtap.keyStroke({"cmd"}, "v", KEYSTROKE_DELAY, app)
-    end)
+  local target = SNIPASTE_TARGETS[app:bundleID()]
+  local function returnToTarget()
+    window:focus()
+    if target.paste then
+      hs.timer.doAfter(0.15, function()
+        hs.eventtap.keyStroke({"cmd"}, "v", KEYSTROKE_DELAY, app)
+      end)
+    end
+  end
+  if target.resize then
+    resizeClipboardImage(token, returnToTarget)
+  else
+    returnToTarget()
   end
 end
 
@@ -471,7 +521,7 @@ Actions.snipaste_enter = function()
     attempts = attempts + 1
     if hs.pasteboard.changeCount() ~= initialChangeCount then
       if hs.pasteboard.readImage() then
-        completeSnipaste()
+        completeSnipaste(token)
         return
       end
     end

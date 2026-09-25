@@ -22,13 +22,13 @@ Cleanup after acceptance (2026-09-24), pending re-test:
 2. macOS: confirmed after cleanup (Hammerspoon reloads without errors; human reported OK).
 3. Win+Esc on a secondary monitor when one is connected.
 4. macOS host with VMware Fusion frontmost: the human reported Windows hotstrings in the guest typing `a`/`aa` (Hammerspoon replaced them on the host with unicode events on the `a` key). Hammerspoon hotstrings now pass through VMware Fusion, Parallels, UTM and Microsoft Remote Desktop. Reload Hammerspoon and check `nadia `, `"-` and `teh ` inside the Windows VM, and `teh ` still in a native Mac app.
+5. macOS Snipaste 80% resize (needs `magick` in `/opt/homebrew/bin` or `/usr/local/bin`): capture, Enter with OneNote/Teams/Obsidian as the last target; the pasted image is 80% of the capture (Console: `Snipaste clipboard resized 80%`), Teams auto-pastes, Word keeps the original size.
 
 ## Known parity gaps (deliberately deferred)
 
 - F12 on macOS lacks the Windows `YM` post-paste step (3 s wait + Ctrl+F3); pending implementation.
 - macOS hotstrings are case-sensitive; Windows matches case-insensitively and conforms case.
 - Alt+P on macOS opens any selection in IINA; Windows filters media paths and uses AIMP.
-- Snipaste 80% ImageMagick resize is Windows-only; not needed on macOS for now.
 - Snipaste capture on macOS is bound to the mouse side button inside Snipaste, outside keyflow.
 
 ## Active design constraints
