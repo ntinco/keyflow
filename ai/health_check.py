@@ -733,6 +733,8 @@ def scan_unused_ahk_functions(file_index: dict[str, dict[str, object]], token_co
 # A literal ending in a space followed by a variable: the variable (usually a
 # path) reaches the shell unquoted and breaks on spaces.
 RE_AHK_RUN_UNQUOTED = re.compile(r"""\b(?:Run|RunWait|utilRunCommand)\(\s*(['"])(?:(?!\1).)*?\s\1\s+[A-Za-z_]""")
+# ControlGetFocus returns an HWND in AHK v2; comparing it to class names fails.
+RE_AHK_FOCUS_WITHOUT_CLASSNN = re.compile(r"(?<!ControlGetClassNN\()\bControlGetFocus\(")
 # Primary-monitor globals ignore secondary monitors and the taskbar.
 RE_AHK_SCREEN_GLOBAL = re.compile(r"\bA_Screen(?:Width|Height)\b")
 
@@ -768,6 +770,8 @@ def scan_ahk_risks(file_index: dict[str, dict[str, object]]) -> list[dict[str, o
             code = line
             if ahk_string_comment_column(code) is not None:
                 issues.append({"type": "ahk_semicolon_in_string", "file": repo_path, "line": line_number, "message": "' ;' inside a string starts a comment in AHK v2; write ' `;'."})
+            if RE_AHK_FOCUS_WITHOUT_CLASSNN.search(code):
+                issues.append({"type": "ahk_focus_hwnd_as_class", "file": repo_path, "line": line_number, "message": "ControlGetFocus returns an HWND in AHK v2; wrap it in ControlGetClassNN to compare class names."})
             if RE_AHK_RUN_UNQUOTED.search(code):
                 issues.append({"type": "ahk_run_unquoted_argument", "file": repo_path, "line": line_number, "message": "Command argument built from a variable is not quoted; paths with spaces break. Wrap it as '\"' var '\"'."})
             if RE_AHK_SCREEN_GLOBAL.search(code) and not repo_path.endswith("library/util.ahk"):

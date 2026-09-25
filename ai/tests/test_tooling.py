@@ -168,6 +168,10 @@ class AhkRiskLintTests(unittest.TestCase):
         self.assertEqual(self._types('x := typeAndRead("x `;;")'), [])
         self.assertEqual(self._types('x := ";;" ; comment with "quote ;"'), [])
 
+    def test_focus_hwnd_used_as_class(self) -> None:
+        self.assertEqual(self._types('try focused := ControlGetFocus("A")'), ["ahk_focus_hwnd_as_class"])
+        self.assertEqual(self._types('try focused := StrLower(ControlGetClassNN(ControlGetFocus("A")))'), [])
+
     def test_primary_monitor_geometry(self) -> None:
         self.assertEqual(self._types("h := A_ScreenHeight - 40"), ["ahk_single_monitor_geometry"])
         self.assertEqual(self._types("h := A_ScreenHeight", "platforms/windows/library/util.ahk"), [])

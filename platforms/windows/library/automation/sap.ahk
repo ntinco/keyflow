@@ -40,14 +40,12 @@ class SapService {
     if !WinActive(winTitle)
       return false
 
-    try focusedControl := ControlGetFocus("A")
+    ; ControlGetFocus returns an HWND in v2; the class name ("Edit2") is what
+    ; identifies a text field. No focused control makes ControlGetClassNN throw.
+    try focusedControl := StrLower(ControlGetClassNN(ControlGetFocus("A")))
     catch
       return false
 
-    if !focusedControl
-      return false
-
-    focusedControl := StrLower(focusedControl)
     return InStr(focusedControl, "edit") || InStr(focusedControl, "richedit")
   }
 
