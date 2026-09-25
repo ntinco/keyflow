@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Runtime smoke recorder for keyflow.
 
 Runs the AutoHotkey entry point with a short timeout and writes a machine-readable
@@ -6,9 +6,9 @@ result to ai/run-result.json so agents can distinguish "guide layer healthy" fro
 "runtime smoke actually ran without parse errors".
 
 Usage:
-    python ai/run_smoke.py
-    python ai/run_smoke.py --repo-root .
-    python ai/run_smoke.py --timeout 5 --pretty
+    python3 ai/run_smoke.py
+    python3 ai/run_smoke.py --repo-root .
+    python3 ai/run_smoke.py --timeout 5 --pretty
 
 Outcome values in the artifact:
     launched      — Process started and did not exit within timeout.

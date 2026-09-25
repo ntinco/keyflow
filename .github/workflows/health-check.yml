@@ -1,0 +1,21 @@
+name: health-check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 -m unittest discover -s ai/tests -v
+      - run: python3 ai/health_check.py
+      - run: python3 ai/hotkey_sync.py --check
+      # The macOS validators need only Lua, not macOS; Windows validators need AutoHotkey and stay local.
+      - run: sudo apt-get update && sudo apt-get install -y lua5.4
+      - run: lua5.4 ai/tests/macos_logic_test.lua
+      - run: find platforms/macos -name '*.lua' -exec luac5.4 -p {} +

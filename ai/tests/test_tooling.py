@@ -1,4 +1,4 @@
-"""Unit tests for AI tooling. Run: python -m unittest discover -s ai/tests"""
+"""Unit tests for AI tooling. Run: python3 -m unittest discover -s ai/tests"""
 
 from __future__ import annotations
 

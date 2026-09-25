@@ -54,12 +54,12 @@ AI operates:
 
 Hotstring (autocorrect, snippet, SAP command):
 
-1. `python ai/hotkey_sync.py --add-hotstring PROFILE TRIGGER VALUE [--immediate]` (or `--set-hotstring` / `--remove-hotstring`). Trigger conflicts (duplicates, immediate prefixes, ending-character clashes) are rejected.
-2. After the human confirms: `python ai/hotkey_sync.py --mark-reviewed PROFILE`.
+1. `python3 ai/hotkey_sync.py --add-hotstring PROFILE TRIGGER VALUE [--immediate]` (or `--set-hotstring` / `--remove-hotstring`). Trigger conflicts (duplicates, immediate prefixes, ending-character clashes) are rejected.
+2. After the human confirms: `python3 ai/hotkey_sync.py --mark-reviewed PROFILE`.
 
 SAP transaction hotkey (portable):
 
-1. `python ai/hotkey_sync.py --add-hotkey '{"id": "sap_gui_...", "file": "sap-gui", "type": "hotkey", "key": "!9", "windows_context": "...", "context_label": "sap-gui-session", "action": "sap-tcode:SE16N", "label": "...", "platform": ["windows", "macos"], "portability": "portable-intent"}'`.
+1. `python3 ai/hotkey_sync.py --add-hotkey '{"id": "sap_gui_...", "file": "sap-gui", "type": "hotkey", "key": "!9", "windows_context": "...", "context_label": "sap-gui-session", "action": "sap-tcode:SE16N", "label": "...", "platform": ["windows", "macos"], "portability": "portable-intent"}'`.
 2. No runtime code: both platforms dispatch `sap-tcode:` through their SAP adapter.
 
 Other hotkey on both platforms:
@@ -93,9 +93,56 @@ Turn every confirmed finding into a mechanical guard when feasible: a pure-logic
 
 ## Completion
 
-- Run `python ai/health_check.py --pretty`.
-- Run `python ai/hotkey_sync.py --check` when catalog/generated ownership is relevant; health validation also performs this drift check.
-- Run `python -m unittest discover -s ai/tests` when tooling or tested runtime logic changes.
+- Run `python3 ai/health_check.py` (short report; `--json` or `--pretty` for the full JSON).
+- Run `python3 ai/hotkey_sync.py --check` when catalog/generated ownership is relevant; health validation also performs this drift check.
+- Run `python3 -m unittest discover -s ai/tests` when tooling or tested runtime logic changes.
 - Run relevant static/syntax checks and `ai/run_smoke.py` when runtime wiring changes and the environment supports them.
 - On Windows, `platforms/windows/tools/selftest.ahk` produces runtime evidence for hotstrings and window geometry; extend it when a Windows behavior can be checked without real apps.
 - Never claim a check or runtime behavior that was not executed or observed.
+
+<!-- workspace-contract sha256:379df4eaa154 -->
+## Workspace contract
+
+Identical in the six repositories under `~/gh/`. The master copy is the one in
+`gen-box/ai/governance.md`: edit only that one, then run `python3 tools/contract_sync.py ~/gh` from `gen-box`.
+Two of the repositories are public, so this section never holds private detail.
+
+| Repo | Holds | Data class |
+|---|---|---|
+| `ntinco-os` | personal operating system: state, plans, time, finance, durable context | private-personal |
+| `abap-box` | ABAP/SAP technical memory: knowledge, cheatsheets, skills, SAP utilities | private-technical |
+| `abap-craft` | ABAP Craft, the public ABAP articles site | public |
+| `gen-box` | generic reusable tools and agent skills | private-technical |
+| `keyflow` | hotkeys, hotstrings and daily desktop automation (Windows/macOS) | public |
+| `keyflow-station` | workstation installation, maintenance and backup sync | private-technical |
+
+Content only moves to a repository of the same or a more private class, with one exception below.
+Private-personal content never leaves `ntinco-os`. Client or employer confidential data belongs in none of them.
+
+Routing between repositories:
+
+- Generic tool or file converter -> `gen-box`; other repositories run it from `~/gh/gen-box/tools/` and never copy it.
+- ABAP/SAP knowledge -> `abap-box`; to `abap-craft` only anonymized and with explicit human approval.
+- Hotkey, hotstring or daily desktop automation -> `keyflow`.
+- Installation, provisioning or machine maintenance -> `keyflow-station`.
+- Personal fact, plan, time or finance -> `ntinco-os`.
+- When a task belongs to another repository, say so and work there; never build a local substitute.
+
+Autonomy:
+
+- Without asking: read, edit, run validators and commit on the task branch.
+- Ask first: push, open a pull request, or change a repository other than the task's.
+- Only on explicit human order: merge or push to `main`; delete branches, tags, stashes, untracked files or remote data;
+  rewrite published history (rebase, amend, force push).
+
+Parallel work: one branch or worktree per task (`git worktree add ../<repo>-<task> -b <task>`). Never stage, commit,
+stash, reset or revert changes you did not make; if the tree holds foreign changes, use a new worktree.
+
+Pending acceptance: what waits for the human (runtime checks, claims to confirm) lives in one place per repository,
+declared in `ai/repo-map.json` -> `pending_acceptance`; that file may be absent while nothing is pending.
+
+Commands: write `python3` in commands and docs. Validators that need a specific OS or application (AutoHotkey,
+Hammerspoon, PowerShell, SAP) go in `ai/repo-map.json` -> `platform_validators` and never run in CI on another platform.
+Enable the versioned hooks once per clone with `git config core.hooksPath .githooks`; the pre-commit hook runs the
+health check. `CLAUDE.md` only imports `AGENTS.md`; it is never a second authority.
+<!-- /workspace-contract -->

@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(**/.env)",
+      "Edit(**/.env)",
+      "Read(**/.env.*)",
+      "Edit(**/.env.*)",
+      "Read(**/secrets.*)",
+      "Edit(**/secrets.*)",
+      "Read(**/*.pem)",
+      "Edit(**/*.pem)",
+      "Read(**/*.key)",
+      "Edit(**/*.key)",
+      "Read(**/*.kdbx)",
+      "Edit(**/*.kdbx)",
+      "Read(**/*.pfx)",
+      "Edit(**/*.pfx)",
+      "Read(**/*.p12)",
+      "Edit(**/*.p12)",
+      "Read(**/*.ovpn)",
+      "Edit(**/*.ovpn)",
+      "Read(**/*.sapc)",
+      "Edit(**/*.sapc)",
+      "Read(~/.ssh/**)",
+      "Edit(~/.ssh/**)",
+      "Read(platforms/windows/data/local-secrets.ini)",
+      "Edit(platforms/windows/data/local-secrets.ini)",
+      "Read(platforms/windows/data/local-startup.ini)",
+      "Edit(platforms/windows/data/local-startup.ini)",
+      "Read(platforms/shared/data/memory-vars.ini)",
+      "Edit(platforms/shared/data/memory-vars.ini)",
+      "Read(platforms/shared/data/local-paths.ini)",
+      "Edit(platforms/shared/data/local-paths.ini)",
+      "Read(platforms/windows/data/rom.ini)",
+      "Edit(platforms/windows/data/rom.ini)"
+    ]
+  }
+}

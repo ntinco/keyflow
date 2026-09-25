@@ -64,10 +64,13 @@
     "platforms/windows/storage.db"
   ],
   "validators": [
-    "python ai/health_check.py --pretty",
-    "python ai/hotkey_sync.py --check",
-    "python -m unittest discover -s ai/tests",
-    "python ai/run_smoke.py --platform windows",
-    "python ai/run_smoke.py --platform macos"
-  ]
+    "python3 ai/health_check.py",
+    "python3 ai/hotkey_sync.py --check",
+    "python3 -m unittest discover -s ai/tests"
+  ],
+  "platform_validators": {
+    "macos": ["python3 ai/run_smoke.py --platform macos", "lua ai/tests/macos_logic_test.lua"],
+    "windows": ["python3 ai/run_smoke.py --platform windows", "platforms/windows/tools/selftest.ahk"]
+  },
+  "pending_acceptance": "ai/current-plan.md"
 }
