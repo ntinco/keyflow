@@ -35,6 +35,7 @@ AI operates:
 
 - Local-only secrets and state remain local and must not be committed or modified unless explicitly requested.
 - Runtime code must not depend on Git metadata.
+- Workstation provisioning, maintenance and backup sync (package updates, cache cleanup, env refresh, VPN clients, FreeFileSync/rsync) belong to `keyflow-station`, not here. `platforms/*/tools/` holds only what keyflow runtime or validation uses.
 - Do not reintroduce removed services, dependencies, tracking, or features without new evidence that they add value.
 - `platforms/shared/data/hotkeys.db` is the single human-managed hotkey source; generated catalogs/bindings are not alternative authorities.
 - AI edits `hotkeys.db` only when the human requested that specific change, and only through `ai/hotkey_sync.py` edit commands (never raw SQL): they validate, roll back on failure and regenerate artifacts.
