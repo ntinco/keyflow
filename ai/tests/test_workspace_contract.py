@@ -1,4 +1,4 @@
-# shared: gen-box/shared/test_workspace_contract.py sha256:fe0d1a9fc3f1 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
+# shared: gen-box/shared/test_workspace_contract.py sha256:6a76a749f333 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
 """Workspace contract check (gen-box/shared/workspace_contract.py) on this repository and on broken copies of it."""
 from __future__ import annotations
 
@@ -125,6 +125,17 @@ class WorkspaceContractTests(unittest.TestCase):
             handle.write('local=".githooks/missing.local"\n')
         self.assertEqual(MODULE.problems(self.root), [
             ".githooks/missing.local is declared in .githooks/pre-commit.conf but is not an executable file"])
+
+    def test_the_hook_must_be_vendored_where_git_runs_it(self):
+        target = next(t for t, s in SHARED.items() if s == "shared/githooks/pre-commit")
+        repo_map = self.root / "ai/repo-map.json"
+        data = json.loads(repo_map.read_text(encoding="utf-8"))
+        del data["shared_files"][target]
+        data["shared_files"]["unused-hook-copy"] = "shared/githooks/pre-commit"
+        repo_map.write_text(json.dumps(data), encoding="utf-8")
+        shutil.copy(self.root / target, self.root / "unused-hook-copy")
+        self.assertEqual(MODULE.problems(self.root),
+                         ["shared_files must map gen-box/shared/githooks/pre-commit to .githooks/pre-commit"])
 
     def test_claude_md_must_only_import_agents(self):
         (self.root / "CLAUDE.md").write_text("@AGENTS.md\nExtra rule.\n", encoding="utf-8")

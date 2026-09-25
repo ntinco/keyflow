@@ -1,4 +1,4 @@
-# shared: gen-box/shared/workspace_contract.py sha256:8fad589972f4 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
+# shared: gen-box/shared/workspace_contract.py sha256:dae67a5b4d2e (edit it in gen-box, then run tools/contract_sync.py in gen-box)
 """Workspace contract checks shared by the six repositories; the master copy is gen-box/shared/workspace_contract.py.
 
 problems(root) lists what breaks the workspace contract in the repository at root: the contract block or a file
@@ -116,6 +116,18 @@ def vendored_problems(root: Path, shared: dict, master: Path | None) -> list[str
             problems.append(f"{target} differs from gen-box/{source}: {SYNC}")
     missing = sorted(set(SOURCES) - set(shared.values()))
     problems += [f"ai/repo-map.json shared_files lacks gen-box/{source}" for source in missing]
+    # Where a copy lives matters: git runs .githooks/pre-commit, unittest discovers test_*.py, and the
+    # health check imports the module beside it.
+    targets = {source: {t for t, s in shared.items() if s == source} for source in SOURCES}
+    if targets["shared/githooks/pre-commit"] and ".githooks/pre-commit" not in targets["shared/githooks/pre-commit"]:
+        problems.append("shared_files must map gen-box/shared/githooks/pre-commit to .githooks/pre-commit")
+    if targets["shared/test_workspace_contract.py"] and not any(
+            Path(t).name.startswith("test_") for t in targets["shared/test_workspace_contract.py"]):
+        problems.append("shared_files must map gen-box/shared/test_workspace_contract.py to a test_*.py file")
+    own = Path(__file__).resolve()
+    if own.is_relative_to(root.resolve()) and own.relative_to(root.resolve()).as_posix() not in targets[SOURCES[0]]:
+        problems.append(f"shared_files must map gen-box/{SOURCES[0]} to {own.relative_to(root.resolve()).as_posix()}, "
+                        "the copy the health check imports")
     return problems
 
 
