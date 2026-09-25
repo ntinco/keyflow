@@ -32,6 +32,18 @@ class WorkspaceContractTests(unittest.TestCase):
             self.assertEqual(MODULE.workspace_contract_problems(root),
                              ["workspace contract edited here: edit it in gen-box and run tools/contract_sync.py"])
 
+    def test_contract_must_match_gen_box_master(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self.copy_repo(str(Path(tmp) / "repo"))
+            source = (root / "ai/governance.md").read_text(encoding="utf-8")
+            master = Path(tmp) / "gen-box/ai/governance.md"
+            master.parent.mkdir(parents=True)
+            master.write_text(source, encoding="utf-8")
+            self.assertEqual(MODULE.workspace_contract_problems(root), [])
+            master.write_text(source.replace("Ask first", "Never ask"), encoding="utf-8")
+            self.assertEqual(MODULE.workspace_contract_problems(root),
+                             ["workspace contract differs from the gen-box master: run tools/contract_sync.py in gen-box"])
+
     def test_claude_md_must_only_import_agents(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = self.copy_repo(tmp)

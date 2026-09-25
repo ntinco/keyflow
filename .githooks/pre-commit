@@ -1,9 +1,15 @@
 #!/bin/sh
 # Versioned hook; enable once per clone: git config core.hooksPath .githooks
+# The health check runs on the staged tree (the index), so unstaged edits cannot hide what the commit contains.
 set -eu
-cd "$(git rev-parse --show-toplevel)"
-if ! out=$(python3 ai/health_check.py 2>&1); then
+top=$(git rev-parse --show-toplevel)
+cd "$top"
+staged=$(mktemp -d)
+trap 'rm -rf "$staged"' EXIT
+git checkout-index --all --prefix="$staged/"
+printf 'gitdir: %s\n' "$(git rev-parse --absolute-git-dir)" > "$staged/.git"
+if ! out=$(cd "$staged" && WORKSPACE_ROOT=$(dirname "$top") python3 ai/health_check.py 2>&1); then
     printf '%s\n' "$out" >&2
-    echo "pre-commit: health check failed; commit aborted" >&2
+    echo "pre-commit: health check failed on the staged tree; commit aborted" >&2
     exit 1
 fi
