@@ -68,6 +68,20 @@ local SPECIAL_BEHAVIORS = {
   },
 }
 
+-- VMs and remote desktops run their own keyflow in the guest. Hotstrings must
+-- pass through: the guest reads key codes and ignores the unicode string, so
+-- every postUnicodeText chunk would arrive as the "a" key it is posted with.
+local GUEST_BUNDLE_IDS = {
+  ["com.vmware.fusion"] = true,
+  ["com.parallels.desktop.console"] = true,
+  ["com.utmapp.UTM"] = true,
+  ["com.microsoft.rdc.macos"] = true,
+}
+
+local function isGuestApp(bundleID)
+  return GUEST_BUNDLE_IDS[bundleID or ""] == true
+end
+
 local MAX_BUFFER = 64
 local SYNTHETIC_EVENT_MARKER = 926491
 local log
@@ -287,6 +301,11 @@ function Hotstrings.start(actions, bindings, profiles)
       bufferAppPID = frontPID
     end
 
+    if front and isGuestApp(front:bundleID()) then
+      buffer = ""
+      return false
+    end
+
     if eventType ~= hs.eventtap.event.types.keyDown then
       buffer = ""
       return false
@@ -334,5 +353,6 @@ Hotstrings.reset = resetBuffer
 -- Pure helpers exposed for ai/tests.
 Hotstrings.buildTriggers = buildTriggers
 Hotstrings.findMatch = findMatch
+Hotstrings.isGuestApp = isGuestApp
 
 return Hotstrings

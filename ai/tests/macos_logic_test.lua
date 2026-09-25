@@ -98,6 +98,10 @@ expectEqual(count, 1, ";; erases only the first ;")
 trigger, count = match("ma;;")
 expectEqual(trigger and trigger.id, "hs_semicolons", ";; fires inside a word (AHK ? option)")
 expectEqual(count, 1, ";; inside a word erases only the first ;")
+
+expectEqual(Hotstrings.isGuestApp("com.vmware.fusion"), true, "VMware Fusion passes hotstrings to the guest")
+expectEqual(Hotstrings.isGuestApp("com.apple.TextEdit"), false, "native apps keep hotstrings")
+expectEqual(Hotstrings.isGuestApp(nil), false, "no frontmost bundle keeps hotstrings")
 expectEqual(match("mabd,"), nil, "triggers without ? still respect word boundaries")
 
 expectEqual(match("da", inSap), nil, "SAP commands never fire immediately")
