@@ -100,7 +100,7 @@ Turn every confirmed finding into a mechanical guard when feasible: a pure-logic
 - On Windows, `platforms/windows/tools/selftest.ahk` produces runtime evidence for hotstrings and window geometry; extend it when a Windows behavior can be checked without real apps.
 - Never claim a check or runtime behavior that was not executed or observed.
 
-<!-- workspace-contract sha256:885e0973f8f7 -->
+<!-- workspace-contract sha256:f84b065a99ba -->
 ## Workspace contract
 
 Identical in the six repositories under `~/gh/`. The master copy is the one in
@@ -133,6 +133,9 @@ Private-personal content never leaves `ntinco-os`. Client or employer confidenti
 Routing between repositories:
 
 - Generic tool or file converter -> `gen-box`; other repositories run it from `~/gh/gen-box/tools/` and never copy it.
+  The exception is `gen-box/shared/` (contract check, its test, pre-commit hook): every repository commits the copies
+  listed in `ai/repo-map.json` -> `shared_files`, because CI and cloud sessions clone one repository alone. Edit only
+  the gen-box source and run `contract_sync.py`; a copy edited in place fails the health check.
 - ABAP/SAP knowledge -> `abap-box`; to `abap-craft` only anonymized and with explicit human approval.
 - Hotkey, hotstring or daily desktop automation -> `keyflow`.
 - Installation, provisioning or machine maintenance -> `keyflow-station`.
@@ -154,8 +157,15 @@ declared in `ai/repo-map.json` -> `pending_acceptance`; that file may be absent 
 
 Commands: write `python3` in commands and docs. Validators that need a specific OS or application (AutoHotkey,
 Hammerspoon, PowerShell, SAP) go in `ai/repo-map.json` -> `platform_validators` and never run in CI on another platform.
+Environments: macOS and Linux (CI and cloud sessions). Windows is out of scope until the human reopens it: no Windows
+CI and no Windows-only tooling work.
 Hooks: enable the versioned hooks once per clone with `git config core.hooksPath .githooks` (a Claude Code
-SessionStart hook in `.claude/settings.json` may do it); the pre-commit hook runs the health check on the staged tree.
+SessionStart hook in `.claude/settings.json` may do it); on macOS `python3 tools/link_workspace.py ~/gh` from `gen-box`
+points every repository at `gen-box/shared/githooks` instead. The pre-commit hook runs the check that
+`.githooks/pre-commit.conf` names on the staged tree.
+Cold start (`AGENTS.md`, `CLAUDE.md`, `ai/governance.md`, `ai/repo-map.json`) stays under `ai/repo-map.json` ->
+`cold_start_token_budget`; raise it only with the reason in the commit. CI compares each repository with gen-box when
+the `GEN_BOX_TOKEN` secret is set.
 `gen-box/tools/secret_guard.py` is the Claude Code PreToolUse hook (matcher `Bash`) that extends the Read/Edit deny
 list to shell commands; the human wires it in `.claude/settings.json`.
 Hooks and validators execute repository code: run them only on branches the human or their agents wrote, and review an

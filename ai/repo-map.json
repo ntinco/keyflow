@@ -72,5 +72,11 @@
     "macos": ["python3 ai/run_smoke.py --platform macos", "lua ai/tests/macos_logic_test.lua"],
     "windows": ["python3 ai/run_smoke.py --platform windows", "platforms/windows/tools/selftest.ahk"]
   },
-  "pending_acceptance": "ai/current-plan.md"
+  "pending_acceptance": "ai/current-plan.md",
+  "shared_files": {
+    "ai/workspace_contract.py": "shared/workspace_contract.py",
+    "ai/tests/test_workspace_contract.py": "shared/test_workspace_contract.py",
+    ".githooks/pre-commit": "shared/githooks/pre-commit"
+  },
+  "cold_start_token_budget": 4300
 }
