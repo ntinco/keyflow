@@ -1,11 +1,8 @@
 ﻿class LauncherService {
   supportedPasteExtensionsPattern := "i)\.(txt|abap|md|ahk)$"
 
-  mediaExtensionsPattern := "i)\.(mp3|m4a|aac|flac|wav|ogg|opus|wma|mp4|m4v|mkv|avi|mov|wmv|webm|flv)$"
-
   _isMediaPath(filename) {
-    return (filename ~= this.mediaExtensionsPattern)
-      or InStr(filename, "music") or InStr(filename, "audio") or InStr(filename, "video")
+    return InStr(filename, "music")
   }
 
   dismissLauncherUi(shortWait := true) {
