@@ -954,7 +954,9 @@ def workspace_contract_problems(root: Path) -> list[str]:
     master = Path(os.environ.get("WORKSPACE_ROOT") or root.resolve().parent) / "gen-box/ai/governance.md"
     if len(blocks) == 1 and not (root / "tools/contract_sync.py").is_file() and master.is_file():
         master_blocks = WORKSPACE_CONTRACT.findall(master.read_text(encoding="utf-8").replace("\r\n", "\n"))
-        if len(master_blocks) == 1 and master_blocks[0] != blocks[0]:
+        if len(master_blocks) != 1:
+            problems.append(f"gen-box master {master} must hold exactly one workspace contract block")
+        elif master_blocks[0] != blocks[0]:
             problems.append("workspace contract differs from the gen-box master: run tools/contract_sync.py in gen-box")
     return problems
 

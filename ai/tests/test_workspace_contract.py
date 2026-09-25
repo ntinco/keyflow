@@ -43,6 +43,9 @@ class WorkspaceContractTests(unittest.TestCase):
             master.write_text(source.replace("Ask first", "Never ask"), encoding="utf-8")
             self.assertEqual(MODULE.workspace_contract_problems(root),
                              ["workspace contract differs from the gen-box master: run tools/contract_sync.py in gen-box"])
+            master.write_text("no contract here\n", encoding="utf-8")
+            self.assertEqual(MODULE.workspace_contract_problems(root),
+                             [f"gen-box master {master} must hold exactly one workspace contract block"])
 
     def test_claude_md_must_only_import_agents(self):
         with tempfile.TemporaryDirectory() as tmp:
