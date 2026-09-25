@@ -1,9 +1,10 @@
-# shared: gen-box/shared/workspace_contract.py sha256:fc17e810795e (edit it in gen-box, then run tools/contract_sync.py in gen-box)
+# shared: gen-box/shared/workspace_contract.py sha256:79b73506e002 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
 """Workspace contract checks shared by the six repositories; the master copy is gen-box/shared/workspace_contract.py.
 
 problems(root) lists what breaks the workspace contract in the repository at root: the contract block or a file
 vendored from gen-box edited in place or out of date, the wiring the contract requires (pending_acceptance,
-CLAUDE.md, pre-commit hook settings) and the cold-start token budget. The gen-box checkout used as the
+CLAUDE.md, pre-commit hook settings, the secret deny rules and secret_guard hook in .claude/settings.json) and the
+cold-start token budget. The gen-box checkout used as the
 authority is root itself, WORKSPACE_ROOT/gen-box or the sibling directory; without one only the local checks run.
 Run directly to print the problems of this repository; exits 1 when there are any. Standard library only.
 """
@@ -26,6 +27,14 @@ SOURCES = (
     "shared/githooks/pre-commit",
 )
 BOOT_FILES = ("AGENTS.md", "CLAUDE.md", "ai/governance.md", "ai/repo-map.json")
+SETTINGS = ".claude/settings.json"
+# Every repository denies these secret paths; it may add its own rules on top.
+SECRET_DENY = tuple(f"{tool}({pattern})" for pattern in (
+    "**/.env", "**/.env.*", "**/secrets.*", "**/*.pem", "**/*.key", "**/*.kdbx", "**/*.pfx", "**/*.p12",
+    "**/*.ovpn", "**/*.sapc", "~/.ssh/**") for tool in ("Read", "Edit"))
+# Lets the call through when gen-box is not beside the repository (a single-repository clone), since a
+# PreToolUse hook that exits 2 blocks every Bash call.
+SECRET_GUARD = 'f="$CLAUDE_PROJECT_DIR/../gen-box/tools/secret_guard.py"; [ ! -f "$f" ] || python3 "$f"'
 SYNC = "run tools/contract_sync.py in gen-box"
 
 
@@ -99,6 +108,29 @@ def contract_problems(root: Path, master: Path | None) -> list[str]:
     return []
 
 
+def settings_problems(root: Path) -> list[str]:
+    """The secret deny rules and the secret_guard PreToolUse hook that every .claude/settings.json carries."""
+    if not (root / SETTINGS).is_file():
+        return [f"{SETTINGS} is missing"]
+    settings = load_json(root / SETTINGS)
+    permissions = settings.get("permissions")
+    deny = permissions.get("deny") if isinstance(permissions, dict) else None
+    deny = deny if isinstance(deny, list) else []
+    found = []
+    if missing := [rule for rule in SECRET_DENY if rule not in deny]:
+        found.append(f"{SETTINGS} permissions.deny lacks {', '.join(missing)}")
+    hooks = settings.get("hooks")
+    entries = hooks.get("PreToolUse") if isinstance(hooks, dict) else None
+    wired = any(
+        isinstance(entry, dict) and entry.get("matcher") == "Bash" and isinstance(entry.get("hooks"), list)
+        and any(isinstance(hook, dict) and hook.get("type") == "command" and hook.get("command") == SECRET_GUARD
+                for hook in entry["hooks"])
+        for entry in (entries if isinstance(entries, list) else []))
+    if not wired:
+        found.append(f"{SETTINGS} hooks.PreToolUse must run secret_guard on Bash with the command {SECRET_GUARD}")
+    return found
+
+
 def vendored_problems(root: Path, shared: dict, master: Path | None) -> list[str]:
     problems: list[str] = []
     for target, source in sorted(shared.items()):
@@ -147,6 +179,7 @@ def problems(root: Path) -> list[str]:
         found.append("ai/repo-map.json must name one pending_acceptance path")
     if read(root / "CLAUDE.md").strip() != "@AGENTS.md":
         found.append("CLAUDE.md must exist and contain only @AGENTS.md")
+    found += settings_problems(root)
     conf = read(root / ".githooks/pre-commit.conf")
     # The hook sources the file, so the last assignment of each setting is the one that counts.
     if not CHECK.match(last_assignment(conf, "check")):

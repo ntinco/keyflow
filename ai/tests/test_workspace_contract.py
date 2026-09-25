@@ -1,4 +1,4 @@
-# shared: gen-box/shared/test_workspace_contract.py sha256:20db21c6ffe5 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
+# shared: gen-box/shared/test_workspace_contract.py sha256:51b6bebaab0c (edit it in gen-box, then run tools/contract_sync.py in gen-box)
 """Workspace contract check (gen-box/shared/workspace_contract.py) on this repository and on broken copies of it."""
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ _spec = importlib.util.spec_from_file_location("workspace_contract", _path)
 MODULE = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(MODULE)
 _LOCAL = MODULE.LOCAL.findall((ROOT / ".githooks/pre-commit.conf").read_text(encoding="utf-8"))
-FIXTURE_FILES = MODULE.BOOT_FILES + (".githooks/pre-commit.conf", *_LOCAL, *SHARED)
+FIXTURE_FILES = MODULE.BOOT_FILES + (".githooks/pre-commit.conf", MODULE.SETTINGS, *_LOCAL, *SHARED)
 
 
 class WorkspaceContractTests(unittest.TestCase):
@@ -148,6 +148,43 @@ class WorkspaceContractTests(unittest.TestCase):
     def test_claude_md_must_only_import_agents(self):
         (self.root / "CLAUDE.md").write_text("@AGENTS.md\nExtra rule.\n", encoding="utf-8")
         self.assertEqual(MODULE.problems(self.root), ["CLAUDE.md must exist and contain only @AGENTS.md"])
+
+    def edit_settings(self, change) -> None:
+        path = self.root / MODULE.SETTINGS
+        data = json.loads(path.read_text(encoding="utf-8"))
+        change(data)
+        path.write_text(json.dumps(data), encoding="utf-8")
+
+    def test_settings_file_is_required(self):
+        (self.root / MODULE.SETTINGS).unlink()
+        self.assertEqual(MODULE.problems(self.root), [".claude/settings.json is missing"])
+
+    def test_settings_must_deny_every_secret_path(self):
+        self.edit_settings(lambda data: data["permissions"]["deny"].remove("Edit(~/.ssh/**)"))
+        self.assertEqual(MODULE.problems(self.root), [".claude/settings.json permissions.deny lacks Edit(~/.ssh/**)"])
+        self.edit_settings(lambda data: data.pop("permissions"))
+        self.assertEqual(MODULE.problems(self.root),
+                         [".claude/settings.json permissions.deny lacks " + ", ".join(MODULE.SECRET_DENY)])
+
+    def test_settings_may_deny_more_paths(self):
+        self.edit_settings(lambda data: data["permissions"]["deny"].append("Read(local/**)"))
+        self.assertEqual(MODULE.problems(self.root), [])
+
+    def test_settings_must_wire_secret_guard(self):
+        expected = [".claude/settings.json hooks.PreToolUse must run secret_guard on Bash with the command "
+                    + MODULE.SECRET_GUARD]
+        variants = (
+            lambda data: data.pop("hooks"),
+            lambda data: data["hooks"]["PreToolUse"][0].update(matcher="Edit"),
+            # The unguarded command exits 2 without gen-box beside the repository, blocking every Bash call.
+            lambda data: data["hooks"]["PreToolUse"][0]["hooks"][0].update(
+                command='python3 "$CLAUDE_PROJECT_DIR/../gen-box/tools/secret_guard.py"'),
+        )
+        original = (self.root / MODULE.SETTINGS).read_text(encoding="utf-8")
+        for change in variants:
+            (self.root / MODULE.SETTINGS).write_text(original, encoding="utf-8")
+            self.edit_settings(change)
+            self.assertEqual(MODULE.problems(self.root), expected)
 
     def test_cold_start_budget(self):
         repo_map = self.root / "ai/repo-map.json"
