@@ -1,4 +1,4 @@
-# shared: gen-box/shared/test_workspace_contract.py sha256:6a76a749f333 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
+# shared: gen-box/shared/test_workspace_contract.py sha256:09378b743ed4 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
 """Workspace contract check (gen-box/shared/workspace_contract.py) on this repository and on broken copies of it."""
 from __future__ import annotations
 
@@ -85,9 +85,11 @@ class WorkspaceContractTests(unittest.TestCase):
                          [f"{target} differs from gen-box/{source}: run tools/contract_sync.py in gen-box"])
 
     def test_hook_config_must_set_a_check_command(self):
-        (self.root / ".githooks/pre-commit.conf").write_text('check=""\n', encoding="utf-8")
-        self.assertEqual(MODULE.problems(self.root),
-                         ['.githooks/pre-commit.conf must set check="<health check command>" for the shared hook'])
+        conf = self.root / ".githooks/pre-commit.conf"
+        for text in ('check=""\n', 'check="true"\ncheck=""\n'):
+            conf.write_text(text, encoding="utf-8")
+            self.assertEqual(MODULE.problems(self.root),
+                             ['.githooks/pre-commit.conf must set check="<health check command>" for the shared hook'])
 
     def test_every_shared_source_is_required_without_gen_box(self):
         target = next(t for t, s in SHARED.items() if s == "shared/githooks/pre-commit")

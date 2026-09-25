@@ -1,4 +1,4 @@
-# shared: gen-box/shared/workspace_contract.py sha256:dae67a5b4d2e (edit it in gen-box, then run tools/contract_sync.py in gen-box)
+# shared: gen-box/shared/workspace_contract.py sha256:719fd7b48744 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
 """Workspace contract checks shared by the six repositories; the master copy is gen-box/shared/workspace_contract.py.
 
 problems(root) lists what breaks the workspace contract in the repository at root: the contract block or a file
@@ -49,6 +49,11 @@ def unvendor(text: str) -> tuple[str, str, str] | None:
     if not match:
         return None
     return match.group(1), match.group(2), text[:start] + text[match.end():]
+
+
+def last_assignment(conf: str, name: str) -> str:
+    lines = [line for line in conf.splitlines() if line.startswith(f"{name}=")]
+    return lines[-1] if lines else ""
 
 
 def boot_tokens(root: Path) -> int:
@@ -142,11 +147,12 @@ def problems(root: Path) -> list[str]:
     if read(root / "CLAUDE.md").strip() != "@AGENTS.md":
         found.append("CLAUDE.md must exist and contain only @AGENTS.md")
     conf = read(root / ".githooks/pre-commit.conf")
-    if not CHECK.search(conf):
+    # The hook sources the file, so the last assignment of each setting is the one that counts.
+    if not CHECK.match(last_assignment(conf, "check")):
         found.append(".githooks/pre-commit.conf must set check=\"<health check command>\" for the shared hook")
-    for local in LOCAL.findall(conf):
-        if not (root / local).is_file() or not (root / local).stat().st_mode & 0o111:
-            found.append(f"{local} is declared in .githooks/pre-commit.conf but is not an executable file")
+    local = LOCAL.match(last_assignment(conf, "local"))
+    if local and (not (root / local.group(1)).is_file() or not (root / local.group(1)).stat().st_mode & 0o111):
+        found.append(f"{local.group(1)} is declared in .githooks/pre-commit.conf but is not an executable file")
     shared = repo_map.get("shared_files")
     if not isinstance(shared, dict) or not shared:
         found.append("ai/repo-map.json must map shared_files (vendored path -> gen-box source)")
