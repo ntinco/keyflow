@@ -1,4 +1,4 @@
-# shared: gen-box/shared/test_workspace_contract.py sha256:6a7c10c79066 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
+# shared: gen-box/shared/test_workspace_contract.py sha256:a0e9f949526a (edit it in gen-box, then run tools/contract_sync.py in gen-box)
 """Workspace contract check (gen-box/shared/workspace_contract.py) on this repository and on broken copies of it."""
 from __future__ import annotations
 
@@ -82,6 +82,27 @@ class WorkspaceContractTests(unittest.TestCase):
             handle.write("# newer in gen-box\n")
         self.assertEqual(MODULE.problems(self.root),
                          [f"{target} differs from gen-box/{source}: run tools/contract_sync.py in gen-box"])
+
+    def test_hook_config_must_set_a_check_command(self):
+        (self.root / ".githooks/pre-commit.conf").write_text('check=""\n', encoding="utf-8")
+        self.assertEqual(MODULE.problems(self.root),
+                         ['.githooks/pre-commit.conf must set check="<health check command>" for the shared hook'])
+
+    def test_every_shared_source_is_required_without_gen_box(self):
+        target = next(t for t, s in SHARED.items() if s == "shared/githooks/pre-commit")
+        repo_map = self.root / "ai/repo-map.json"
+        data = json.loads(repo_map.read_text(encoding="utf-8"))
+        del data["shared_files"][target]
+        repo_map.write_text(json.dumps(data), encoding="utf-8")
+        self.assertEqual(MODULE.problems(self.root),
+                         ["ai/repo-map.json shared_files lacks gen-box/shared/githooks/pre-commit"])
+
+    def test_source_missing_from_gen_box_fails(self):
+        target, source = next(iter(sorted(SHARED.items())))
+        master = self.make_gen_box()
+        (master / source).unlink()
+        self.assertEqual(MODULE.problems(self.root),
+                         [f"gen-box/{source} is missing from {master}: update that checkout or drop the mapping"])
 
     def test_claude_md_must_only_import_agents(self):
         (self.root / "CLAUDE.md").write_text("@AGENTS.md\nExtra rule.\n", encoding="utf-8")

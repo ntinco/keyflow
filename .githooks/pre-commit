@@ -1,5 +1,5 @@
 #!/bin/sh
-# shared: gen-box/shared/githooks/pre-commit sha256:cbda84dc790d (edit it in gen-box, then run tools/contract_sync.py in gen-box)
+# shared: gen-box/shared/githooks/pre-commit sha256:4832c4766fea (edit it in gen-box, then run tools/contract_sync.py in gen-box)
 # Shared pre-commit hook for the workspace repositories. Enable once per clone with
 # `git config core.hooksPath .githooks` (tools/link_workspace.py in gen-box points it at gen-box/shared/githooks).
 # The repository's .githooks/pre-commit.conf sets `check` (the health check command) and optionally `exclude`
@@ -14,6 +14,10 @@ if [ ! -f .githooks/pre-commit.conf ]; then
 fi
 check='' exclude=''
 . ./.githooks/pre-commit.conf
+if [ -z "$check" ]; then
+    echo "pre-commit: .githooks/pre-commit.conf sets no check command; commit aborted" >&2
+    exit 1
+fi
 staged=$(mktemp -d)
 trap 'rm -rf "$staged"' EXIT
 if [ -n "$exclude" ]; then
@@ -32,6 +36,7 @@ if ! out=$(cd "$staged" && WORKSPACE_ROOT=$(dirname "$top") sh -c "$check" 2>&1)
     echo "pre-commit: health check failed on the staged tree; commit aborted" >&2
     exit 1
 fi
+# Not exec: the EXIT trap must still remove the staged snapshot.
 if [ -x .githooks/pre-commit.local ]; then
-    exec ./.githooks/pre-commit.local
+    ./.githooks/pre-commit.local
 fi
