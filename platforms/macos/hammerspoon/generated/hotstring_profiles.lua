@@ -450,6 +450,7 @@ return {
     {trigger = "rev,", value = "Pendiente de revisión.", immediate = true},
     {trigger = "urg,", value = "URGENTE:", immediate = true},
     {trigger = "sig,", value = "Con gusto te ayudo, ¿en qué consiste?", immediate = true},
+    {trigger = "cpm", value = "commit y push directo a main", immediate = false},
   }},
   {id = "sap-transaction-shortcuts", mode = "sap-command", contextLabel = "sap-gui-session", entries = {
     {trigger = "z0", value = "zpm000", immediate = false},

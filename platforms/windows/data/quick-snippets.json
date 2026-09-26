@@ -71,6 +71,10 @@
       "trigger": "sig,",
       "value": "Con gusto te ayudo, ¿en qué consiste?",
       "immediate": true
+    },
+    {
+      "trigger": "cpm",
+      "value": "commit y push directo a main"
     }
   ]
 }

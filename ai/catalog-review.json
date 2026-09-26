@@ -17,9 +17,9 @@
       "id": "quick-snippets",
       "file": "platforms/windows/data/quick-snippets.json",
       "status": "verified",
-      "last_human_verification": "2026-09-24",
+      "last_human_verification": "2026-09-25",
       "notes": "Content runtime-accepted by human on macOS; baseline content hash recorded.",
-      "content_sha256": "e602a9e82442574bb2de42af9b826411f91d4e5ceaa93468667d659bb2560dfe"
+      "content_sha256": "4780387d6620ed0f17eff65bab22b7d0af386f2dd0c1a7dcc1caf495312aabf3"
     },
     {
       "id": "sap-transaction-catalog",
