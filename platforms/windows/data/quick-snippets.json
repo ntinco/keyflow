@@ -28,11 +28,6 @@
       "immediate": true
     },
     {
-      "trigger": "sp,",
-      "value": "summary in prompt",
-      "immediate": true
-    },
-    {
       "trigger": "ntt,",
       "value": "NTT DATA",
       "immediate": true
@@ -75,6 +70,10 @@
     {
       "trigger": "cpm",
       "value": "commit y push directo a main"
+    },
+    {
+      "trigger": "sp",
+      "value": "Resume esta conversación en un prompt autocontenido para que otra IA, sin acceso a este chat, continúe o ejecute lo acordado. Conserva decisiones, restricciones, parámetros y próximos pasos. Incluye textualmente código, datos o fragmentos de archivos que sean necesarios. Elimina redundancias. Entrégalo en un solo bloque de código."
     }
   ]
 }
