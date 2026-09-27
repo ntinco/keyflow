@@ -20,7 +20,7 @@ Active catalog: **22 hotkeys** and **5 hotstrings**.
 | `Win+F1` | global | Snipaste capture | macos | portable-intent |
 | `MouseFwd` | global | Snipaste screenshot (Windows; manual on macOS) | windows | windows-only |
 | `Alt+T` | global | Time capture (ntinco-os t) | macos | portable-intent |
-| `Alt+A` | global | Ask AI (Gemini, Codex, Claude) | macos | portable-intent |
+| `Alt+A` | global | Ask AI (ChatGPT, Copilot, Claude) | macos | portable-intent |
 
 ## SAP GUI and NWBC
 
