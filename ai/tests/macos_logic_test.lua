@@ -163,6 +163,15 @@ Clipboard.paste("x", sendPaste)
 advance(Clipboard.RESTORE_DELAY)
 expectEqual(pasteboard.contents, nil, "empty clipboard is restored as empty")
 
+-- Time capture summary ------------------------------------------------------
+local summary = Actions.timeCaptureSummary
+expectEqual(summary(0, "CLOSE TIME-1\nNEW WORK-001 = CC1 (A) in the map\nADD 2026-09-26 19:20-OPEN OPEN P/R MEAL\nWROTE 1 row(s)\n\nHEALTH OK", ""),
+  "✓ CLOSE TIME-1\n19:20-OPEN OPEN P/R MEAL", "success keeps stored rows, hides raw codes and health")
+expectEqual(summary(2, "", "error: refusing to write\nAMBIGUITIES (1):\nAMBIGUOUS 2026-09-26 19:20 'x' — needs Context"),
+  "✗ AMBIGUOUS 2026-09-26 19:20 'x' — needs Context", "ambiguity reports its reason")
+expectEqual(summary(2, "", "error: conflict at 19:20"), "✗ error: conflict at 19:20", "error line reported")
+expectEqual(summary(127, "", ""), "✗ t exited 127", "missing command reported")
+
 if failures > 0 then
   os.exit(1)
 end
