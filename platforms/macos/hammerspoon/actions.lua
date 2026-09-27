@@ -555,8 +555,8 @@ end
 -- log in with the human's own accounts; no API keys here. Gemini CLI was dropped:
 -- Google no longer accepts it for individual accounts (2026-09).
 local ASK_AI_DEFAULT_PROVIDERS = {
-  {name = "ChatGPT", bin = "codex", args = {"exec", "--skip-git-repo-check"}},
   {name = "Copilot", bin = "copilot", args = {"-s", "-p"}},
+  {name = "ChatGPT", bin = "codex", args = {"exec", "--skip-git-repo-check"}},
   {name = "Claude", bin = "claude", args = {"-p"}},
 }
 -- Optional per-machine order kept outside this public repository, so work or
