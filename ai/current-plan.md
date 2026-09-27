@@ -23,6 +23,7 @@ Cleanup after acceptance (2026-09-24), pending re-test:
 3. Win+Esc on a secondary monitor when one is connected.
 4. macOS host with VMware Fusion frontmost: the human reported Windows hotstrings in the guest typing `a`/`aa` (Hammerspoon replaced them on the host with unicode events on the `a` key). Hammerspoon hotstrings now pass through VMware Fusion, Parallels, UTM and Microsoft Remote Desktop. Reload Hammerspoon and check `nadia `, `"-` and `teh ` inside the Windows VM, and `teh ` still in a native Mac app.
 5. macOS Snipaste 80% resize (needs `magick` in `/opt/homebrew/bin` or `/usr/local/bin`): capture, Enter with OneNote/Teams/Obsidian as the last target; the pasted image is 80% of the capture (Console: `Snipaste clipboard resized 80%`), Teams auto-pastes, Word keeps the original size.
+6. macOS Option+T time capture (ntinco-os `tools/t`): reload Hammerspoon, press Option+T in any app, type `almuerzo`, Enter: the prompt closes, focus returns to the app, an alert shows `✓ … MEAL - LUNCH` and the commit reaches `origin/main`; an unknown word shows `✗ AMBIGUOUS …` and writes nothing; Cancelar writes nothing.
 
 ## Known parity gaps (deliberately deferred)
 

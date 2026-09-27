@@ -509,6 +509,46 @@ Actions.global_snipaste_capture = function()
   end
 end
 
+-- Time capture: one line to the ntinco-os `t` command, which owns parsing, the
+-- time rules and the commit; this only prompts and shows what was stored.
+local TIME_CAPTURE_COMMAND = "/gh/ntinco-os/tools/t"
+local TIME_CAPTURE_RESULT = {ADD = true, CLOSE = true, FINISH = true, DUPLICATE = true, NO = true}
+
+-- Pure: the stored-row lines on success, the last error line on failure.
+function Actions.timeCaptureSummary(exitCode, stdOut, stdErr)
+  if exitCode ~= 0 then
+    local last = ""
+    for line in ((stdErr or "") .. "\n" .. (stdOut or "")):gmatch("[^\n]+") do
+      if line:match("^error:") or line:match("^AMBIGUOUS") then last = line end
+    end
+    return "✗ " .. (last ~= "" and last or ("t exited " .. tostring(exitCode)))
+  end
+  local lines = {}
+  for line in (stdOut or ""):gmatch("[^\n]+") do
+    if TIME_CAPTURE_RESULT[line:match("^(%u+)") or ""] then
+      lines[#lines + 1] = (line:gsub("^ADD %d+%-%d+%-%d+ ", ""))
+    end
+  end
+  return "✓ " .. table.concat(lines, "\n")
+end
+
+Actions.global_time_capture = function()
+  local previousApp = hs.application.frontmostApplication()
+  hs.focus()
+  local button, line = hs.dialog.textPrompt(
+    "¿Qué estás haciendo?", "cc68 · almuerzo · 14:20 cena · fin", "", "Registrar", "Cancelar")
+  if previousApp then previousApp:activate() end
+  line = (line or ""):match("^%s*(.-)%s*$")
+  if button ~= "Registrar" or line == "" then return end
+  local command = os.getenv("HOME") .. TIME_CAPTURE_COMMAND
+  local task = startTask(command, function(exitCode, stdOut, stdErr)
+    hs.alert.show(Actions.timeCaptureSummary(exitCode, stdOut, stdErr), 4)
+  end, {line})
+  if not task then
+    hs.alert.show("✗ time capture not available: " .. command)
+  end
+end
+
 -- Context (Snipaste focused) is checked by the key watcher before dispatch.
 Actions.snipaste_enter = function()
   local initialChangeCount = hs.pasteboard.changeCount()

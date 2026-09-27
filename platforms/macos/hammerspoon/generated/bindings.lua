@@ -11,6 +11,7 @@ return {
   {id = "global_alt_d", type = "hotkey", key = "!d", contextLabel = "global", tcode = "", label = "Activate IDE group"},
   {id = "global_alt_e", type = "hotkey", key = "!e", contextLabel = "global", tcode = "", label = "Activate SAP workspace group"},
   {id = "global_snipaste_capture", type = "hotkey", key = "#f1", contextLabel = "global", tcode = "", label = "Snipaste capture"},
+  {id = "global_time_capture", type = "hotkey", key = "!t", contextLabel = "global", tcode = "", label = "Time capture (ntinco-os t)"},
   {id = "global_win_esc", type = "hotkey", key = "#esc", contextLabel = "global", tcode = "", label = "Resize window height"},
   {id = "hs_sap_block_minus", type = "hotstring", key = "*-", contextLabel = "", tcode = "", label = "SAP insert comment block (-)", immediate = true},
   {id = "hs_sap_block_plus", type = "hotstring", key = "*+", contextLabel = "", tcode = "", label = "SAP insert comment block (+)", immediate = true},
