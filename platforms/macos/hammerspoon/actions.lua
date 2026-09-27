@@ -550,12 +550,13 @@ Actions.global_time_capture = function()
   end
 end
 
--- Ask AI: one prompt tried on each provider CLI in order (free quota first); a
--- provider that is missing, fails, times out or reports a limit hands over to
--- the next. The CLIs log in with the human's own accounts; no API keys here.
+-- Ask AI: one prompt tried on each provider CLI in order; a provider that is
+-- missing, fails, times out or reports a limit hands over to the next. The CLIs
+-- log in with the human's own accounts; no API keys here. Gemini CLI was dropped:
+-- Google no longer accepts it for individual accounts (2026-09).
 local ASK_AI_DEFAULT_PROVIDERS = {
-  {name = "Gemini", bin = "gemini", args = {"-p"}},
-  {name = "Codex", bin = "codex", args = {"exec", "--skip-git-repo-check"}},
+  {name = "ChatGPT", bin = "codex", args = {"exec", "--skip-git-repo-check"}},
+  {name = "Copilot", bin = "copilot", args = {"-s", "-p"}},
   {name = "Claude", bin = "claude", args = {"-p"}},
 }
 -- Optional per-machine order kept outside this public repository, so work or
