@@ -564,6 +564,8 @@ local ASK_AI_DEFAULT_PROVIDERS = {
 local ASK_AI_CONFIG = "/.config/keyflow/ask-ai.conf"
 local ASK_AI_OUTPUT_DIR = "/Downloads/ai"
 local ASK_AI_TIMEOUT = 180
+local ASK_AI_YOUTUBE_EXTRACT = "/gh/gen-box/tools/youtube_extract.py"
+local ASK_AI_YOUTUBE_TIMEOUT = 60
 -- Only checked on short output, so a real answer that mentions a limit is kept.
 local ASK_AI_LIMIT_PATTERNS = {
   "quota", "rate.?limit", "usage limit", "resource_exhausted", "exceeded", "too many requests",
@@ -601,6 +603,30 @@ function Actions.askAiParseProviders(text)
     end
   end
   return #providers > 0 and providers or nil
+end
+
+-- Pure: first YouTube URL in a prompt, or nil when there is none.
+function Actions.askAiYouTubeUrl(prompt)
+  for url in (prompt or ""):gmatch("https?://[^%s]+") do
+    url = url:gsub("[%)%]%},;%.]+$", "")
+    local host = url:match("^https?://([^/]+)")
+    host = host and host:lower() or ""
+    if host == "youtu.be" or host == "www.youtu.be"
+        or host == "youtube.com" or host:match("%.youtube%.com$") then
+      return url
+    end
+  end
+  return nil
+end
+
+-- Pure: keep the user's instruction, but give the provider local transcript
+-- context so it never needs network access to YouTube.
+function Actions.askAiYouTubePrompt(originalPrompt, extracted)
+  return "Solicitud original:\n" .. originalPrompt
+    .. "\n\nContenido extraído localmente con gen-box youtube_extract.py:\n"
+    .. extracted
+    .. "\n\nResponde a la solicitud original usando este contenido. "
+    .. "No intentes acceder a YouTube ni afirmes que el video es inaccesible."
 end
 
 local function askAiProviders(home)
@@ -681,6 +707,58 @@ local function askAiTry(providers, index, prompt, skipped, home)
   end)
 end
 
+local function askAiRun(providers, prompt, home)
+  local youtubeUrl = Actions.askAiYouTubeUrl(prompt)
+  if not youtubeUrl then
+    askAiTry(providers, 1, prompt, {}, home)
+    return
+  end
+
+  local extractor = home .. ASK_AI_YOUTUBE_EXTRACT
+  if not hs.fs.attributes(extractor) then
+    hs.alert.show("✗ YouTube: falta " .. extractor, 8)
+    return
+  end
+
+  local finished, timer = false, nil
+  local task = startTask("/usr/bin/env", function(exitCode, stdOut, stdErr)
+    if finished then return end
+    finished = true
+    if timer then timer:stop() end
+    local extracted = (stdOut or ""):match("^%s*(.-)%s*$")
+    if exitCode ~= 0 or extracted == "" then
+      local detail = ""
+      for line in ((stdErr or "") .. "\n" .. (stdOut or "")):gmatch("[^\n]+") do
+        if line:match("%S") then detail = line end
+      end
+      if detail == "" then detail = "youtube_extract.py exited " .. tostring(exitCode) end
+      hs.alert.show("✗ YouTube: " .. detail:sub(1, 180), 8)
+      return
+    end
+    askAiTry(providers, 1, Actions.askAiYouTubePrompt(prompt, extracted), {}, home)
+  end, {"python3", extractor, youtubeUrl}, function(t)
+    t:setEnvironment({
+      HOME = home,
+      USER = os.getenv("USER") or "",
+      LANG = "en_US.UTF-8",
+      TMPDIR = os.getenv("TMPDIR") or "/tmp",
+      PATH = table.concat(askAiBinDirs(home), ":") .. ":/usr/bin:/bin:/usr/sbin:/sbin",
+    })
+  end)
+  if not task then
+    hs.alert.show("✗ YouTube: no se pudo iniciar gen-box", 8)
+    return
+  end
+  task:closeInput()
+  hs.alert.show("… YouTube → gen-box", 2)
+  timer = hs.timer.doAfter(ASK_AI_YOUTUBE_TIMEOUT, function()
+    if finished then return end
+    finished = true
+    task:terminate()
+    hs.alert.show("✗ YouTube: timeout " .. ASK_AI_YOUTUBE_TIMEOUT .. "s", 8)
+  end)
+end
+
 Actions.global_ask_ai = function()
   local home = os.getenv("HOME")
   local providers = askAiProviders(home)
@@ -693,7 +771,7 @@ Actions.global_ask_ai = function()
   if previousApp then previousApp:activate() end
   prompt = (prompt or ""):match("^%s*(.-)%s*$")
   if button ~= "Preguntar" or prompt == "" then return end
-  askAiTry(providers, 1, prompt, {}, home)
+  askAiRun(providers, prompt, home)
 end
 
 -- Context (Snipaste focused) is checked by the key watcher before dispatch.

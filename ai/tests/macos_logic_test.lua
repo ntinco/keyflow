@@ -189,6 +189,19 @@ expectEqual(#parsed, 2, "config keeps provider lines, skips comments and one-wor
 expectEqual(parsed[2].bin .. " " .. table.concat(parsed[2].args, " "), "tool run", "trailing comment dropped")
 expectEqual(Actions.askAiParseProviders("# nothing\n"), nil, "config without providers falls back to defaults")
 
+local youtubeUrl = "https://www.youtube.com/watch?v=v_rkfTWwBAI"
+expectEqual(Actions.askAiYouTubeUrl(youtubeUrl), youtubeUrl, "YouTube watch URL is detected")
+expectEqual(Actions.askAiYouTubeUrl("resume https://youtu.be/abc123?t=30 por favor"),
+  "https://youtu.be/abc123?t=30", "youtu.be URL inside an instruction is detected")
+expectEqual(Actions.askAiYouTubeUrl("https://example.com/watch?v=abc"), nil, "non-YouTube URL is ignored")
+local youtubePrompt = Actions.askAiYouTubePrompt("resume " .. youtubeUrl, "# Demo\n\n## Transcript\nhola")
+expectEqual(youtubePrompt:find("Solicitud original:", 1, true) ~= nil, true,
+  "YouTube enrichment keeps the original request")
+expectEqual(youtubePrompt:find("gen-box youtube_extract.py", 1, true) ~= nil, true,
+  "YouTube enrichment identifies the local extractor")
+expectEqual(youtubePrompt:find("No intentes acceder a YouTube", 1, true) ~= nil, true,
+  "YouTube enrichment tells the provider not to refetch")
+
 if failures > 0 then
   os.exit(1)
 end
