@@ -553,11 +553,14 @@ end
 -- Ask AI: one prompt tried on each provider CLI in order (free quota first); a
 -- provider that is missing, fails, times out or reports a limit hands over to
 -- the next. The CLIs log in with the human's own accounts; no API keys here.
-local ASK_AI_PROVIDERS = {
+local ASK_AI_DEFAULT_PROVIDERS = {
   {name = "Gemini", bin = "gemini", args = {"-p"}},
   {name = "Codex", bin = "codex", args = {"exec", "--skip-git-repo-check"}},
   {name = "Claude", bin = "claude", args = {"-p"}},
 }
+-- Optional per-machine order kept outside this public repository, so work or
+-- employer tools are never named here. One provider per line: `Name bin [args...]`.
+local ASK_AI_CONFIG = "/.config/keyflow/ask-ai.conf"
 local ASK_AI_OUTPUT_DIR = "/Downloads/ai"
 local ASK_AI_TIMEOUT = 180
 -- Only checked on short output, so a real answer that mentions a limit is kept.
@@ -586,6 +589,27 @@ function Actions.askAiFailure(exitCode, stdOut, stdErr)
   return nil
 end
 
+-- Pure: providers from the config text, or nil when it names none.
+function Actions.askAiParseProviders(text)
+  local providers = {}
+  for line in (text or ""):gmatch("[^\n]+") do
+    local words = {}
+    for word in line:gsub("#.*", ""):gmatch("%S+") do words[#words + 1] = word end
+    if #words >= 2 then
+      providers[#providers + 1] = {name = words[1], bin = words[2], args = {table.unpack(words, 3)}}
+    end
+  end
+  return #providers > 0 and providers or nil
+end
+
+local function askAiProviders(home)
+  local handle = io.open(home .. ASK_AI_CONFIG, "r")
+  if not handle then return ASK_AI_DEFAULT_PROVIDERS end
+  local text = handle:read("*a")
+  handle:close()
+  return Actions.askAiParseProviders(text) or ASK_AI_DEFAULT_PROVIDERS
+end
+
 -- Hammerspoon starts tasks with a bare PATH; the CLIs are Node scripts that need
 -- `env node` on it as well as the binary itself.
 local function askAiBinDirs(home)
@@ -612,15 +636,15 @@ local function askAiDeliver(provider, prompt, answer, skipped, outputDir)
   hs.alert.show(header .. "\n" .. answer:sub(1, 200), 6)
 end
 
-local function askAiTry(index, prompt, skipped, home)
-  local provider = ASK_AI_PROVIDERS[index]
+local function askAiTry(providers, index, prompt, skipped, home)
+  local provider = providers[index]
   if not provider then
     hs.alert.show("✗ ninguna IA respondió\n" .. table.concat(skipped, "\n"), 8)
     return
   end
   local function nextProvider(reason)
     skipped[#skipped + 1] = "↷ " .. provider.name .. ": " .. reason
-    askAiTry(index + 1, prompt, skipped, home)
+    askAiTry(providers, index + 1, prompt, skipped, home)
   end
   local binary = askAiBinary(home, provider.bin)
   if not binary then return nextProvider("not installed") end
@@ -657,14 +681,18 @@ local function askAiTry(index, prompt, skipped, home)
 end
 
 Actions.global_ask_ai = function()
+  local home = os.getenv("HOME")
+  local providers = askAiProviders(home)
+  local names = {}
+  for _, provider in ipairs(providers) do names[#names + 1] = provider.name end
   local previousApp = hs.application.frontmostApplication()
   hs.focus()
   local button, prompt = hs.dialog.textPrompt(
-    "Pregunta a la IA", "Gemini → Codex → Claude", "", "Preguntar", "Cancelar")
+    "Pregunta a la IA", table.concat(names, " → "), "", "Preguntar", "Cancelar")
   if previousApp then previousApp:activate() end
   prompt = (prompt or ""):match("^%s*(.-)%s*$")
   if button ~= "Preguntar" or prompt == "" then return end
-  askAiTry(1, prompt, {}, os.getenv("HOME"))
+  askAiTry(providers, 1, prompt, {}, home)
 end
 
 -- Context (Snipaste focused) is checked by the key watcher before dispatch.

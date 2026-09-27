@@ -184,6 +184,11 @@ expectEqual(failure(0, "You've hit your usage limit. Try again later.", ""),
 expectEqual(failure(0, "Rate limits " .. string.rep("explained at length. ", 20), ""), nil,
   "a long answer that mentions limits is kept")
 
+local parsed = Actions.askAiParseProviders("# order\nGemini gemini -p\n\nTool tool run  # work\nbroken\n")
+expectEqual(#parsed, 2, "config keeps provider lines, skips comments and one-word lines")
+expectEqual(parsed[2].bin .. " " .. table.concat(parsed[2].args, " "), "tool run", "trailing comment dropped")
+expectEqual(Actions.askAiParseProviders("# nothing\n"), nil, "config without providers falls back to defaults")
+
 if failures > 0 then
   os.exit(1)
 end
