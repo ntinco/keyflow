@@ -37,4 +37,13 @@ function Clipboard.paste(text, sendPaste, savedClipboard)
   end)
 end
 
+-- Leaves text on the clipboard for the user; a pending paste restore is
+-- dropped so it cannot overwrite it.
+function Clipboard.set(text)
+  if restoreTimer then restoreTimer:stop() end
+  restoreTimer = nil
+  pending = nil
+  hs.pasteboard.setContents(text)
+end
+
 return Clipboard

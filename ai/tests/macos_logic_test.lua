@@ -172,6 +172,18 @@ expectEqual(summary(2, "", "error: refusing to write\nAMBIGUITIES (1):\nAMBIGUOU
 expectEqual(summary(2, "", "error: conflict at 19:20"), "✗ error: conflict at 19:20", "error line reported")
 expectEqual(summary(127, "", ""), "✗ t exited 127", "missing command reported")
 
+-- Ask AI fallback --------------------------------------------------------------
+local failure = Actions.askAiFailure
+expectEqual(failure(0, "  Paris is the capital.\n", ""), nil, "a real answer is kept")
+expectEqual(failure(0, "  \n", ""), "empty answer", "empty output falls through")
+expectEqual(failure(1, "", "Loaded cached credentials.\nError: Quota exceeded for requests\n"),
+  "Error: Quota exceeded for requests", "nonzero exit reports the last error line")
+expectEqual(failure(1, "", ""), "exit 1", "silent failure reports the exit code")
+expectEqual(failure(0, "You've hit your usage limit. Try again later.", ""),
+  "You've hit your usage limit. Try again later.", "short limit message on exit 0 falls through")
+expectEqual(failure(0, "Rate limits " .. string.rep("explained at length. ", 20), ""), nil,
+  "a long answer that mentions limits is kept")
+
 if failures > 0 then
   os.exit(1)
 end

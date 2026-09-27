@@ -41,12 +41,13 @@ local launcherTargetApp
 -- hs.task objects held only by locals can be garbage-collected mid-run.
 local runningTasks = {}
 
-local function startTask(path, callback, args)
+local function startTask(path, callback, args, configure)
   local task
   task = hs.task.new(path, function(...)
     runningTasks[task] = nil
     if callback then callback(...) end
   end, args)
+  if task and configure then configure(task) end
   if not task or not task:start() then return nil end
   runningTasks[task] = true
   return task
@@ -547,6 +548,123 @@ Actions.global_time_capture = function()
   if not task then
     hs.alert.show("✗ time capture not available: " .. command)
   end
+end
+
+-- Ask AI: one prompt tried on each provider CLI in order (free quota first); a
+-- provider that is missing, fails, times out or reports a limit hands over to
+-- the next. The CLIs log in with the human's own accounts; no API keys here.
+local ASK_AI_PROVIDERS = {
+  {name = "Gemini", bin = "gemini", args = {"-p"}},
+  {name = "Codex", bin = "codex", args = {"exec", "--skip-git-repo-check"}},
+  {name = "Claude", bin = "claude", args = {"-p"}},
+}
+local ASK_AI_OUTPUT_DIR = "/Downloads/ai"
+local ASK_AI_TIMEOUT = 180
+-- Only checked on short output, so a real answer that mentions a limit is kept.
+local ASK_AI_LIMIT_PATTERNS = {
+  "quota", "rate.?limit", "usage limit", "resource_exhausted", "exceeded", "too many requests",
+  "not supported", "unsupported", "not available in your",
+}
+
+-- Pure: nil when the answer is usable, else a short reason to try the next provider.
+function Actions.askAiFailure(exitCode, stdOut, stdErr)
+  local answer = (stdOut or ""):match("^%s*(.-)%s*$")
+  if exitCode ~= 0 then
+    local last = ""
+    for line in ((stdErr or "") .. "\n" .. answer):gmatch("[^\n]+") do
+      if line:match("%S") then last = line end
+    end
+    return (last ~= "" and last or ("exit " .. tostring(exitCode))):sub(1, 120)
+  end
+  if answer == "" then return "empty answer" end
+  if #answer < 300 then
+    local lower = answer:lower()
+    for _, pattern in ipairs(ASK_AI_LIMIT_PATTERNS) do
+      if lower:find(pattern) then return answer:sub(1, 120) end
+    end
+  end
+  return nil
+end
+
+-- Hammerspoon starts tasks with a bare PATH; the CLIs are Node scripts that need
+-- `env node` on it as well as the binary itself.
+local function askAiBinDirs(home)
+  return {"/opt/homebrew/bin", "/usr/local/bin", home .. "/.local/bin", home .. "/.npm-global/bin"}
+end
+
+local function askAiBinary(home, bin)
+  for _, dir in ipairs(askAiBinDirs(home)) do
+    if hs.fs.attributes(dir .. "/" .. bin) then return dir .. "/" .. bin end
+  end
+end
+
+local function askAiDeliver(provider, prompt, answer, skipped, outputDir)
+  local file = outputDir .. "/" .. os.date("%Y%m%d-%H%M%S") .. "-" .. provider:lower() .. ".md"
+  local handle = io.open(file, "w")
+  if handle then
+    handle:write("# ", prompt, "\n\n_", provider, "_\n\n", answer, "\n")
+    handle:close()
+    startTask("/usr/bin/open", nil, {file})
+  end
+  Clipboard.set(answer)
+  local header = "✓ " .. provider .. " (copiado)"
+  if #skipped > 0 then header = header .. "\n" .. table.concat(skipped, "\n") end
+  hs.alert.show(header .. "\n" .. answer:sub(1, 200), 6)
+end
+
+local function askAiTry(index, prompt, skipped, home)
+  local provider = ASK_AI_PROVIDERS[index]
+  if not provider then
+    hs.alert.show("✗ ninguna IA respondió\n" .. table.concat(skipped, "\n"), 8)
+    return
+  end
+  local function nextProvider(reason)
+    skipped[#skipped + 1] = "↷ " .. provider.name .. ": " .. reason
+    askAiTry(index + 1, prompt, skipped, home)
+  end
+  local binary = askAiBinary(home, provider.bin)
+  if not binary then return nextProvider("not installed") end
+  local outputDir = home .. ASK_AI_OUTPUT_DIR
+  hs.fs.mkdir(outputDir)
+  local args = {table.unpack(provider.args)}
+  args[#args + 1] = prompt
+  local finished, timer = false, nil
+  local task = startTask(binary, function(exitCode, stdOut, stdErr)
+    -- A timed-out task still calls back after terminate(); the timer already moved on.
+    if finished then return end
+    finished = true
+    if timer then timer:stop() end
+    local reason = Actions.askAiFailure(exitCode, stdOut, stdErr)
+    if reason then return nextProvider(reason) end
+    askAiDeliver(provider.name, prompt, stdOut:match("^%s*(.-)%s*$"), skipped, outputDir)
+  end, args, function(t)
+    local env = {HOME = home, USER = os.getenv("USER") or "", LANG = "en_US.UTF-8",
+      TMPDIR = os.getenv("TMPDIR") or "/tmp",
+      PATH = table.concat(askAiBinDirs(home), ":") .. ":/usr/bin:/bin:/usr/sbin:/sbin"}
+    t:setEnvironment(env)
+    t:setWorkingDirectory(outputDir)
+  end)
+  if not task then return nextProvider("did not start") end
+  -- The CLIs append piped stdin to the prompt, so an open pipe would stall them.
+  task:closeInput()
+  hs.alert.show("… " .. provider.name, 2)
+  timer = hs.timer.doAfter(ASK_AI_TIMEOUT, function()
+    if finished then return end
+    finished = true
+    task:terminate()
+    nextProvider("timeout " .. ASK_AI_TIMEOUT .. "s")
+  end)
+end
+
+Actions.global_ask_ai = function()
+  local previousApp = hs.application.frontmostApplication()
+  hs.focus()
+  local button, prompt = hs.dialog.textPrompt(
+    "Pregunta a la IA", "Gemini → Codex → Claude", "", "Preguntar", "Cancelar")
+  if previousApp then previousApp:activate() end
+  prompt = (prompt or ""):match("^%s*(.-)%s*$")
+  if button ~= "Preguntar" or prompt == "" then return end
+  askAiTry(1, prompt, {}, os.getenv("HOME"))
 end
 
 -- Context (Snipaste focused) is checked by the key watcher before dispatch.
