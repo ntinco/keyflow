@@ -100,7 +100,7 @@ Turn every confirmed finding into a mechanical guard when feasible: a pure-logic
 - On Windows, `platforms/windows/tools/selftest.ahk` produces runtime evidence for hotstrings and window geometry; extend it when a Windows behavior can be checked without real apps.
 - Never claim a check or runtime behavior that was not executed or observed.
 
-<!-- workspace-contract sha256:e0e9bf4324e7 -->
+<!-- workspace-contract sha256:d11ff2278c21 -->
 ## Workspace contract
 
 Identical in the six repositories under `~/gh/`. The master copy is the one in
@@ -138,7 +138,8 @@ Routing between repositories:
   the gen-box source and run `contract_sync.py`; a copy edited in place fails the health check.
 - ABAP/SAP knowledge -> `abap-box`; to `abap-craft` only anonymized and with explicit human approval.
 - Hotkey, hotstring or daily desktop automation -> `keyflow`.
-- Installation, provisioning or machine maintenance -> `keyflow-station`; Claude Code user config -> `gen-box/claude/`.
+- Installation, provisioning or machine maintenance -> `keyflow-station`; Claude Code user config -> `gen-box/claude/`;
+  OpenClaw config and usage -> `gen-box/openclaw/`.
 - Personal fact, plan, time or finance -> `ntinco-os`.
 - When a task belongs to another repository, say so and work there; never build a local substitute.
 
