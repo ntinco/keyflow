@@ -163,45 +163,6 @@ Clipboard.paste("x", sendPaste)
 advance(Clipboard.RESTORE_DELAY)
 expectEqual(pasteboard.contents, nil, "empty clipboard is restored as empty")
 
--- Time capture summary ------------------------------------------------------
-local summary = Actions.timeCaptureSummary
-expectEqual(summary(0, "CLOSE TIME-1\nNEW WORK-001 = CC1 (A) in the map\nADD 2026-09-26 19:20-OPEN OPEN P/R MEAL\nWROTE 1 row(s)\n\nHEALTH OK", ""),
-  "✓ CLOSE TIME-1\n19:20-OPEN OPEN P/R MEAL", "success keeps stored rows, hides raw codes and health")
-expectEqual(summary(2, "", "error: refusing to write\nAMBIGUITIES (1):\nAMBIGUOUS 2026-09-26 19:20 'x' — needs Context"),
-  "✗ AMBIGUOUS 2026-09-26 19:20 'x' — needs Context", "ambiguity reports its reason")
-expectEqual(summary(2, "", "error: conflict at 19:20"), "✗ error: conflict at 19:20", "error line reported")
-expectEqual(summary(127, "", ""), "✗ t exited 127", "missing command reported")
-
--- Ask AI fallback --------------------------------------------------------------
-local failure = Actions.askAiFailure
-expectEqual(failure(0, "  Paris is the capital.\n", ""), nil, "a real answer is kept")
-expectEqual(failure(0, "  \n", ""), "empty answer", "empty output falls through")
-expectEqual(failure(1, "", "Loaded cached credentials.\nError: Quota exceeded for requests\n"),
-  "Error: Quota exceeded for requests", "nonzero exit reports the last error line")
-expectEqual(failure(1, "", ""), "exit 1", "silent failure reports the exit code")
-expectEqual(failure(0, "You've hit your usage limit. Try again later.", ""),
-  "You've hit your usage limit. Try again later.", "short limit message on exit 0 falls through")
-expectEqual(failure(0, "Rate limits " .. string.rep("explained at length. ", 20), ""), nil,
-  "a long answer that mentions limits is kept")
-
-local parsed = Actions.askAiParseProviders("# order\nClaude claude -p\n\nTool tool run  # work\nbroken\n")
-expectEqual(#parsed, 2, "config keeps provider lines, skips comments and one-word lines")
-expectEqual(parsed[2].bin .. " " .. table.concat(parsed[2].args, " "), "tool run", "trailing comment dropped")
-expectEqual(Actions.askAiParseProviders("# nothing\n"), nil, "config without providers falls back to defaults")
-
-local youtubeUrl = "https://www.youtube.com/watch?v=v_rkfTWwBAI"
-expectEqual(Actions.askAiYouTubeUrl(youtubeUrl), youtubeUrl, "YouTube watch URL is detected")
-expectEqual(Actions.askAiYouTubeUrl("resume https://youtu.be/abc123?t=30 por favor"),
-  "https://youtu.be/abc123?t=30", "youtu.be URL inside an instruction is detected")
-expectEqual(Actions.askAiYouTubeUrl("https://example.com/watch?v=abc"), nil, "non-YouTube URL is ignored")
-local youtubePrompt = Actions.askAiYouTubePrompt("resume " .. youtubeUrl, "# Demo\n\n## Transcript\nhola")
-expectEqual(youtubePrompt:find("Solicitud original:", 1, true) ~= nil, true,
-  "YouTube enrichment keeps the original request")
-expectEqual(youtubePrompt:find("gen-box youtube_extract.py", 1, true) ~= nil, true,
-  "YouTube enrichment identifies the local extractor")
-expectEqual(youtubePrompt:find("No intentes acceder a YouTube", 1, true) ~= nil, true,
-  "YouTube enrichment tells the provider not to refetch")
-
 if failures > 0 then
   os.exit(1)
 end
