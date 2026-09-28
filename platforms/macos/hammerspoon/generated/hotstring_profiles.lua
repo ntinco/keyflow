@@ -434,6 +434,7 @@ return {
     {trigger = "visable", value = "visible", immediate = false},
     {trigger = "whereever", value = "wherever", immediate = false},
     {trigger = "operacion", value = "operación", immediate = false},
+    {trigger = "paulino", value = "Paulino", immediate = false},
   }},
   {id = "quick-snippets", mode = "replace", contextLabel = "global", entries = {
     {trigger = "bd,", value = "Buen día,", immediate = true},

@@ -1721,6 +1721,10 @@
     {
       "trigger": "operacion",
       "value": "operación"
+    },
+    {
+      "trigger": "paulino",
+      "value": "Paulino"
     }
   ]
 }

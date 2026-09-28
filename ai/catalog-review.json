@@ -9,9 +9,9 @@
       "id": "autocorrect",
       "file": "platforms/windows/data/autocorrect.json",
       "status": "verified",
-      "last_human_verification": "2026-09-24",
+      "last_human_verification": "2026-09-28",
       "notes": "Content runtime-accepted by human on macOS; baseline content hash recorded.",
-      "content_sha256": "6b88f3518cb9fbaff87e6135e51192abdc188852d114ad4cd6fc2398e3c47f28"
+      "content_sha256": "57856f5ce8a01ac475873affe53e94f1d51766588ee540809f91d3476a27da5c"
     },
     {
       "id": "quick-snippets",
