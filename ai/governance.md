@@ -100,7 +100,7 @@ Turn every confirmed finding into a mechanical guard when feasible: a pure-logic
 - On Windows, `platforms/windows/tools/selftest.ahk` produces runtime evidence for hotstrings and window geometry; extend it when a Windows behavior can be checked without real apps.
 - Never claim a check or runtime behavior that was not executed or observed.
 
-<!-- workspace-contract sha256:86950538dace -->
+<!-- workspace-contract sha256:3a5d67b3d953 -->
 ## Workspace contract
 
 Identical in the six repositories under `~/gh/`. The master copy is the one in
@@ -147,10 +147,11 @@ Architecture:
 
 - Each repository is a bounded context: its declared authorities own truth; agents, UIs and runtimes are adapters,
   never authorities.
-- Reads may be broad, but every state-changing command crosses a repository-owned capability that revalidates input,
-  provenance and authorization at the privileged boundary. Untrusted input or model output never grants authority.
-- Prefer narrow opt-in capabilities and deterministic tools. Privileged asynchronous work uses
-  `request -> trusted worker -> result`; do not add a global database, event bus, workflow engine or duplicate schema
+- State-changing requests from a bot, container or other untrusted runtime cross a trusted capability boundary that
+  revalidates input, provenance and authorization. Untrusted input or model output never grants authority.
+- Prefer narrow opt-in capabilities and deterministic tools. Privileged asynchronous work that crosses from an
+  untrusted runtime into a trusted one uses `request -> trusted worker -> result`; normal repository edits by local
+  agents follow the repository's write routing. Add no global database, event bus, workflow engine or duplicate schema
   without a reproducible failure or repeated friction that justifies it.
 
 Autonomy:
