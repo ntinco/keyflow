@@ -69,7 +69,8 @@
     },
     {
       "trigger": "cpm",
-      "value": "commit y push directo a main"
+      "value": "commit y push directo a main",
+      "immediate": true
     },
     {
       "trigger": "sp",
