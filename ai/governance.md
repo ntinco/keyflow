@@ -35,7 +35,7 @@ AI operates:
 
 - Local-only secrets and state remain local and must not be committed or modified unless explicitly requested.
 - Runtime code must not depend on Git metadata.
-- Workstation provisioning, maintenance and backup sync (package updates, cache cleanup, env refresh, VPN clients, FreeFileSync/rsync) belong to `keyflow-station`, not here. `platforms/*/tools/` holds only what keyflow runtime or validation uses.
+- Workstation provisioning, maintenance and backup sync (package updates, cache cleanup, env refresh, VPN clients, FreeFileSync/rsync) belong to `workstation-ops`, not here. `platforms/*/tools/` holds only what keyflow runtime or validation uses.
 - Do not reintroduce removed services, dependencies, tracking, or features without new evidence that they add value.
 - `platforms/shared/data/hotkeys.db` is the single human-managed hotkey source; generated catalogs/bindings are not alternative authorities.
 - AI edits `hotkeys.db` only when the human requested that specific change, and only through `ai/hotkey_sync.py` edit commands (never raw SQL): they validate, roll back on failure and regenerate artifacts.
@@ -100,7 +100,7 @@ Turn every confirmed finding into a mechanical guard when feasible: a pure-logic
 - On Windows, `platforms/windows/tools/selftest.ahk` produces runtime evidence for hotstrings and window geometry; extend it when a Windows behavior can be checked without real apps.
 - Never claim a check or runtime behavior that was not executed or observed.
 
-<!-- workspace-contract sha256:b6919a8b8f04 -->
+<!-- workspace-contract sha256:f2b419251770 -->
 ## Workspace contract
 
 Identical in the six repositories under `~/gh/`. The master copy is the one in
@@ -125,7 +125,7 @@ current truth: fix the rule or the code, never ignore it.
 | `abap-craft` | ABAP Craft, the public ABAP articles site | public |
 | `gen-box` | generic reusable tools and agent skills | private-technical |
 | `keyflow` | hotkeys, hotstrings and daily desktop automation (Windows/macOS) | public |
-| `keyflow-station` | workstation installation, maintenance and backup sync | private-technical |
+| `workstation-ops` | workstation operations | private-technical |
 
 Content only moves to a repository of the same or a more private class, with one exception below.
 `ntinco-os` alone holds private-personal data; approved adapters carry only what an authorized task needs.
@@ -139,7 +139,7 @@ Routing between repositories:
   the gen-box source and run `contract_sync.py`; a copy edited in place fails the health check.
 - ABAP/SAP knowledge -> `abap-box`; to `abap-craft` only anonymized and with explicit human approval.
 - Hotkey, hotstring or daily desktop automation -> `keyflow`.
-- Installation, provisioning or machine maintenance -> `keyflow-station`; Claude Code user config -> `gen-box/claude/`;
+- Installation, provisioning or machine maintenance -> `workstation-ops`; Claude Code user config -> `gen-box/claude/`;
   OpenClaw config and usage -> `gen-box/openclaw/`.
 - Personal fact, plan, time or finance -> `ntinco-os`.
 - When a task belongs to another repository, say so and work there; never build a local substitute.
