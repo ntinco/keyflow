@@ -17,3 +17,4 @@ storage.db
 
 # graphify-axet
 *.graphify*
+*.axet-code/
