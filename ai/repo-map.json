@@ -26,6 +26,7 @@
     "validation": {
       "health": "ai/health_check.py",
       "hotkey_sync": "ai/hotkey_sync.py",
+      "catalog_hash": "ai/catalog_hash.py",
       "smoke": "ai/run_smoke.py",
       "tests": "ai/tests/"
     },

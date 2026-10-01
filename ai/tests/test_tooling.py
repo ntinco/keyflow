@@ -137,7 +137,8 @@ class CatalogEditTests(unittest.TestCase):
 class HealthCheckHelperTests(unittest.TestCase):
     def test_hash_matches_between_tools(self) -> None:
         items = [{"trigger": "bd,", "value": "Buen día,", "immediate": True}]
-        self.assertEqual(hotkey_sync.catalog_items_sha256(items), health_check.catalog_items_sha256(items))
+        self.assertEqual(hotkey_sync.catalog_items_sha256(items), "419b85eaa8996b89322d93c0cb372c40e46f2881ce3609dce9f9abfe6c78a3a5")
+        self.assertEqual(health_check.catalog_items_sha256(items), hotkey_sync.catalog_items_sha256(items))
 
     def test_lua_comments_cannot_satisfy_contracts(self) -> None:
         code = 'local a = "--keep" -- iina-cli\n--[[ block\nstill ]] local b = 1'

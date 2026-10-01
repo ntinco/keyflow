@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import re
 import sqlite3
@@ -14,6 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import workspace_contract as shared_contract  # noqa: E402
+from catalog_hash import catalog_items_sha256  # noqa: E402
 
 RE_INCLUDE = re.compile(r'^\s*#Include\s+"?([^"\r\n]+)"?', re.MULTILINE)
 RE_SERVICE_CALL = re.compile(r"services\.([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z_][A-Za-z0-9_]*)")
@@ -321,12 +321,6 @@ def validate_profiles(profiles: list[dict[str, str]], data_dir: Path, repo_root:
             })
         results.append(entry)
     return results, issues
-
-
-def catalog_items_sha256(items: object) -> str:
-    """Mirror of ai/hotkey_sync.py catalog_items_sha256."""
-    canonical = json.dumps(items, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def current_catalog_sha256(repo_root: Path, catalog_rel: str) -> str | None:

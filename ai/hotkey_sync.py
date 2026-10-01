@@ -23,7 +23,6 @@ and platforms/macos/hammerspoon/generated/bindings.lua
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import re
 import sqlite3
@@ -31,6 +30,8 @@ import sys
 from collections import defaultdict
 from datetime import date
 from pathlib import Path
+
+from catalog_hash import catalog_items_sha256
 
 
 ROOT = Path(__file__).parent.parent
@@ -453,12 +454,6 @@ def validate_hotstrings(entries: list[dict[str, object]], profiles: list[dict[st
     issues = find_hotstring_conflicts(entries, profiles)
     if issues:
         raise CatalogError("Hotstring trigger conflicts:\n- " + "\n- ".join(issues))
-
-
-def catalog_items_sha256(items: object) -> str:
-    """Content hash used by ai/catalog-review.json; mirrored in ai/health_check.py."""
-    canonical = json.dumps(items, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def _load_all() -> tuple[list[dict[str, object]], list[dict[str, object]]]:
