@@ -9,6 +9,7 @@ local APP_BUNDLE_IDS = {
   cursor = "com.todesktop.230313mzl4w4u",
   eclipse = "epp.package.committers",
   finder = "com.apple.finder",
+  githubCopilot = "com.github.githubapp",
   iina = "com.colliderli.iina",
   sap = "com.sap.platin",
   snipaste = "com.Snipaste",
@@ -127,6 +128,7 @@ Actions.global_alt_d = function()
     APP_BUNDLE_IDS.cursor,
     APP_BUNDLE_IDS.vscode,
     APP_BUNDLE_IDS.terminal,
+    APP_BUNDLE_IDS.githubCopilot,
   })
 end
 
