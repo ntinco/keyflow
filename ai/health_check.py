@@ -420,7 +420,7 @@ def load_repo_map(repo_root: Path) -> tuple[dict[str, object], list[dict[str, st
 def validate_repo_map(repo_root: Path, repo_map: dict[str, object]) -> list[dict[str, str]]:
     issues: list[dict[str, str]] = []
     expected_keys = {"schema_version", "purpose", "routing", "ownership", "local_only", "validators", "platform_validators", "pending_acceptance",
-                     "shared_files", "cold_start_token_budget"}
+                     "requires", "shared_files", "cold_start_token_budget"}
     if set(repo_map) != expected_keys:
         issues.append({
             "type": "repo_map_top_level_shape",

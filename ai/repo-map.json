@@ -72,6 +72,7 @@
     "macos": ["python3 ai/run_smoke.py --platform macos", "lua ai/tests/macos_logic_test.lua"],
     "windows": ["python3 ai/run_smoke.py --platform windows", "platforms/windows/tools/selftest.ahk"]
   },
+  "requires": {"catalog": ["hammerspoon", "lua"]},
   "pending_acceptance": "ai/current-plan.md",
   "shared_files": {
     "ai/workspace_contract.py": "shared/workspace_contract.py",
