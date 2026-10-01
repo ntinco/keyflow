@@ -75,6 +75,7 @@ Local secrets/state must not be committed. The complete routing/boundary list is
 ## macOS onboarding
 
 1. Install Hammerspoon and required local tools used by the actions you enable.
+   The macOS validators (`ai/run_smoke.py`, `ai/tests/macos_logic_test.lua`) need `lua` and `luac` (Homebrew `lua`).
 2. Symlink `platforms/macos/hammerspoon` into the Hammerspoon config, for example `~/.hammerspoon/keyflow`.
 3. Load it from `~/.hammerspoon/init.lua` with `dofile(hs.configdir .. "/keyflow/init.lua")`.
 4. Reload Hammerspoon and perform the relevant runtime acceptance checks in `ai/current-plan.md` when that active frontier exists.
