@@ -77,12 +77,8 @@ Structural validators prove wiring, not runtime behavior. For runtime changes an
 - On Windows, `platforms/windows/tools/selftest.ahk` produces runtime evidence for hotstrings and window geometry; extend it when a Windows behavior can be checked without real apps.
 - Never claim a check or runtime behavior that was not executed or observed.
 
-<!-- workspace-contract sha256:96c8fc3942d9 -->
+<!-- workspace-contract sha256:5d1301a146fd -->
 ## Workspace contract
-
-Identical in the six repositories under `~/gh/`. The master copy is the one in
-`gen-box/ai/governance.md`: edit only that one, then run `python3 tools/contract_sync.py ~/gh` from `gen-box`.
-Two of the repositories are public, so this section never holds private detail.
 
 Precedence, highest first:
 
@@ -92,8 +88,7 @@ Precedence, highest first:
 4. `ai/repo-map.json`: it locates and runs things and sets no rule.
 5. Skills and templates, always optional.
 
-`AGENTS.md` and `CLAUDE.md` only point here. When a text and a validator disagree, the failing validator is the
-current truth: fix the rule or the code, never ignore it.
+When a text and a validator disagree, the failing validator is the current truth: fix the rule or the code, never ignore it.
 
 | Repo | Holds | Data class |
 |---|---|---|
@@ -111,9 +106,6 @@ Client or employer confidential data belongs in none of them.
 Routing between repositories:
 
 - Generic tool or file converter -> `gen-box`; other repositories run it from `~/gh/gen-box/tools/` and never copy it.
-  The exception is `gen-box/shared/` (contract check, its test, pre-commit hook): every repository commits the copies
-  listed in `ai/repo-map.json` -> `shared_files`, because CI and cloud sessions clone one repository alone. Edit only
-  the gen-box source and run `contract_sync.py`; a copy edited in place fails the health check.
 - ABAP/SAP knowledge -> `abap-box`; to `abap-craft` only anonymized and with explicit human approval.
 - Hotkey, hotstring or daily desktop automation -> `keyflow`.
 - Installation, provisioning or machine maintenance -> `workstation-ops`; Claude Code user config -> `gen-box/claude/`;
@@ -143,22 +135,9 @@ Autonomy:
 Parallel work: one branch or worktree per task (`git worktree add ../<repo>-<task> -b <task>`). Never stage, commit,
 stash, reset or revert changes you did not make; if the tree holds foreign changes, use a new worktree.
 
-Pending acceptance: what waits for the human (runtime checks, claims to confirm) lives in one place per repository,
-declared in `ai/repo-map.json` -> `pending_acceptance`; that file may be absent while nothing is pending.
-
 Commands: write `python3` in commands and docs. Validators that need a specific OS or application (AutoHotkey,
 Hammerspoon, PowerShell, SAP) go in `ai/repo-map.json` -> `platform_validators` and never run in CI on another platform.
 Environments: macOS and Linux (CI, cloud sessions); Windows is out of scope until the human reopens it.
-Hooks: enable the versioned hooks once per clone with `git config core.hooksPath .githooks` (a Claude Code
-SessionStart hook in `.claude/settings.json` may do it); on macOS `python3 tools/link_workspace.py ~/gh` from `gen-box`
-points every repository at `gen-box/shared/githooks` instead. The pre-commit hook runs the check that
-`.githooks/pre-commit.conf` names on the staged tree.
-Cold start (`AGENTS.md`, `CLAUDE.md`, `ai/governance.md`, `ai/repo-map.json`) stays under `ai/repo-map.json` ->
-`cold_start_token_budget`; raise it only with the reason in the commit. CI compares each repository with gen-box when
-the `GEN_BOX_TOKEN` secret is set.
-`gen-box/tools/secret_guard.py` is the Claude Code PreToolUse hook (matcher `Bash`) that extends the Read/Edit deny
-list to shell commands; the human wires it in `.claude/settings.json`, and the contract check requires it there with
-the 22 secret deny rules.
 Hooks and validators execute repository code: run them only on branches the human or their agents wrote, and review an
 outside contribution in CI or a disposable environment first.
 <!-- /workspace-contract -->
