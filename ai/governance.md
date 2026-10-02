@@ -52,41 +52,17 @@ AI operates:
 
 ## Change recipes
 
-Hotstring (autocorrect, snippet, SAP command):
-
-1. `python3 ai/hotkey_sync.py --add-hotstring PROFILE TRIGGER VALUE [--immediate]` (or `--set-hotstring` / `--remove-hotstring`). Trigger conflicts (duplicates, immediate prefixes, ending-character clashes) are rejected.
-2. After the human confirms: `python3 ai/hotkey_sync.py --mark-reviewed PROFILE`.
-3. SAP transaction hotstring: use `sap-transaction-catalog` when the trigger is the tcode, or `sap-transaction-shortcuts` for an alias. Keep the tcode lowercase in the value. The adapter adds `/n` while preserving its case; do not put `/n` in the catalog value. Other SAP commands and SAP hotkeys keep their existing normalization.
-
-SAP transaction hotkey (portable):
-
-1. `python3 ai/hotkey_sync.py --add-hotkey '{"id": "sap_gui_...", "file": "sap-gui", "type": "hotkey", "key": "!9", "windows_context": "...", "context_label": "sap-gui-session", "action": "sap-tcode:SE16N", "label": "...", "platform": ["windows", "macos"], "portability": "portable-intent"}'`.
-2. No runtime code: both platforms dispatch `sap-tcode:` through their SAP adapter.
-
-Other hotkey on both platforms:
-
-1. Add the row with `--add-hotkey`; `action` holds the Windows AHK body, `platform` lists both, `portability` is `portable-intent`, `context_label` is `global` or a label present in `init.lua` `CONTEXT_APPS`.
-2. Implement `Actions.<id>` in `platforms/macos/hammerspoon/actions.lua`; `health_check` fails while it is missing.
-3. Put reusable Windows logic in a registered service under `platforms/windows/library/automation/`, not inline in `action`.
-4. Add pure logic tests to `ai/tests/` when the change has branching logic that can run without the real apps.
-5. Record the runtime checks the human must perform in `ai/current-plan.md`.
-
-Special hotstring with computed output (`hs_*`): add the row with `--add-hotkey` (type `hotstring`, options `:*:` for immediate), implement Windows behavior in `action`, and add the id to `SPECIAL_BEHAVIORS` in `hotstrings.lua`.
+- `hotkeys.db` is the only source. Use `python3 ai/hotkey_sync.py` edit commands; they validate changes and regenerate platform artifacts. Never edit generated catalogs directly.
+- Hotstrings: use `--add-hotstring`, `--set-hotstring` or `--remove-hotstring`. Resolve any reported trigger conflicts. Mark a catalog reviewed only after its content is human-confirmed.
+- SAP tcode hotstrings: use `sap-transaction-catalog` for tcode triggers or `sap-transaction-shortcuts` for aliases. Store the lowercase tcode without `/n`; the adapters add `/n` and preserve case. Other SAP commands and SAP hotkeys retain their existing normalization.
+- SAP tcode hotkeys use `sap-tcode:<code>` and need no per-hotkey runtime implementation.
+- Other portable hotkeys need a Windows action and a matching `Actions.<id>` in `platforms/macos/hammerspoon/actions.lua`; keep reusable Windows logic in a registered automation service.
+- Add pure-logic tests for branching behavior. Record only checks requiring real applications or user observation in `ai/current-plan.md`.
+- Computed `hs_*` hotstrings additionally need Windows behavior in the catalog action and an entry in `SPECIAL_BEHAVIORS` in `hotstrings.lua`.
 
 ## Review recipe
 
-Structural validators prove the pieces are wired; they do not prove behavior. Before completing any runtime change, and when the human asks for a review, check each risk below against the diff and record findings with file:line:
-
-1. Overlap and timing: two triggers within a delay/timer window (clipboard restore, SAP run tokens, `hs.timer` callbacks); state a late callback reads.
-2. Input erasure: who erases the trigger (AHK auto-erase unless `b0`; macOS `visibleCount`), and that nothing erases it twice; character vs byte counts.
-3. Dispatch and scope: a key or hotstring must fire only in its context, and an inactive match must not swallow or hide another binding.
-4. Focus and target: the action types into the intended field/window (SAP command field, Snipaste return target), including after an app switch.
-5. Paths and quoting: spaces, non-ASCII and empty selections in paths passed to shells or apps.
-6. Screen geometry: secondary monitors, taskbar/work area, maximized windows.
-7. Platform parity: the same intent has the same steps on Windows and macOS, or the difference is recorded as a deferred gap.
-8. Failure path: missing app, empty clipboard, timeout; the user's clipboard and text are left intact.
-
-Turn every confirmed finding into a mechanical guard when feasible: a pure-logic test in `ai/tests/`, a `health_check` rule, or a `hotkey_sync` validation. Otherwise add the manual check to `ai/current-plan.md`.
+Structural validators prove wiring, not runtime behavior. For runtime changes and requested reviews, inspect relevant timing and input erasure, dispatch/scope/focus, platform parity, paths/geometry, and failure handling; record findings with file:line. Turn reproducible risks into tests or validators where practical, and keep remaining real-app checks in `ai/current-plan.md`.
 
 ## Active work state
 
