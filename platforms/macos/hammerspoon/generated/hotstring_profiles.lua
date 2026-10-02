@@ -673,6 +673,7 @@ return {
     {trigger = "zconst", value = "zconst", immediate = false},
     {trigger = "zal11", value = "zal11", immediate = false},
     {trigger = "zele", value = "zele", immediate = false},
+    {trigger = "iw3d", value = "iw3d", immediate = false},
   }},
   {id = "ymt-commands", mode = "sap-command", contextLabel = "sap-gui-session", entries = {
     {trigger = "da", value = "=da", immediate = false},

@@ -789,6 +789,10 @@
     {
       "trigger": "zele",
       "value": "zele"
+    },
+    {
+      "trigger": "iw3d",
+      "value": "iw3d"
     }
   ]
 }

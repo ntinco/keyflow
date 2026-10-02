@@ -243,7 +243,7 @@ function Actions.cancelSapRun()
 end
 
 -- Mirrors SapService._normalizeTcode in platforms/windows/library/automation/sap.ahk.
-local function normalizeTcode(tcode)
+local function normalizeTcode(tcode, preserveCase)
   local normalized = tcode:match("^%s*(.-)%s*$")
   if normalized:sub(1, 1) == "/" then
     return normalized
@@ -252,10 +252,10 @@ local function normalizeTcode(tcode)
   if normalized:sub(1, 1) == "=" then
     return normalized:upper()
   end
-  return "/n" .. normalized:upper()
+  return "/n" .. (preserveCase and normalized or normalized:upper())
 end
 
-local function runTcode(tcode)
+local function runTcode(tcode, preserveCase)
   if not isFrontSap() then return end
   Actions.cancelSapRun()
   local token = sapRunToken
@@ -266,7 +266,7 @@ local function runTcode(tcode)
       hs.eventtap.keyStroke({"cmd"}, "a", KEYSTROKE_DELAY)
       hs.timer.doAfter(0.05, function()
         if token == sapRunToken and isFrontSap() then
-          pasteText(normalizeTcode(tcode))
+          pasteText(normalizeTcode(tcode, preserveCase))
           hs.timer.doAfter(0.15, function()
             if token == sapRunToken and isFrontSap() then
               hs.eventtap.keyStroke({}, "return", KEYSTROKE_DELAY)

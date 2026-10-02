@@ -23,6 +23,8 @@ end
 -- SAP tcode normalization ---------------------------------------------------
 local normalize = Actions.normalizeTcode
 expectEqual(normalize("se16n"), "/nSE16N", "plain tcode gets /n")
+expectEqual(normalize("iw3d", true), "/niw3d", "SAP hotstring keeps lowercase and adds /n")
+expectEqual(normalize("se16n", true), "/nse16n", "hotstring preserves lowercase")
 expectEqual(normalize("  va03 "), "/nVA03", "whitespace trimmed")
 expectEqual(normalize("/nse38"), "/nse38", "slash commands sent as-is")
 expectEqual(normalize("/o"), "/o", "session command sent as-is")
@@ -62,11 +64,13 @@ local triggers = Hotstrings.buildTriggers(
     {id = "snippets", mode = "replace", contextLabel = "global",
       entries = {{trigger = "bd,", value = "Buen día,", immediate = true},
                  {trigger = "ñd,", value = "x", immediate = true}}},
-    {id = "sap", mode = "sap-command", contextLabel = "sap-gui-session",
+    {id = "sap-transaction-catalog", mode = "sap-command", contextLabel = "sap-gui-session",
+      entries = {{trigger = "iw3d", value = "iw3d", immediate = false}}},
+    {id = "ymt-commands", mode = "sap-command", contextLabel = "sap-gui-session",
       entries = {{trigger = "da", value = "=DA", immediate = true}}},
   }
 )
-expectEqual(#triggers, 5, "special hotstrings without behavior are skipped")
+expectEqual(#triggers, 6, "special hotstrings without behavior are skipped")
 
 local function inSap(trigger) return true end
 local function outsideSap(trigger) return trigger.contextLabel ~= "sap-gui-session" end
@@ -104,10 +108,18 @@ expectEqual(Hotstrings.isGuestApp("com.apple.TextEdit"), false, "native apps kee
 expectEqual(Hotstrings.isGuestApp(nil), false, "no frontmost bundle keeps hotstrings")
 expectEqual(match("mabd,"), nil, "triggers without ? still respect word boundaries")
 
-expectEqual(match("da", inSap), nil, "SAP commands never fire immediately")
-trigger, count, terminator = match("da ", inSap)
+expectEqual(match("iw3d", inSap), nil, "SAP commands never fire immediately")
+trigger, count, terminator = match("iw3d ", inSap)
 expectEqual(trigger and trigger.run ~= nil, true, "SAP command runs on ending character")
-expectEqual(count, 2, "SAP command erases its trigger")
+local sapRunArgs
+trigger.run({runSapTcode = function(...) sapRunArgs = {...} end})
+expectEqual(sapRunArgs[1], "iw3d", "SAP hotstring forwards its transaction")
+expectEqual(sapRunArgs[2], true, "SAP hotstring opts into case preservation")
+expectEqual(count, 4, "SAP command erases its trigger")
+trigger = select(1, match("da ", inSap))
+local ymtRunArgs
+trigger.run({runSapTcode = function(...) ymtRunArgs = {...} end})
+expectEqual(ymtRunArgs[2], false, "non-tcode SAP command keeps default normalization")
 expectEqual(match("da "), nil, "SAP command is scoped to SAP")
 
 -- Clipboard restore with a fake clock ---------------------------------------

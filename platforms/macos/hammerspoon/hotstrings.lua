@@ -209,6 +209,8 @@ local function buildTriggers(bindings, profiles)
   end
 
   for _, profile in ipairs(profiles) do
+    local preserveCase = profile.id == "sap-transaction-catalog"
+      or profile.id == "sap-transaction-shortcuts"
     for _, entry in ipairs(profile.entries) do
       local value = entry.value
       local mode = profile.mode
@@ -222,7 +224,7 @@ local function buildTriggers(bindings, profiles)
           return value
         end,
         run = mode == "sap-command" and function(actions)
-          actions.runSapTcode(value)
+          actions.runSapTcode(value, preserveCase)
         end or nil,
       }
     end

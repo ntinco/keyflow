@@ -9,12 +9,15 @@ Complete human runtime acceptance of the current macOS Hammerspoon slice and its
 - `platforms/shared/data/hotkeys.db` is the shared human-managed source for Windows and macOS hotkeys/hotstrings; `ai/hotkey_sync.py` generates the platform artifacts and checks drift.
 - The macOS runtime covers contextual SAP GUI/Eclipse hotkeys, shared hotstrings, Finder/Spotlight launcher actions, IINA dispatch via LaunchServices, Snipaste return to the most recent allowed target, window-group rotation, and Cmd+Esc height stretch.
 - SAP transaction hotkeys use the portable `sap-tcode:<code>` action where shared intent is required; platform adapters execute the behavior.
+- SAP transaction hotstrings preserve the lowercase tcode and add `/n`; SAP hotkeys retain their existing uppercase normalization.
 - macOS hotstring replacement types single-line text as unicode key events (multi-line blocks still paste and restore the clipboard), excludes synthetic events from its trigger buffer, respects word boundaries, and waits for an ending character unless an entry is marked `immediate`.
 - SAP commands starting with `/` or `=` are sent as-is; others get the `/n` prefix.
 
 ## Pending human verification
 
 Accepted on 2026-09-24. macOS: hotstrings, SAP tcode hotkeys/hotstrings and `=` OK-codes, SAP Easy Access, context isolation, Eclipse keys, Alt+D/Alt+E, SAP comment hotstrings, Finder/Spotlight F12, Alt+P via IINA, Snipaste return, Cmd+Esc, clipboard restore. Windows: `selftest.ahk` all PASS, SAP Alt+1, SAP hotstrings with space and Enter, F12 and Alt+P in Everything (`Everything.exe`, matched by `ahk_class EVERYTHING`; Alt+P plays only paths containing `music`), Win+Esc including elevated windows.
+
+New SAP tcode hotstring change (2026-10-01), pending runtime acceptance: on Windows and macOS, type `iw3d` followed by an ending character in a SAP GUI text field and confirm the adapter submits `/niw3d` without uppercasing. In SAP Easy Access, confirm `iw3d` still follows the direct-submit path.
 
 Cleanup after acceptance (2026-09-24), pending re-test:
 

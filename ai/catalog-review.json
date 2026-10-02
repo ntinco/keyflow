@@ -25,9 +25,9 @@
       "id": "sap-transaction-catalog",
       "file": "platforms/windows/data/sap-transaction-catalog.json",
       "status": "verified",
-      "last_human_verification": "2026-09-24",
+      "last_human_verification": "2026-10-01",
       "notes": "Content runtime-accepted by human on macOS; baseline content hash recorded.",
-      "content_sha256": "2df40644f2ed06190ac18413cc5d439443f1757f56bbd1481ed9cd4b59912772"
+      "content_sha256": "03430d295957e1dd6bac5870d25c1d37e329cdd615444c4708b089e7b10d0794"
     },
     {
       "id": "sap-transaction-shortcuts",

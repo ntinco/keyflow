@@ -56,6 +56,7 @@ Hotstring (autocorrect, snippet, SAP command):
 
 1. `python3 ai/hotkey_sync.py --add-hotstring PROFILE TRIGGER VALUE [--immediate]` (or `--set-hotstring` / `--remove-hotstring`). Trigger conflicts (duplicates, immediate prefixes, ending-character clashes) are rejected.
 2. After the human confirms: `python3 ai/hotkey_sync.py --mark-reviewed PROFILE`.
+3. SAP transaction hotstring: use `sap-transaction-catalog` when the trigger is the tcode, or `sap-transaction-shortcuts` for an alias. Keep the tcode lowercase in the value. The adapter adds `/n` while preserving its case; do not put `/n` in the catalog value. Other SAP commands and SAP hotkeys keep their existing normalization.
 
 SAP transaction hotkey (portable):
 

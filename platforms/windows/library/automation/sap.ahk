@@ -28,8 +28,8 @@ class SapService {
     return InStr(focusedControl, "edit")
   }
 
-  runTcode(tcode) {
-    command := this._normalizeTcode(tcode)
+  runTcode(tcode, preserveCase := false) {
+    command := this._normalizeTcode(tcode, preserveCase)
     if !command
       return
 
@@ -53,7 +53,7 @@ class SapService {
   }
 
   ; Mirrors normalizeTcode in platforms/macos/hammerspoon/actions.lua.
-  _normalizeTcode(tcode) {
+  _normalizeTcode(tcode, preserveCase := false) {
     command := Trim(tcode)
     if !command
       return ""
@@ -62,6 +62,6 @@ class SapService {
     ; "=" OK-codes are already complete commands; "/n" would break them.
     if InStr(command, "=") = 1
       return StrUpper(command)
-    return "/n" StrUpper(command)
+    return "/n" (preserveCase ? command : StrUpper(command))
   }
 }
