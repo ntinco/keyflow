@@ -359,8 +359,10 @@ def validate_entries(entries: list[dict[str, object]]) -> None:
             issues.append(f"{entry_id}: platform must be a non-empty JSON array")
         elif any(platform not in {"windows", "macos"} for platform in platforms):
             issues.append(f"{entry_id}: platform values must be windows or macos")
-        if entry.get("portability") not in {"windows-only", "portable-intent"}:
-            issues.append(f"{entry_id}: portability must be windows-only or portable-intent")
+        if entry.get("portability") not in {"windows-only", "macos-only", "portable-intent"}:
+            issues.append(f"{entry_id}: portability must be windows-only, macos-only or portable-intent")
+        if entry.get("portability") == "macos-only" and platforms != ["macos"]:
+            issues.append(f"{entry_id}: macos-only requires platform [\"macos\"]")
         action = str(entry.get("action") or "").strip()
         if not action or not str(entry.get("label") or "").strip():
             issues.append(f"{entry_id}: action and label are required")

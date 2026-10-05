@@ -175,6 +175,122 @@ Clipboard.paste("x", sendPaste)
 advance(Clipboard.RESTORE_DELAY)
 expectEqual(pasteboard.contents, nil, "empty clipboard is restored as empty")
 
+-- Generated bindings stay wired to actions ----------------------------------
+local generated = dofile(dir .. "generated/bindings.lua")
+local summaryBinding
+for _, binding in ipairs(generated) do
+  if binding.type == "hotkey" and binding.tcode == "" then
+    expectEqual(type(Actions[binding.id]), "function", "action registered for " .. binding.id)
+  end
+  if binding.id == "netnewswire_summary_current" then summaryBinding = binding end
+end
+expectEqual(summaryBinding and summaryBinding.contextLabel, "netnewswire",
+  "summary binding is scoped to NetNewsWire")
+mods, key = Dispatch.parseAhkKey(summaryBinding["key"])
+table.sort(mods)
+expectEqual(table.concat(mods, ","), "alt,cmd", "!#s is Option+Cmd")
+expectEqual(key, "s", "!#s key is s")
+
+-- NetNewsWire summary -------------------------------------------------------
+expectEqual(Actions.escapeHtml([[<script>alert("x")</script> & more]]),
+  "&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt; &amp; more", "HTML metacharacters are escaped")
+expectEqual(Actions.escapeHtml("&lt;"), "&amp;lt;", "existing entities are not trusted")
+local html = Actions.summaryHtml("a\n<img src=x onerror=alert(1)>")
+expectEqual(html:find("<img", 1, true), nil, "summary text cannot inject markup")
+expectEqual(html:find("<pre>a\n&lt;img", 1, true) ~= nil, true, "summary keeps line breaks inside <pre>")
+expectEqual(
+  Actions.summaryFailureMessage("status\nerror: No hay ningún artículo abierto en NetNewsWire.\nerror=1\n"),
+  "No hay ningún artículo abierto en NetNewsWire.", "script error reason is shown")
+expectEqual(Actions.summaryFailureMessage("zsh: command not found: python3"),
+  "No se pudo generar el resumen.", "unknown failure gets the generic message")
+expectEqual(Actions.summaryFailureMessage("error: " .. string.rep("x", 201)),
+  "No se pudo generar el resumen.", "oversized error detail is not shown")
+expectEqual(Actions.summaryFailureMessage(nil), "No se pudo generar el resumen.", "missing stderr is tolerated")
+
+local alerts, tasks, windows, deleted = {}, {}, {}, 0
+local settings, scriptExists = {}, true
+local function fakeWindow()
+  local window = {calls = {}}
+  return setmetatable(window, {__index = function(_, name)
+    return function(self, value)
+      if name == "delete" then deleted = deleted + 1 end
+      self.calls[name] = value == nil and true or value
+      return self
+    end
+  end})
+end
+hs.printf = function() end
+hs.alert = {show = function(text) alerts[#alerts + 1] = text end}
+hs.settings = {get = function(name) return settings[name] end}
+hs.fs = {attributes = function() return scriptExists and "file" or nil end}
+hs.screen = {mainScreen = function()
+  return {frame = function() return {x = 100, y = 50, w = 1600, h = 1000} end}
+end}
+hs.webview = {
+  windowMasks = {titled = 1, closable = 2, resizable = 8},
+  new = function(rect, preferences)
+    local window = fakeWindow()
+    window.rect, window.preferences = rect, preferences
+    windows[#windows + 1] = window
+    return window
+  end,
+}
+hs.task = {new = function(path, callback, args)
+  local task = {path = path, callback = callback, args = args}
+  function task:start() tasks[#tasks + 1] = self; return self end
+  return task
+end}
+local summarize = Actions.netnewswire_summary_current
+
+scriptExists = false
+summarize()
+expectEqual(#tasks, 0, "missing script launches nothing")
+expectEqual(alerts[#alerts], "No se encontró nnw_summary.py.", "missing script is reported")
+
+scriptExists = true
+summarize()
+expectEqual(#tasks, 1, "summary starts one task")
+expectEqual(alerts[#alerts], "Resumiendo…", "start feedback is shown")
+expectEqual(tasks[1].path, "/bin/zsh", "summary runs through the login shell")
+expectEqual(tasks[1].args[1], "-lc", "login shell supplies the provider PATH")
+expectEqual(tasks[1].args[2]:find("nnw_summary", 1, true), nil, "script path is not part of the shell source")
+expectEqual(tasks[1].args[4], os.getenv("HOME") .. "/gh/netnewswire-ai/tools/nnw_summary.py",
+  "workspace default script is a positional argument")
+summarize()
+expectEqual(#tasks, 1, "a running summary is not duplicated")
+expectEqual(alerts[#alerts], "El resumen sigue en curso…", "second press reports the running summary")
+
+tasks[1].callback(1, "partial", "error: NetNewsWire no está abierto.\nerror=1\n")
+expectEqual(#windows, 0, "failed summary opens no window")
+expectEqual(alerts[#alerts], "NetNewsWire no está abierto.", "failure shows the script reason")
+
+settings["keyflow.netnewswireSummaryScript"] = "/tmp/it's; $(x)/nnw_summary.py"
+summarize()
+expectEqual(#tasks, 2, "state is cleared after a failure")
+expectEqual(tasks[2].args[4], "/tmp/it's; $(x)/nnw_summary.py", "local override wins and stays one argument")
+tasks[2].callback(0, " \n", "")
+expectEqual(#windows, 0, "empty output opens no window")
+expectEqual(alerts[#alerts], "No se pudo generar el resumen.", "empty output is a failure")
+
+summarize()
+tasks[3].callback(0, "Título\n\n<b>Resumen</b>\n", "")
+expectEqual(#windows, 1, "successful summary opens a window")
+expectEqual(windows[1].rect.w, 760, "window width")
+expectEqual(windows[1].rect.h, 580, "window height")
+expectEqual(windows[1].rect.x, 520, "window is centered horizontally on the screen")
+expectEqual(windows[1].rect.y, 260, "window is centered vertically on the screen")
+expectEqual(windows[1].preferences.javaScriptEnabled, false, "summary window runs no JavaScript")
+expectEqual(windows[1].calls.windowStyle, 11, "window is titled, closable and resizable")
+expectEqual(windows[1].calls.html:find("&lt;b&gt;Resumen&lt;/b&gt;", 1, true) ~= nil, true,
+  "window shows the escaped summary")
+summarize()
+tasks[4].callback(0, "otro", "")
+expectEqual(deleted, 1, "previous summary window is closed")
+windows[2].calls.windowCallback("closing")
+summarize()
+tasks[5].callback(0, "tercero", "")
+expectEqual(deleted, 1, "a window the user closed is not deleted again")
+
 if failures > 0 then
   os.exit(1)
 end

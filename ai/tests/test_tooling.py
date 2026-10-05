@@ -68,6 +68,38 @@ class HotstringConflictTests(unittest.TestCase):
         self.assertEqual(hotkey_sync.find_hotstring_conflicts([], profiles), [])
 
 
+class NetNewsWireSummaryBindingTests(unittest.TestCase):
+    BINDING_ID = "netnewswire_summary_current"
+
+    def test_catalog_binding_is_macos_only(self) -> None:
+        entries = hotkey_sync.load_db()
+        entry = next(item for item in entries if item["id"] == self.BINDING_ID)
+        self.assertEqual(
+            (entry["type"], entry["key"], entry["context_label"], entry["platform"], entry["portability"],
+             entry["label"], bool(entry["active"])),
+            ("hotkey", "!#s", "netnewswire", ["macos"], "macos-only", "Summarize current NetNewsWire article", True),
+        )
+        self.assertFalse(entry["windows_context"])
+        self.assertIn(f'id = "{self.BINDING_ID}"', hotkey_sync.generate_macos_bindings(entries))
+        for file_key in {str(item["file"]) for item in entries}:
+            self.assertNotIn(self.BINDING_ID, hotkey_sync.generate_file(file_key, entries))
+        for ahk_file in hotkey_sync.HOTKEYS_DIR.rglob("*.ahk"):
+            self.assertNotIn(self.BINDING_ID, ahk_file.read_text(encoding="utf-8"))
+
+    def test_runtime_wires_context_and_action(self) -> None:
+        macos_dir = REPO_ROOT / "platforms" / "macos" / "hammerspoon"
+        init_text = (macos_dir / "init.lua").read_text(encoding="utf-8")
+        self.assertRegex(
+            init_text,
+            r'\["netnewswire"\] = \{\s*\{bundleID = "com\.ranchero\.NetNewsWire-Evergreen", name = "NetNewsWire"\},\s*\}',
+        )
+        # Event-tap contexts are named in init.lua; this one must stay on the app-watcher path.
+        self.assertNotIn('binding.contextLabel == "netnewswire"', init_text)
+        actions_text = (macos_dir / "actions.lua").read_text(encoding="utf-8")
+        self.assertIn(f"Actions.{self.BINDING_ID} = function()", actions_text)
+        self.assertNotIn("netnewswire-ai-summary", actions_text)
+
+
 class CatalogEditTests(unittest.TestCase):
     def setUp(self) -> None:
         self.tmp = tempfile.TemporaryDirectory()
@@ -123,6 +155,18 @@ class CatalogEditTests(unittest.TestCase):
             hotkey_sync.set_hotkey("hs_semicolons", "action", 'Send("{BS}ñ")')
         self.assertIn("erases its trigger", str(caught.exception))
         self.assertEqual(self.db.read_bytes(), before)
+
+    def test_macos_only_portability(self) -> None:
+        row = ('{"id": "nnw_probe", "file": "global", "type": "hotkey", "key": "!#F9", "action": "x", '
+               '"label": "x", "platform": %s, "portability": "%s"}')
+        before = self.db.read_bytes()
+        for platform, portability in (('["windows", "macos"]', "macos-only"), ('["macos"]', "linux-only")):
+            with self.assertRaises(hotkey_sync.CatalogError) as caught:
+                hotkey_sync.add_hotkey(row % (platform, portability))
+            self.assertIn("nnw_probe", str(caught.exception))
+            self.assertEqual(self.db.read_bytes(), before)
+        entries, _ = hotkey_sync.add_hotkey(row % ('["macos"]', "macos-only"))
+        self.assertEqual(next(e for e in entries if e["id"] == "nnw_probe")["portability"], "macos-only")
 
     def test_hotkey_requires_id(self) -> None:
         before = self.db.read_bytes()

@@ -29,6 +29,19 @@ Cleanup after acceptance (2026-09-24), pending re-test:
 6. `cpm` in a native macOS text field and a Windows text field: typing the last `m` expands once to `commit y push directo a main` without a space or Enter.
 7. macOS Alt+D (Option+D) with GitHub Copilot (`com.github.githubapp`) open: it joins the IDE group rotation with Cursor, VS Code and Terminal.
 
+NetNewsWire summary hotkey (2026-10-05), pending runtime acceptance; nothing below has been observed. `⌥⌘S` (`netnewswire_summary_current`, `macos-only`) runs `netnewswire-ai/tools/nnw_summary.py --current` through `/bin/zsh -lc` and shows stdout in an `hs.webview` window. The script path is `hs.settings` `keyflow.netnewswireSummaryScript` when set, otherwise `$HOME/gh/netnewswire-ai/tools/nnw_summary.py`. Until `netnewswire-ai` merges `nnw-summary`, set the override in the Hammerspoon console: `hs.settings.set("keyflow.netnewswireSummaryScript", os.getenv("HOME") .. "/gh/netnewswire-ai-summary/tools/nnw_summary.py")`; afterwards `hs.settings.clear("keyflow.netnewswireSummaryScript")`.
+
+1. Reload Hammerspoon; the Console shows no errors and one more contextual binding.
+2. Open NetNewsWire and a real article; note its read/starred state.
+3. Press `⌥⌘S`: the `Resumiendo…` alert appears.
+4. A titled, closable, resizable window (about 760×580, centered) shows the right summary; it scrolls, the text can be selected and copied, line breaks are kept, Escape closes it.
+5. NetNewsWire is still open and the article's read/starred state is unchanged.
+6. The clipboard is unchanged and no Terminal window opened.
+7. With another app frontmost, `⌥⌘S` is not intercepted (the app receives it).
+8. Two quick presses: the second shows `El resumen sigue en curso…` and the Console logs a single `NetNewsWire summary finished`.
+9. A second summary replaces the previous window.
+10. No article selected: an alert with the reason and no window. Override pointing to a missing file: `No se encontró nnw_summary.py.` and nothing runs.
+
 ## Known parity gaps (deliberately deferred)
 
 - F12 on macOS lacks the Windows `YM` post-paste step (3 s wait + Ctrl+F3); pending implementation.

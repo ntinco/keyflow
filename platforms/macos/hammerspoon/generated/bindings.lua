@@ -19,6 +19,7 @@ return {
   {id = "hs_semicolons", type = "hotstring", key = ";;", contextLabel = "", tcode = "", label = "Type ñ", immediate = true, insideWord = true},
   {id = "launcher_alt_p", type = "hotkey", key = "!p", contextLabel = "launcher", tcode = "", label = "Open selected media"},
   {id = "launcher_f12", type = "hotkey", key = "f12", contextLabel = "launcher", tcode = "", label = "Paste selected files"},
+  {id = "netnewswire_summary_current", type = "hotkey", key = "!#s", contextLabel = "netnewswire", tcode = "", label = "Summarize current NetNewsWire article"},
   {id = "sap_gui_alt_0", type = "hotkey", key = "!0", contextLabel = "sap-gui-session", tcode = "SE80", label = "SE80 object navigator"},
   {id = "sap_gui_alt_1", type = "hotkey", key = "!1", contextLabel = "sap-gui-session", tcode = "SE11", label = "SE11 ABAP Dictionary"},
   {id = "sap_gui_alt_3", type = "hotkey", key = "!3", contextLabel = "sap-gui-session", tcode = "SE93", label = "SE93 transaction maintenance"},

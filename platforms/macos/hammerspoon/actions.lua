@@ -537,4 +537,108 @@ Actions.snipaste_enter = function()
   hs.timer.doAfter(0.1, readCapture)
 end
 
+-- NetNewsWire summary: keyflow owns only hotkey, execution and presentation;
+-- the summary itself lives in netnewswire-ai/tools/nnw_summary.py.
+local SUMMARY_SCRIPT_SETTING = "keyflow.netnewswireSummaryScript"
+local SUMMARY_SCRIPT_DEFAULT = "/gh/netnewswire-ai/tools/nnw_summary.py"
+-- Hammerspoon's GUI PATH lacks the provider CLIs, so a login shell resolves
+-- them. The script path is the positional $1, never part of the shell source.
+local SUMMARY_SHELL_COMMAND = 'exec python3 "$1" --current'
+local SUMMARY_FAILED = "No se pudo generar el resumen."
+local HTML_ESCAPES = {["&"] = "&amp;", ["<"] = "&lt;", [">"] = "&gt;", ['"'] = "&quot;"}
+
+local summaryTask
+local summaryWindow
+
+local function escapeHtml(text)
+  return (text:gsub('[&<>"]', HTML_ESCAPES))
+end
+
+-- Article and model text are untrusted: escaped into a <pre>, never markup.
+local function summaryHtml(text)
+  return '<!DOCTYPE html><html><head><meta charset="utf-8"><style>'
+    .. "body{margin:0;font:15px/1.5 -apple-system,sans-serif;"
+    .. "color:#1d1d1f;background:#fff}"
+    .. "pre{margin:0;padding:20px 24px;font:inherit;white-space:pre-wrap;"
+    .. "overflow-wrap:break-word;-webkit-user-select:text}"
+    .. "@media(prefers-color-scheme:dark){body{color:#f5f5f7;background:#1e1e1e}}"
+    .. "</style></head><body><pre>" .. escapeHtml(text) .. "</pre></body></html>"
+end
+
+-- nnw_summary.py reports its user-facing reason as an "error: ..." stderr line.
+local function summaryFailureMessage(errorOutput)
+  local detail = ("\n" .. (errorOutput or "")):match("\nerror: ([^\r\n]+)")
+  if detail and #detail <= 200 then return detail end
+  return SUMMARY_FAILED
+end
+
+local function summaryScriptPath()
+  local override = hs.settings.get(SUMMARY_SCRIPT_SETTING)
+  if type(override) == "string" and override ~= "" then return override end
+  return os.getenv("HOME") .. SUMMARY_SCRIPT_DEFAULT
+end
+
+local function showSummary(text)
+  if summaryWindow then summaryWindow:delete() end
+  local screen = (hs.screen.mainScreen() or hs.screen.primaryScreen()):frame()
+  local width, height = math.min(760, screen.w), math.min(580, screen.h)
+  local masks = hs.webview.windowMasks
+  local window
+  window = hs.webview.new({
+    x = screen.x + (screen.w - width) / 2,
+    y = screen.y + (screen.h - height) / 2,
+    w = width,
+    h = height,
+  }, {javaScriptEnabled = false})
+  window
+    :windowStyle(masks.titled | masks.closable | masks.resizable)
+    :windowTitle("Resumen — NetNewsWire")
+    :allowTextEntry(true)
+    :closeOnEscape(true)
+    :deleteOnClose(true)
+    :windowCallback(function(action)
+      if action == "closing" and summaryWindow == window then summaryWindow = nil end
+    end)
+    :html(summaryHtml(text))
+    :show()
+    :bringToFront()
+  summaryWindow = window
+  local hsWindow = window:hswindow()
+  if hsWindow then hsWindow:focus() end
+end
+
+Actions.netnewswire_summary_current = function()
+  if summaryTask then
+    hs.alert.show("El resumen sigue en curso…")
+    return
+  end
+  local script = summaryScriptPath()
+  if hs.fs.attributes(script, "mode") ~= "file" then
+    hs.printf("keyflow: NetNewsWire summary script not found: %s", script)
+    hs.alert.show("No se encontró nnw_summary.py.")
+    return
+  end
+  summaryTask = startTask("/bin/zsh", function(exitCode, output, errorOutput)
+    summaryTask = nil
+    local text = (output or ""):match("^%s*(.-)%s*$")
+    hs.printf("keyflow: NetNewsWire summary finished exit=%s bytes=%d", tostring(exitCode), #text)
+    if exitCode ~= 0 or text == "" then
+      hs.alert.show(summaryFailureMessage(errorOutput))
+      return
+    end
+    showSummary(text)
+  end, {"-lc", SUMMARY_SHELL_COMMAND, "keyflow-nnw-summary", script})
+  if not summaryTask then
+    hs.printf("keyflow: NetNewsWire summary did not start")
+    hs.alert.show(SUMMARY_FAILED)
+    return
+  end
+  hs.alert.show("Resumiendo…")
+end
+
+-- Pure helpers exposed for ai/tests.
+Actions.escapeHtml = escapeHtml
+Actions.summaryHtml = summaryHtml
+Actions.summaryFailureMessage = summaryFailureMessage
+
 return Actions

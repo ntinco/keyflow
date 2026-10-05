@@ -21,6 +21,9 @@ local CONTEXT_APPS = {
     {bundleID = "com.apple.finder", name = "Finder"},
     {bundleID = "com.apple.Spotlight", name = "Spotlight"},
   },
+  ["netnewswire"] = {
+    {bundleID = "com.ranchero.NetNewsWire-Evergreen", name = "NetNewsWire"},
+  },
   ["sap-eclipse"] = {
     {bundleID = "epp.package.committers", name = "Eclipse"},
   },

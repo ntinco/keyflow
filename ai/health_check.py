@@ -827,7 +827,7 @@ def validate_macos_runtime(repo_root: Path, macos_entry_rel: str) -> list[dict[s
 
     bindings = re.findall(r'\{id\s*=\s*"([^"]+)",\s*type\s*=\s*"([^"]+)",.*?contextLabel\s*=\s*"([^"]*)",\s*tcode\s*=\s*"([^"]*)"', bindings_text)
     bound_hotkey_ids = {binding_id for binding_id, binding_type, _, _ in bindings if binding_type == "hotkey"}
-    prefixes = ("eclipse_", "global_", "launcher_", "sap_gui_", "snipaste_")
+    prefixes = ("eclipse_", "global_", "launcher_", "netnewswire_", "sap_gui_", "snipaste_")
     for action_id in sorted(action_ids):
         if action_id.startswith(prefixes) and action_id not in bound_hotkey_ids:
             issues.append({"type": "macos_action_without_binding", "file": to_repo_path(actions_file, repo_root), "action": action_id, "message": "Hammerspoon action has no generated hotkey binding."})
