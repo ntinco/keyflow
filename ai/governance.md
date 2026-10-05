@@ -77,7 +77,7 @@ Structural validators prove wiring, not runtime behavior. For runtime changes an
 - On Windows, `platforms/windows/tools/selftest.ahk` produces runtime evidence for hotstrings and window geometry; extend it when a Windows behavior can be checked without real apps.
 - Never claim a check or runtime behavior that was not executed or observed.
 
-<!-- workspace-contract sha256:fd8aa7ce4537 -->
+<!-- workspace-contract sha256:ad1d8ee574f4 -->
 ## Workspace contract
 
 Precedence, highest first:
@@ -92,7 +92,7 @@ When a text and a validator disagree, the failing validator is the current truth
 
 | Repo | Owns | Class |
 |---|---|---|
-| `ntinco-os` | personal state, plans, time, finance | private-personal |
+| `life-os` | personal state, plans, time, finance | private-personal |
 | `abap-box` | ABAP/SAP knowledge, skills, utilities | private-technical |
 | `abap-craft` | public ABAP articles; only anonymized, human-approved material | public |
 | `gen-box` | generic reusable tools and agent skills | private-technical |
@@ -100,7 +100,7 @@ When a text and a validator disagree, the failing validator is the current truth
 | `netnewswire-ai` | NetNewsWire review, ranking, local enrichment and rollback | private-technical |
 | `workstation-ops` | installs, provisioning, machine maintenance and backups | private-technical |
 
-Route work to the owning repository; never build a local substitute. Private-personal data stays in `ntinco-os`; client or employer confidential data belongs in none. Other content moves only to the same or a more private class.
+Route work to the owning repository; never build a local substitute. Private-personal data stays in `life-os`; client or employer confidential data belongs in none. Other content moves only to the same or a more private class.
 
 Architecture:
 
