@@ -17,6 +17,8 @@ platforms/macos/hammerspoon/
   init.lua                       # entrypoint and contextual binding runtime
   actions.lua                    # hand-authored actions
   hotstrings.lua                 # hotstring watcher
+  dispatch.lua                   # pure key-binding helpers
+  clipboard.lua                  # shared clipboard save/restore
   generated/                     # generated bindings/profile data
 
 platforms/shared/data/hotkeys.db # shared human-managed hotkey source
@@ -54,6 +56,19 @@ python3 ai/hotkey_sync.py --check
 ```
 
 When runtime wiring changes, use `ai/run_smoke.py` where the environment supports the target platform. Its result JSON is local/generated, not authority. Runtime acceptance that depends on real applications, credentials, UI state or human observation remains human-owned.
+
+## Runtime changes and review
+
+Structural validators prove wiring, not runtime behavior. For a runtime change or a requested review:
+
+- inspect the relevant timing and input erasure, dispatch/scope/focus, platform parity, paths/geometry and failure handling; record findings with `file:line`;
+- add pure-logic tests for branching behavior, and turn reproducible risks into tests or validators where practical;
+- keep the checks that still need real applications or human observation in `ai/current-plan.md`.
+
+Platform checks (the commands are `platform_validators` in `ai/repo-map.json`):
+
+- Windows: `ai/run_smoke.py --platform windows` launches the entrypoint to catch parse and startup errors, and reports `not_run` without AutoHotkey. `platforms/windows/tools/selftest.ahk` produces runtime evidence for hotstrings and window geometry; extend it when a Windows behavior can be checked without real apps.
+- macOS: `ai/run_smoke.py --platform macos` parse-checks the Lua files with `luac -p`, and `ai/tests/macos_logic_test.lua` runs the pure logic. Neither exercises Hammerspoon.
 
 ## Local configuration
 

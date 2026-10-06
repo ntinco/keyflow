@@ -38,21 +38,10 @@ FORBIDDEN_REFERENCE_PATTERNS = (
     ("retired_docs_reference", re.compile(r"(^|[\s`\"'=:(])" + re.escape(RETIRED_DOCS_SEGMENT), re.IGNORECASE | re.MULTILINE)),
 )
 FORBIDDEN_SCAN_EXCLUDED_PREFIXES = (".git/", ".axet-code/", "ai/__pycache__/")
-FORBIDDEN_SCAN_EXACT_PATHS = {
-    ".git",
-    "ai/health-check.json",
-    "ai/health-check.summary.json",
-    "ai/health_check.py",
-    "ai/run-result.json",
-    "ai/run-result-macos.json",
-    "platforms/windows/data/local-secrets.ini",
-    "platforms/windows/data/local-startup.ini",
-    "platforms/shared/data/memory-vars.ini",
-    "platforms/shared/data/local-paths.ini",
-    "platforms/windows/data/rom.ini",
-    "storage.db",
-    "platforms/windows/storage.db",
-}
+# Local-only paths are skipped too; they come from the repo-map (local_paths).
+FORBIDDEN_SCAN_EXACT_PATHS = {".git", "ai/health_check.py"}
+# Change classes whose procedure left the always-loaded governance; each needs a live route.
+PROCEDURE_ROUTES = ("catalog_change", "runtime_change_or_review")
 
 KNOWN_DEAD_CLASSES = {"PasteService"}
 KNOWN_DEAD_CONSTANTS: tuple[str, ...] = ()
@@ -398,6 +387,26 @@ def validate_catalog_review(repo_root: Path, review_rel: str, profiles: list[dic
     return result, issues
 
 
+def local_paths(repo_map: dict[str, object]) -> list[str]:
+    """Every path that stays out of Git: local_only secrets/state plus ownership.generated_local outputs."""
+    ownership = repo_map.get("ownership")
+    groups = (repo_map.get("local_only"), ownership.get("generated_local") if isinstance(ownership, dict) else None)
+    return [rel for group in groups if isinstance(group, list) for rel in group if isinstance(rel, str)]
+
+
+def procedure_route_problem(repo_root: Path, route: str) -> str:
+    """A procedure route is `python3 <script> ...` or `<file>#<heading-slug>`; empty when its target exists."""
+    if route.startswith("python3 "):
+        script = route.split()[1]
+        return "" if (repo_root / script).is_file() else f"script is missing: {script}"
+    rel, _, anchor = route.partition("#")
+    if not rel or not (repo_root / rel).is_file():
+        return f"file is missing: {rel}"
+    headings = {re.sub(r"[^a-z0-9 -]", "", line.lstrip("#").strip().lower()).replace(" ", "-")
+                for line in read_text(repo_root / rel).splitlines() if line.startswith("#")}
+    return "" if not anchor or anchor in headings else f"{rel} has no heading for #{anchor}"
+
+
 def load_repo_map(repo_root: Path) -> tuple[dict[str, object], list[dict[str, str]]]:
     path = repo_root / REPO_MAP_FILE
     if not path.exists():
@@ -443,9 +452,14 @@ def validate_repo_map(repo_root: Path, repo_map: dict[str, object]) -> list[dict
                 issues.append({"type": "repo_map_route_missing", "file": REPO_MAP_FILE, "message": f"Missing route: {'.'.join(keys)}"})
             elif not (repo_root / rel).exists():
                 issues.append({"type": "repo_map_dead_route", "file": REPO_MAP_FILE, "message": f"Route {'.'.join(keys)} points to missing path: {rel}"})
-        active_work = nested(routing, "conditional", "active_work")
-        if active_work and (repo_root / active_work).exists() and not (repo_root / active_work).is_file():
-            issues.append({"type": "repo_map_active_work_invalid", "file": REPO_MAP_FILE, "message": "conditional.active_work must point to a file when present."})
+        for key in PROCEDURE_ROUTES:
+            route = nested(routing, "procedures", key)
+            problem = procedure_route_problem(repo_root, route) if route else "route is missing"
+            if problem:
+                issues.append({"type": "repo_map_procedure_route", "file": REPO_MAP_FILE, "message": f"Procedure route procedures.{key}: {problem}"})
+    active_work = nested(repo_map, "pending_acceptance")
+    if active_work and (repo_root / active_work).exists() and not (repo_root / active_work).is_file():
+        issues.append({"type": "repo_map_active_work_invalid", "file": REPO_MAP_FILE, "message": "pending_acceptance must point to a file when present."})
 
     ownership = repo_map.get("ownership")
     if not isinstance(ownership, dict):
@@ -466,15 +480,8 @@ def validate_repo_map(repo_root: Path, repo_map: dict[str, object]) -> list[dict
             elif not (repo_root / rel).exists():
                 issues.append({"type": "repo_map_generated_route_missing", "file": REPO_MAP_FILE, "message": f"Generated path is missing: {rel}"})
 
-    local_only = repo_map.get("local_only")
-    if not isinstance(local_only, list):
+    if not isinstance(repo_map.get("local_only"), list):
         issues.append({"type": "repo_map_local_only", "file": REPO_MAP_FILE, "message": "local_only must be a list."})
-    else:
-        generated_local = ownership.get("generated_local", []) if isinstance(ownership, dict) else []
-        if isinstance(generated_local, list):
-            missing_local = sorted(set(generated_local) - set(local_only))
-            if missing_local:
-                issues.append({"type": "repo_map_generated_local_gap", "file": REPO_MAP_FILE, "message": f"generated_local paths must also be local_only: {missing_local}"})
 
     validators = repo_map.get("validators")
     if not isinstance(validators, list) or not validators or any(not isinstance(value, str) or not value.strip() for value in validators):
@@ -528,14 +535,9 @@ def git_path_tracked(repo_root: Path, rel: str) -> bool:
 
 def validate_local_only_contract(repo_root: Path, repo_map: dict[str, object]) -> list[dict[str, str]]:
     issues: list[dict[str, str]] = []
-    local_only = repo_map.get("local_only", [])
-    if not isinstance(local_only, list):
-        return issues
     gitignore_path = repo_root / ".gitignore"
     gitignore_text = read_text(gitignore_path) if gitignore_path.exists() else ""
-    for rel in local_only:
-        if not isinstance(rel, str):
-            continue
+    for rel in local_paths(repo_map):
         if not git_path_ignored(repo_root, rel, gitignore_text):
             issues.append({"type": "local_only_gitignore_gap", "file": ".gitignore", "message": f"Local-only path is not ignored: {rel}"})
         if git_path_tracked(repo_root, rel):
@@ -670,13 +672,14 @@ def scan_unclosed_hotif(hotkeys_dir: Path, repo_root: Path) -> list[dict[str, ob
     return issues
 
 
-def scan_forbidden_references(repo_root: Path) -> list[dict[str, object]]:
+def scan_forbidden_references(repo_root: Path, local: list[str]) -> list[dict[str, object]]:
     findings: list[dict[str, object]] = []
+    skipped = FORBIDDEN_SCAN_EXACT_PATHS | set(local)
     for path in sorted(repo_root.rglob("*")):
         if not path.is_file():
             continue
         rel_path = to_repo_path(path, repo_root)
-        if rel_path in FORBIDDEN_SCAN_EXACT_PATHS or any(rel_path.startswith(prefix) for prefix in FORBIDDEN_SCAN_EXCLUDED_PREFIXES):
+        if rel_path in skipped or any(rel_path.startswith(prefix) for prefix in FORBIDDEN_SCAN_EXCLUDED_PREFIXES):
             continue
         if path.suffix.lower() not in {".ahk", ".ini", ".ps1", ".json", ".txt"}:
             continue
@@ -964,7 +967,7 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
     hotkey_source_rel = nested(routing, "shared", "hotkeys", default=HOTKEY_CATALOG_FILE)
     catalog_review_rel = nested(routing, "shared", "catalog_review", default=CATALOG_REVIEW_FILE)
     hotkey_sync_rel = nested(routing, "validation", "hotkey_sync", default="ai/hotkey_sync.py")
-    active_work_rel = nested(routing, "conditional", "active_work", default="ai/current-plan.md")
+    active_work_rel = nested(repo_map, "pending_acceptance", default="ai/current-plan.md")
 
     keyflow_entry = repo_root / windows_entry_rel
     bootstrap_file = repo_root / bootstrap_rel
@@ -989,7 +992,7 @@ def run(repo_root: Path) -> tuple[dict[str, object], dict[str, object]]:
     dead_candidates = detect_dead_candidates(file_index, registry, token_counter)
     unused_assignments = scan_assignment_candidates(repo_root, token_counter)
     unused_groups = scan_group_candidates(repo_root, token_counter)
-    forbidden_references = scan_forbidden_references(repo_root)
+    forbidden_references = scan_forbidden_references(repo_root, local_paths(repo_map))
     hotkey_counts = scan_hotkey_counts(hotkeys_dir, repo_root)
     unclosed_hotif = scan_unclosed_hotif(hotkeys_dir, repo_root)
     hotkey_catalog_issues = validate_hotkey_catalog(repo_root, hotkey_sync_rel, hotkey_source_rel)

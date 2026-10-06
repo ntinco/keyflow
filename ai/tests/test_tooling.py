@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import copy
+import fnmatch
+import json
+import shlex
 import shutil
 import subprocess
 import sys
@@ -225,6 +229,87 @@ class AhkRiskLintTests(unittest.TestCase):
     def test_primary_monitor_geometry(self) -> None:
         self.assertEqual(self._types("h := A_ScreenHeight - 40"), ["ahk_single_monitor_geometry"])
         self.assertEqual(self._types("h := A_ScreenHeight", "platforms/windows/library/util.ahk"), [])
+
+
+class ControlPlaneTests(unittest.TestCase):
+    """The always-loaded kernel stays small only while what left it remains reachable from the repo-map."""
+
+    def setUp(self) -> None:
+        self.repo_map = json.loads((AI_DIR / "repo-map.json").read_text(encoding="utf-8"))
+        self.procedures = self.repo_map["routing"]["procedures"]
+
+    def _issue_types(self, repo_map: dict[str, object]) -> list[str]:
+        return [str(issue["type"]) for issue in health_check.validate_repo_map(REPO_ROOT, repo_map)]
+
+    def test_repo_map_is_valid(self) -> None:
+        self.assertEqual(self._issue_types(self.repo_map), [])
+        self.assertEqual(set(self.procedures), set(health_check.PROCEDURE_ROUTES))
+
+    def test_missing_or_dead_procedure_route_is_reported(self) -> None:
+        for key in health_check.PROCEDURE_ROUTES:
+            for value in (None, "python3 ai/no_such_tool.py --help", "NO-SUCH.md", "README.md#no-such-heading"):
+                broken = copy.deepcopy(self.repo_map)
+                if value is None:
+                    del broken["routing"]["procedures"][key]
+                else:
+                    broken["routing"]["procedures"][key] = value
+                self.assertEqual(self._issue_types(broken), ["repo_map_procedure_route"], (key, value))
+
+    def test_kernel_points_at_the_procedure_routes(self) -> None:
+        governance = (AI_DIR / "governance.md").read_text(encoding="utf-8").split("<!-- workspace-contract")[0]
+        agents = (REPO_ROOT / "AGENTS.md").read_text(encoding="utf-8")
+        for text in (governance, agents):
+            self.assertIn("`routing.procedures`", text)
+        # Boundaries that no procedure may carry away from the cold start.
+        for anchor in ("`ai/hotkey_sync.py` edit commands, never raw SQL", "never an authority", "`--mark-reviewed`",
+                       "`local_only`", "not observed", "`workstation-ops`", "personas", "`ai/current-plan.md`"):
+            self.assertIn(anchor, governance)
+
+    def test_catalog_change_recipes_are_in_the_routed_help(self) -> None:
+        command = shlex.split(self.procedures["catalog_change"])
+        self.assertEqual(command[0], "python3")
+        result = subprocess.run([sys.executable, *command[1:]], cwd=REPO_ROOT, capture_output=True, text=True, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        for recipe in ("--add-hotstring", "--set-hotstring", "--remove-hotstring", "--add-hotkey", "--mark-reviewed",
+                       "trigger conflict", "sap-transaction-catalog", "sap-transaction-shortcuts", "without /n",
+                       "sap-tcode:<code>", "Actions.<id>", "registered automation service", "SPECIAL_BEHAVIORS"):
+            self.assertIn(recipe, result.stdout)
+
+    def test_runtime_review_procedure_is_in_the_routed_section(self) -> None:
+        rel, _, anchor = self.procedures["runtime_change_or_review"].partition("#")
+        sections = (REPO_ROOT / rel).read_text(encoding="utf-8").split("\n## ")
+        section = next(item for item in sections if item.splitlines()[0].lower().replace(" ", "-") == anchor)
+        for step in ("timing and input erasure", "dispatch/scope/focus", "platform parity", "paths/geometry",
+                     "failure handling", "`file:line`", "pure-logic tests", "`ai/current-plan.md`",
+                     "selftest.ahk", "run_smoke.py --platform windows", "run_smoke.py --platform macos",
+                     "macos_logic_test.lua"):
+            self.assertIn(step, section)
+
+    def test_platform_validators_exist(self) -> None:
+        for commands in self.repo_map["platform_validators"].values():
+            for command in commands:
+                script = next(part for part in command.split() if "/" in part)
+                self.assertTrue((REPO_ROOT / script).is_file(), command)
+
+    def test_generated_local_outputs_are_held_to_the_local_only_contract(self) -> None:
+        ownership = self.repo_map["ownership"]
+        self.assertEqual(set(health_check.local_paths(self.repo_map)),
+                         set(self.repo_map["local_only"]) | set(ownership["generated_local"]))
+        self.assertFalse(set(self.repo_map["local_only"]) & set(ownership["generated_local"]))
+        self.assertEqual(health_check.validate_local_only_contract(REPO_ROOT, self.repo_map), [])
+        for key in ("local_only", "generated_local"):
+            leaking = copy.deepcopy(self.repo_map)
+            target = leaking if key == "local_only" else leaking["ownership"]
+            target[key] = [*target[key], "README.md"]
+            types = [issue["type"] for issue in health_check.validate_local_only_contract(REPO_ROOT, leaking)]
+            self.assertEqual(types, ["local_only_gitignore_gap", "local_only_tracked"], key)
+
+    def test_generated_outputs_are_never_human_owned(self) -> None:
+        ownership = self.repo_map["ownership"]
+        generated = [*ownership["generated_versioned"], *ownership["generated_local"]]
+        for source in ownership["human_owned"]:
+            self.assertFalse(any(fnmatch.fnmatch(source, path) or (path.endswith("/") and source.startswith(path))
+                                 for path in generated), source)
 
 
 class MacosLogicTests(unittest.TestCase):

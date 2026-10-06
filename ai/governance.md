@@ -1,81 +1,34 @@
 # Governance
 
-## Identity
-
-keyflow is a human-owned, AI-operated personal automation runtime. AI is the primary maintainer inside the repository boundaries; humans retain intent and runtime acceptance.
+keyflow is a human-owned, AI-operated personal automation runtime.
 
 ## Ownership
 
-Humans own:
+Humans own intent and desired behavior; runtime acceptance and any observation that needs the real Windows/macOS environment; credentials and local-only state; material irreversible decisions; and the content of `platforms/shared/data/hotkeys.db` and `ai/catalog-review.json`.
 
-- intent and desired behavior;
-- the content of human-managed contracts, `platforms/shared/data/hotkeys.db` and `ai/catalog-review.json` (AI may edit them only as described in Change recipes);
-- runtime acceptance and observations that require access to the real Windows/macOS environment;
-- credentials and other local-only state;
-- material irreversible decisions.
+AI maintains the rest inside existing runtime boundaries: routing, implementation, generated artifacts, validation and this governance.
 
-AI operates:
+## Invariants
 
-- repository routing and implementation;
-- refactoring and cross-platform maintenance;
-- generated artifacts and drift correction;
-- mechanical validation;
-- governance maintenance;
-- routine architectural evolution inside existing runtime boundaries.
-
-## Evidence discipline
-
-- Runtime evidence outranks documentation claims when behavior must be verified in a real environment.
-- Repository evidence outranks prior conversation memory.
-- Generated artifacts never outrank their source contracts.
-- Do not claim Windows or macOS runtime behavior that was not actually observed when runtime validation is required.
-- Do not create narrative status from memory alone.
-
-## Boundaries
-
-- Local-only secrets and state remain local and must not be committed or modified unless explicitly requested.
-- Runtime code must not depend on Git metadata.
-- Workstation provisioning, maintenance and backup sync (package updates, cache cleanup, env refresh, VPN clients, FreeFileSync/rsync) belong to `workstation-ops`, not here. `platforms/*/tools/` holds only what keyflow runtime or validation uses.
-- Do not reintroduce removed services, dependencies, tracking, or features without new evidence that they add value.
-- `platforms/shared/data/hotkeys.db` is the single human-managed hotkey source; generated catalogs/bindings are not alternative authorities.
-- AI edits `hotkeys.db` only when the human requested that specific change, and only through `ai/hotkey_sync.py` edit commands (never raw SQL): they validate, roll back on failure and regenerate artifacts.
-- `ai/catalog-review.json` stores a content hash per catalog; `health_check` flags a catalog whose content changed since review. Run `--mark-reviewed` only after the human confirmed that catalog's current content.
+- `hotkeys.db` is the single human-managed hotkey and hotstring source. Generated artifacts are never an authority: do not edit them by hand, and regenerate them in the same change as their source contract.
+- Edit `hotkeys.db` only for the specific change the human requested, and only through `ai/hotkey_sync.py` edit commands, never raw SQL.
+- Run `--mark-reviewed` (`ai/catalog-review.json`) only after the human confirmed that catalog's current content.
+- Local-only secrets and state (repo-map `local_only`) are never committed, and never modified unless explicitly requested.
+- Runtime evidence outranks documentation; repository evidence outranks conversation memory. Structural validators prove wiring, not runtime behavior: never claim a check that was not executed or Windows/macOS behavior that was not observed.
+- Workstation provisioning, maintenance and backup sync belong to `workstation-ops`; `platforms/*/tools/` holds only what keyflow runtime or validation uses.
 - Provider-specific agent personas or prompt machinery are not repository architecture.
+- Runtime code must not depend on Git metadata.
+- Do not reintroduce removed services, dependencies, tracking or features without new evidence that they add value.
+- Make the smallest complete change; no aesthetic refactors; comment only non-obvious constraints, rejected alternatives or traps.
 
-## Code discipline
+## Procedures
 
-- Optimize for AI maintenance through explicit ownership, deterministic validation, and minimal code surface.
-- Make the smallest complete change that resolves the task.
-- Add comments only for non-obvious constraints, rejected alternatives, or traps that code cannot express clearly.
-- Do not perform aesthetic refactors without maintenance or runtime value.
-- When a source contract changes, update its generated artifacts in the same change.
-
-## Change recipes
-
-- `hotkeys.db` is the only source. Use `python3 ai/hotkey_sync.py` edit commands; they validate changes and regenerate platform artifacts. Never edit generated catalogs directly.
-- Hotstrings: use `--add-hotstring`, `--set-hotstring` or `--remove-hotstring`. Resolve any reported trigger conflicts. Mark a catalog reviewed only after its content is human-confirmed.
-- SAP tcode hotstrings: use `sap-transaction-catalog` for tcode triggers or `sap-transaction-shortcuts` for aliases. Store the lowercase tcode without `/n`; the adapters add `/n` and preserve case. Other SAP commands and SAP hotkeys retain their existing normalization.
-- SAP tcode hotkeys use `sap-tcode:<code>` and need no per-hotkey runtime implementation.
-- Other portable hotkeys need a Windows action and a matching `Actions.<id>` in `platforms/macos/hammerspoon/actions.lua`; keep reusable Windows logic in a registered automation service.
-- Add pure-logic tests for branching behavior. Record only checks requiring real applications or user observation in `ai/current-plan.md`.
-- Computed `hs_*` hotstrings additionally need Windows behavior in the catalog action and an entry in `SPECIAL_BEHAVIORS` in `hotstrings.lua`.
-
-## Review recipe
-
-Structural validators prove wiring, not runtime behavior. For runtime changes and requested reviews, inspect relevant timing and input erasure, dispatch/scope/focus, platform parity, paths/geometry, and failure handling; record findings with file:line. Turn reproducible risks into tests or validators where practical, and keep remaining real-app checks in `ai/current-plan.md`.
-
-## Active work state
-
-`ai/current-plan.md` is optional. Keep it only while a multi-step technical frontier or pending human runtime verification genuinely needs durable continuation state. When that frontier is closed, delete the file; Git is the history.
+- Before a catalog change (hotkey, hotstring, SAP tcode, computed `hs_*`) or a runtime change or review (Windows, macOS, timing/focus/input erasure), follow its repo-map `routing.procedures` entry.
+- `ai/current-plan.md` exists only while a multi-step frontier or pending human runtime verification needs continuation state. Record there the checks that need real applications or human observation; delete it when the frontier closes.
 
 ## Completion
 
-- Run `python3 ai/health_check.py` (short report; `--json` or `--pretty` for the full JSON).
-- Run `python3 ai/hotkey_sync.py --check` when catalog/generated ownership is relevant; health validation also performs this drift check.
-- Run `python3 -m unittest discover -s ai/tests` when tooling or tested runtime logic changes.
-- Run relevant static/syntax checks and `ai/run_smoke.py` when runtime wiring changes and the environment supports them.
-- On Windows, `platforms/windows/tools/selftest.ahk` produces runtime evidence for hotstrings and window geometry; extend it when a Windows behavior can be checked without real apps.
-- Never claim a check or runtime behavior that was not executed or observed.
+Run the repo-map `validators`, plus the `platform_validators` of each platform whose runtime wiring changed where the environment supports them. Report a validator that could not run as not run.
 
 <!-- workspace-contract sha256:11175b1cac67 -->
 ## Workspace contract

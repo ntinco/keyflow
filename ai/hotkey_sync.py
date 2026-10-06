@@ -15,6 +15,18 @@ Catalog edits (validate, roll back on failure, then regenerate artifacts):
   --add-hotkey JSON | --set-hotkey ID FIELD VALUE | --remove-hotkey ID
   --mark-reviewed PROFILE   (only after the human confirmed the catalog content)
 
+Change recipes (--check and ai/health_check.py report conflicts and missing wiring):
+  Hotstring: resolve every reported trigger conflict before finishing.
+  SAP tcode hotstring: profile sap-transaction-catalog (tcode triggers) or sap-transaction-shortcuts
+    (aliases); store the lowercase tcode without /n. The adapters add /n and preserve case; other SAP
+    commands and SAP hotkeys keep their existing normalization.
+  SAP tcode hotkey: action sap-tcode:<code>, portable-intent on windows and macos; no per-hotkey
+    runtime implementation.
+  Other portable hotkey: a Windows action plus a matching Actions.<id> in
+    platforms/macos/hammerspoon/actions.lua; reusable Windows logic lives in a registered automation service.
+  Computed hs_* hotstring: Windows behavior in the catalog action plus an entry in SPECIAL_BEHAVIORS in
+    platforms/macos/hammerspoon/hotstrings.lua.
+
 Source of truth: platforms/shared/data/hotkeys.db
 Generated artifacts: platforms/windows/hotkeys/*.ahk, platforms/windows/hotkeys/README.md,
 and platforms/macos/hammerspoon/generated/bindings.lua

@@ -8,15 +8,12 @@
       "bootstrap": "platforms/windows/library/bootstrap.ahk",
       "services": "platforms/windows/library/automation/",
       "hotkeys": "platforms/windows/hotkeys/",
-      "catalogs": "platforms/windows/data/",
-      "selftest": "platforms/windows/tools/selftest.ahk"
+      "catalogs": "platforms/windows/data/"
     },
     "macos": {
       "entrypoint": "platforms/macos/hammerspoon/init.lua",
       "actions": "platforms/macos/hammerspoon/actions.lua",
       "hotstrings": "platforms/macos/hammerspoon/hotstrings.lua",
-      "dispatch": "platforms/macos/hammerspoon/dispatch.lua",
-      "clipboard": "platforms/macos/hammerspoon/clipboard.lua",
       "generated": "platforms/macos/hammerspoon/generated/"
     },
     "shared": {
@@ -26,12 +23,12 @@
     "validation": {
       "health": "ai/health_check.py",
       "hotkey_sync": "ai/hotkey_sync.py",
-      "catalog_hash": "ai/catalog_hash.py",
       "smoke": "ai/run_smoke.py",
       "tests": "ai/tests/"
     },
-    "conditional": {
-      "active_work": "ai/current-plan.md"
+    "procedures": {
+      "catalog_change": "python3 ai/hotkey_sync.py --help",
+      "runtime_change_or_review": "README.md#runtime-changes-and-review"
     }
   },
   "ownership": {
@@ -52,10 +49,6 @@
     ]
   },
   "local_only": [
-    "ai/health-check.json",
-    "ai/health-check.summary.json",
-    "ai/run-result.json",
-    "ai/run-result-macos.json",
     "platforms/windows/data/local-secrets.ini",
     "platforms/windows/data/local-startup.ini",
     "platforms/shared/data/memory-vars.ini",
@@ -80,5 +73,5 @@
     "ai/tests/test_workspace_contract.py": "shared/test_workspace_contract.py",
     ".githooks/pre-commit": "shared/githooks/pre-commit"
   },
-  "cold_start_token_budget": 3150
+  "cold_start_token_budget": 2300
 }

@@ -2,11 +2,7 @@
 
 Cold-start contract for keyflow.
 
-1. Read `ai/governance.md`.
+1. Read `ai/governance.md`; the `Workspace contract` at its end is binding.
 2. Read `ai/repo-map.json`.
-3. Open only task-relevant runtime/contracts; read `ai/current-plan.md` only when the task touches the active frontier or needs continuation state.
-4. Run the relevant validators before completion.
-5. Runtime evidence and repository evidence outrank prior conversation memory.
-6. Never modify local-only secrets/state unless explicitly requested.
-7. Never claim Windows or macOS runtime behavior without actual runtime evidence when runtime validation is required.
-8. The `Workspace contract` at the end of `ai/governance.md` is binding.
+3. Open only task-relevant runtime/contracts and the `routing.procedures` entry for the change at hand; read `ai/current-plan.md` only when the task touches the active frontier or needs continuation state.
+4. Run the applicable repo-map validators before completion.
