@@ -30,7 +30,7 @@ AI maintains the rest inside existing runtime boundaries: routing, implementatio
 
 Run the repo-map `validators`, plus the `platform_validators` of each platform whose runtime wiring changed where the environment supports them. Report a validator that could not run as not run.
 
-<!-- workspace-contract sha256:11175b1cac67 -->
+<!-- workspace-contract sha256:248c3ea3ade2 -->
 ## Workspace contract
 
 Precedence, highest first:
@@ -49,7 +49,7 @@ When a text and a validator disagree, the failing validator is the current truth
 | `life-os` | personal state, plans, time, finance | private-personal |
 | `abap-box` | ABAP/SAP knowledge, skills, utilities | private-technical |
 | `abap-craft` | public ABAP articles; only anonymized, human-approved material | public |
-| `gen-box` | generic reusable tools and converters | private-technical |
+| `toolbox` | generic reusable tools and converters | private-technical |
 | `dev-factory` | execution of software-development agent tasks: runs, validation, review | public |
 | `keyflow` | hotkeys, hotstrings, daily desktop automation | public |
 | `netnewswire-ai` | NetNewsWire review, ranking, local enrichment and rollback | private-technical |
