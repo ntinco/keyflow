@@ -538,9 +538,9 @@ Actions.snipaste_enter = function()
 end
 
 -- NetNewsWire summary: keyflow owns only hotkey, execution and presentation;
--- the summary itself lives in netnewswire-ai/tools/nnw_summary.py.
+-- the summary itself lives in reader/tools/nnw_summary.py.
 local SUMMARY_SCRIPT_SETTING = "keyflow.netnewswireSummaryScript"
-local SUMMARY_SCRIPT_DEFAULT = "/gh/netnewswire-ai/tools/nnw_summary.py"
+local SUMMARY_SCRIPT_DEFAULT = "/gh/reader/tools/nnw_summary.py"
 -- Hammerspoon's GUI PATH lacks the provider CLIs, so a login shell resolves
 -- them. The script path is the positional $1, never part of the shell source.
 local SUMMARY_SHELL_COMMAND = 'exec python3 "$1" --current'

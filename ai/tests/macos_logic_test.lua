@@ -254,7 +254,7 @@ expectEqual(alerts[#alerts], "Resumiendo…", "start feedback is shown")
 expectEqual(tasks[1].path, "/bin/zsh", "summary runs through the login shell")
 expectEqual(tasks[1].args[1], "-lc", "login shell supplies the provider PATH")
 expectEqual(tasks[1].args[2]:find("nnw_summary", 1, true), nil, "script path is not part of the shell source")
-expectEqual(tasks[1].args[4], os.getenv("HOME") .. "/gh/netnewswire-ai/tools/nnw_summary.py",
+expectEqual(tasks[1].args[4], os.getenv("HOME") .. "/gh/reader/tools/nnw_summary.py",
   "workspace default script is a positional argument")
 summarize()
 expectEqual(#tasks, 1, "a running summary is not duplicated")
