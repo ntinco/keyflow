@@ -68,13 +68,13 @@
       "immediate": true
     },
     {
-      "trigger": "cpm",
-      "value": "commit y push directo a main",
-      "immediate": true
-    },
-    {
       "trigger": "sp",
       "value": "Resume esta conversación en un prompt autocontenido para que otra IA, sin acceso a este chat, continúe o ejecute lo acordado. Conserva decisiones, restricciones, parámetros y próximos pasos. Incluye textualmente código, datos o fragmentos de archivos que sean necesarios. Elimina redundancias. Entrégalo en un solo bloque de código."
+    },
+    {
+      "trigger": "dp",
+      "value": "directo and push",
+      "immediate": true
     }
   ]
 }

@@ -451,8 +451,8 @@ return {
     {trigger = "rev,", value = "Pendiente de revisión.", immediate = true},
     {trigger = "urg,", value = "URGENTE:", immediate = true},
     {trigger = "sig,", value = "Con gusto te ayudo, ¿en qué consiste?", immediate = true},
-    {trigger = "cpm", value = "commit y push directo a main", immediate = true},
     {trigger = "sp", value = "Resume esta conversación en un prompt autocontenido para que otra IA, sin acceso a este chat, continúe o ejecute lo acordado. Conserva decisiones, restricciones, parámetros y próximos pasos. Incluye textualmente código, datos o fragmentos de archivos que sean necesarios. Elimina redundancias. Entrégalo en un solo bloque de código.", immediate = false},
+    {trigger = "dp", value = "directo and push", immediate = true},
   }},
   {id = "sap-transaction-shortcuts", mode = "sap-command", contextLabel = "sap-gui-session", entries = {
     {trigger = "z0", value = "zpm000", immediate = false},
