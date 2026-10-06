@@ -10,7 +10,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     env:
-      HAS_GEN_BOX: ${{ secrets.GEN_BOX_TOKEN != '' }}
+      HAS_AGENT_CORE: ${{ secrets.AGENT_CORE_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -23,21 +23,21 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y lua5.4
       - run: lua5.4 ai/tests/macos_logic_test.lua
       - run: find platforms/macos -name '*.lua' -exec luac5.4 -p {} +
-      # Drift against gen-box: the repository is private, so this needs a read-only token in the GEN_BOX_TOKEN secret.
-      - name: Check out gen-box
-        if: env.HAS_GEN_BOX == 'true'
+      # Drift against agent-core: the repository is private, so this needs a read-only token in the AGENT_CORE_TOKEN secret.
+      - name: Check out agent-core
+        if: env.HAS_AGENT_CORE == 'true'
         uses: actions/checkout@v4
         with:
-          repository: ntinco/gen-box
-          token: ${{ secrets.GEN_BOX_TOKEN }}
-          path: .ci-gen-box
+          repository: ntinco/agent-core
+          token: ${{ secrets.AGENT_CORE_TOKEN }}
+          path: .ci-agent-core
           persist-credentials: false
-      - name: Compare the contract and shared files with gen-box
-        if: env.HAS_GEN_BOX == 'true'
+      - name: Compare the contract and shared files with agent-core
+        if: env.HAS_AGENT_CORE == 'true'
         run: |
           mkdir -p "$RUNNER_TEMP/workspace"
-          mv .ci-gen-box "$RUNNER_TEMP/workspace/gen-box"
+          mv .ci-agent-core "$RUNNER_TEMP/workspace/agent-core"
           WORKSPACE_ROOT="$RUNNER_TEMP/workspace" python3 ai/workspace_contract.py
       - name: Report the skipped drift check
-        if: env.HAS_GEN_BOX != 'true'
-        run: echo "::notice::GEN_BOX_TOKEN is not set; the contract and shared files were not compared with gen-box"
+        if: env.HAS_AGENT_CORE != 'true'
+        run: echo "::notice::AGENT_CORE_TOKEN is not set; the contract and shared files were not compared with agent-core"

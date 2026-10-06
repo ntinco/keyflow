@@ -1,7 +1,7 @@
 #!/bin/sh
-# shared: gen-box/shared/githooks/pre-commit sha256:f33c60bd8668 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
+# shared: agent-core/shared/githooks/pre-commit sha256:3c47a5298756 (edit it in agent-core, then run tools/contract_sync.py in agent-core)
 # Shared pre-commit hook for the workspace repositories. Enable once per clone with
-# `git config core.hooksPath .githooks` (tools/link_workspace.py in gen-box points it at gen-box/shared/githooks).
+# `git config core.hooksPath .githooks` (tools/link_workspace.py in agent-core points it at agent-core/shared/githooks).
 # The staged .githooks/pre-commit.conf sets `check` (the health check command) and optionally `exclude`
 # (one top-level path the check never reads) and `local` (an executable repository hook run after the check).
 # The check runs on the staged tree (the index), so unstaged edits cannot hide what the commit contains.

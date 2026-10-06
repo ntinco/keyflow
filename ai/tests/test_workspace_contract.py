@@ -1,5 +1,5 @@
-# shared: gen-box/shared/test_workspace_contract.py sha256:1dd33b0d4dc3 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
-"""Workspace contract check (gen-box/shared/workspace_contract.py) on this repository and on broken copies of it."""
+# shared: agent-core/shared/test_workspace_contract.py sha256:08ef1809539f (edit it in agent-core, then run tools/contract_sync.py in agent-core)
+"""Workspace contract check (agent-core/shared/workspace_contract.py) on this repository and on broken copies of it."""
 from __future__ import annotations
 
 import importlib.util
@@ -34,9 +34,9 @@ class WorkspaceContractTests(unittest.TestCase):
             (self.root / rel).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(ROOT / rel, self.root / rel)
 
-    def make_gen_box(self) -> Path:
-        """A gen-box beside the fixture whose sources match this repository's vendored copies."""
-        master = self.workspace / "gen-box"
+    def make_agent_core(self) -> Path:
+        """A agent-core beside the fixture whose sources match this repository's vendored copies."""
+        master = self.workspace / "agent-core"
         for target, source in SHARED.items():
             (master / source).parent.mkdir(parents=True, exist_ok=True)
             (master / source).write_text(MODULE.unvendor((ROOT / target).read_text(encoding="utf-8"))[2], encoding="utf-8")
@@ -52,43 +52,43 @@ class WorkspaceContractTests(unittest.TestCase):
     def test_repository_passes(self):
         self.assertEqual(MODULE.problems(ROOT), [])
 
-    def test_copy_passes_against_gen_box(self):
-        self.make_gen_box()
+    def test_copy_passes_against_agent_core(self):
+        self.make_agent_core()
         self.assertEqual(MODULE.problems(self.root), [])
 
     def test_contract_edited_in_place_fails(self):
         self.edit(self.root / "ai/governance.md", "Ask first", "Never ask")
         self.assertEqual(MODULE.problems(self.root),
-                         ["workspace contract edited here: edit it in gen-box and run tools/contract_sync.py in gen-box"])
+                         ["workspace contract edited here: edit it in agent-core and run tools/contract_sync.py in agent-core"])
 
-    def test_contract_must_match_gen_box_master(self):
-        master = self.make_gen_box() / "ai/governance.md"
+    def test_contract_must_match_agent_core_master(self):
+        master = self.make_agent_core() / "ai/governance.md"
         self.edit(master, "Ask first", "Never ask")
         self.assertEqual(MODULE.problems(self.root),
-                         ["workspace contract differs from the gen-box master: run tools/contract_sync.py in gen-box"])
+                         ["workspace contract differs from the agent-core master: run tools/contract_sync.py in agent-core"])
         master.write_text("no contract here\n", encoding="utf-8")
         self.assertEqual(MODULE.problems(self.root),
-                         [f"gen-box master {master} must hold exactly one workspace contract block"])
+                         [f"agent-core master {master} must hold exactly one workspace contract block"])
 
-    def test_a_gen_box_checkout_without_governance_fails(self):
-        master = self.make_gen_box()
+    def test_a_agent_core_checkout_without_governance_fails(self):
+        master = self.make_agent_core()
         (master / "ai/governance.md").unlink()
         self.assertEqual(MODULE.problems(self.root),
-                         [f"gen-box master {master / 'ai/governance.md'} must hold exactly one workspace contract block"])
+                         [f"agent-core master {master / 'ai/governance.md'} must hold exactly one workspace contract block"])
 
     def test_vendored_file_edited_in_place_fails(self):
         target, source = next(iter(sorted(SHARED.items())))
         with (self.root / target).open("a", encoding="utf-8") as handle:
             handle.write("# local edit\n")
         self.assertEqual(MODULE.problems(self.root),
-                         [f"{target} edited here: edit gen-box/{source} and run tools/contract_sync.py in gen-box"])
+                         [f"{target} edited here: edit agent-core/{source} and run tools/contract_sync.py in agent-core"])
 
-    def test_vendored_file_must_match_gen_box(self):
+    def test_vendored_file_must_match_agent_core(self):
         target, source = next(iter(sorted(SHARED.items())))
-        with (self.make_gen_box() / source).open("a", encoding="utf-8") as handle:
-            handle.write("# newer in gen-box\n")
+        with (self.make_agent_core() / source).open("a", encoding="utf-8") as handle:
+            handle.write("# newer in agent-core\n")
         self.assertEqual(MODULE.problems(self.root),
-                         [f"{target} differs from gen-box/{source}: run tools/contract_sync.py in gen-box"])
+                         [f"{target} differs from agent-core/{source}: run tools/contract_sync.py in agent-core"])
 
     def test_hook_config_must_set_a_check_command(self):
         conf = self.root / ".githooks/pre-commit.conf"
@@ -97,27 +97,27 @@ class WorkspaceContractTests(unittest.TestCase):
             self.assertEqual(MODULE.problems(self.root),
                              ['.githooks/pre-commit.conf must set check="<health check command>" for the shared hook'])
 
-    def test_every_shared_source_is_required_without_gen_box(self):
+    def test_every_shared_source_is_required_without_agent_core(self):
         target = next(t for t, s in SHARED.items() if s == "shared/githooks/pre-commit")
         repo_map = self.root / "ai/repo-map.json"
         data = json.loads(repo_map.read_text(encoding="utf-8"))
         del data["shared_files"][target]
         repo_map.write_text(json.dumps(data), encoding="utf-8")
         self.assertEqual(MODULE.problems(self.root),
-                         ["ai/repo-map.json shared_files lacks gen-box/shared/githooks/pre-commit"])
+                         ["ai/repo-map.json shared_files lacks agent-core/shared/githooks/pre-commit"])
 
-    def test_source_missing_from_gen_box_fails(self):
+    def test_source_missing_from_agent_core_fails(self):
         target, source = next(iter(sorted(SHARED.items())))
-        master = self.make_gen_box()
+        master = self.make_agent_core()
         (master / source).unlink()
         self.assertEqual(MODULE.problems(self.root),
-                         [f"gen-box/{source} is missing from {master}: update that checkout or drop the mapping"])
+                         [f"agent-core/{source} is missing from {master}: update that checkout or drop the mapping"])
 
     def test_vendored_hook_must_stay_executable(self):
         target = next(t for t, s in SHARED.items() if s == "shared/githooks/pre-commit")
         (self.root / target).chmod(0o644)
         self.assertEqual(MODULE.problems(self.root),
-                         [f"{target} must be executable: run tools/contract_sync.py in gen-box"])
+                         [f"{target} must be executable: run tools/contract_sync.py in agent-core"])
 
     def test_mappings_stay_inside_the_repository(self):
         repo_map = self.root / "ai/repo-map.json"
@@ -126,7 +126,7 @@ class WorkspaceContractTests(unittest.TestCase):
         repo_map.write_text(json.dumps(data), encoding="utf-8")
         self.assertEqual(MODULE.problems(self.root), [
             "shared_files maps '../escape.py' to 'shared/workspace_contract.py': "
-            "use a path inside the repository and a gen-box/shared source"])
+            "use a path inside the repository and a agent-core/shared source"])
 
     def test_declared_local_hook_must_exist(self):
         with (self.root / ".githooks/pre-commit.conf").open("a", encoding="utf-8") as handle:
@@ -143,7 +143,7 @@ class WorkspaceContractTests(unittest.TestCase):
         repo_map.write_text(json.dumps(data), encoding="utf-8")
         shutil.copy(self.root / target, self.root / "unused-hook-copy")
         self.assertEqual(MODULE.problems(self.root),
-                         ["shared_files must map gen-box/shared/githooks/pre-commit to .githooks/pre-commit"])
+                         ["shared_files must map agent-core/shared/githooks/pre-commit to .githooks/pre-commit"])
 
     def test_claude_md_must_only_import_agents(self):
         (self.root / "CLAUDE.md").write_text("@AGENTS.md\nExtra rule.\n", encoding="utf-8")
@@ -184,9 +184,9 @@ class WorkspaceContractTests(unittest.TestCase):
         variants = (
             lambda data: data.pop("hooks"),
             lambda data: data["hooks"]["PreToolUse"][0].update(matcher="Edit"),
-            # The unguarded command exits 2 without gen-box beside the repository, blocking every Bash call.
+            # The unguarded command exits 2 without agent-core beside the repository, blocking every Bash call.
             lambda data: data["hooks"]["PreToolUse"][0]["hooks"][0].update(
-                command='python3 "$CLAUDE_PROJECT_DIR/../gen-box/tools/secret_guard.py"'),
+                command='python3 "$CLAUDE_PROJECT_DIR/../agent-core/tools/secret_guard.py"'),
         )
         original = (self.root / MODULE.SETTINGS).read_text(encoding="utf-8")
         for change in variants:

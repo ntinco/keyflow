@@ -1,11 +1,11 @@
-# shared: gen-box/shared/workspace_contract.py sha256:9f624d0d4875 (edit it in gen-box, then run tools/contract_sync.py in gen-box)
-"""Workspace contract checks shared by the six repositories; the master copy is gen-box/shared/workspace_contract.py.
+# shared: agent-core/shared/workspace_contract.py sha256:09403e535849 (edit it in agent-core, then run tools/contract_sync.py in agent-core)
+"""Workspace contract checks shared by the workspace repositories; the master copy is agent-core/shared/workspace_contract.py.
 
 problems(root) lists what breaks the workspace contract in the repository at root: the contract block or a file
-vendored from gen-box edited in place or out of date, the wiring the contract requires (pending_acceptance,
+vendored from agent-core edited in place or out of date, the wiring the contract requires (pending_acceptance,
 CLAUDE.md, pre-commit hook settings, the secret deny rules and secret_guard hook in .claude/settings.json) and the
-cold-start token budget. The gen-box checkout used as the
-authority is root itself, WORKSPACE_ROOT/gen-box or the sibling directory; without one only the local checks run.
+cold-start token budget. The agent-core checkout used as the
+authority is root itself, WORKSPACE_ROOT/agent-core or the sibling directory; without one only the local checks run.
 Run directly to print the problems of this repository; exits 1 when there are any. Standard library only.
 """
 from __future__ import annotations
@@ -20,7 +20,7 @@ from pathlib import Path
 BLOCK = re.compile(r"<!-- workspace-contract sha256:(\S+) -->\n(.*?)<!-- /workspace-contract -->", re.DOTALL)
 CHECK = re.compile(r"^check=(?:\"\s*[^\"\s][^\"]*\"|'\s*[^'\s][^']*'|[^\s\"'#]\S*)", re.MULTILINE)
 LOCAL = re.compile(r"^local=[\"']?([^\"'\s]+)", re.MULTILINE)
-MARKER = re.compile(r"# shared: gen-box/(\S+) sha256:([0-9a-f]{12})\b[^\n]*\n")
+MARKER = re.compile(r"# shared: agent-core/(\S+) sha256:([0-9a-f]{12})\b[^\n]*\n")
 SOURCES = (
     "shared/workspace_contract.py",
     "shared/test_workspace_contract.py",
@@ -32,10 +32,10 @@ SETTINGS = ".claude/settings.json"
 SECRET_DENY = tuple(f"{tool}({pattern})" for pattern in (
     "**/.env", "**/.env.*", "**/secrets.*", "**/*.pem", "**/*.key", "**/*.kdbx", "**/*.pfx", "**/*.p12",
     "**/*.ovpn", "**/*.sapc", "~/.ssh/**") for tool in ("Read", "Edit"))
-# Lets the call through when gen-box is not beside the repository (a single-repository clone), since a
+# Lets the call through when agent-core is not beside the repository (a single-repository clone), since a
 # PreToolUse hook that exits 2 blocks every Bash call.
-SECRET_GUARD = 'f="$CLAUDE_PROJECT_DIR/../gen-box/tools/secret_guard.py"; [ ! -f "$f" ] || python3 "$f"'
-SYNC = "run tools/contract_sync.py in gen-box"
+SECRET_GUARD = 'f="$CLAUDE_PROJECT_DIR/../agent-core/tools/secret_guard.py"; [ ! -f "$f" ] || python3 "$f"'
+SYNC = "run tools/contract_sync.py in agent-core"
 
 
 def digest(text: str) -> str:
@@ -43,8 +43,8 @@ def digest(text: str) -> str:
 
 
 def vendor(text: str, source: str) -> str:
-    """The copy of a gen-box file that other repositories commit: the source plus a marker after any shebang."""
-    marker = f"# shared: gen-box/{source} sha256:{digest(text)} (edit it in gen-box, then {SYNC})\n"
+    """The copy of a agent-core file that other repositories commit: the source plus a marker after any shebang."""
+    marker = f"# shared: agent-core/{source} sha256:{digest(text)} (edit it in agent-core, then {SYNC})\n"
     if text.startswith("#!"):
         first, _, rest = text.partition("\n")
         return f"{first}\n{marker}{rest}"
@@ -71,10 +71,10 @@ def boot_tokens(root: Path) -> int:
                for rel in BOOT_FILES if (root / rel).is_file()) // 4
 
 
-def gen_box(root: Path) -> Path | None:
+def agent_core(root: Path) -> Path | None:
     if (root / SOURCES[0]).is_file():
         return root
-    candidate = Path(os.environ.get("WORKSPACE_ROOT") or root.resolve().parent) / "gen-box"
+    candidate = Path(os.environ.get("WORKSPACE_ROOT") or root.resolve().parent) / "agent-core"
     # An existing checkout is the authority even when broken, so its missing files are reported, not skipped.
     return candidate if candidate.is_dir() else None
 
@@ -96,15 +96,15 @@ def contract_problems(root: Path, master: Path | None) -> list[str]:
     if len(blocks) != 1:
         return [f"ai/governance.md needs one workspace contract block, found {len(blocks)}"]
     if digest(blocks[0][1]) != blocks[0][0]:
-        return [f"workspace contract edited here: edit it in gen-box and {SYNC}"]
+        return [f"workspace contract edited here: edit it in agent-core and {SYNC}"]
     if master is None or master == root:
         return []
     source = master / "ai/governance.md"
     master_blocks = BLOCK.findall(read(source))
     if len(master_blocks) != 1:
-        return [f"gen-box master {source} must hold exactly one workspace contract block"]
+        return [f"agent-core master {source} must hold exactly one workspace contract block"]
     if master_blocks[0] != blocks[0]:
-        return [f"workspace contract differs from the gen-box master: {SYNC}"]
+        return [f"workspace contract differs from the agent-core master: {SYNC}"]
     return []
 
 
@@ -141,42 +141,42 @@ def vendored_problems(root: Path, shared: dict, master: Path | None) -> list[str
     for target, source in sorted(shared.items()):
         path = root / target
         if source not in SOURCES or Path(target).is_absolute() or ".." in Path(target).parts:
-            problems.append(f"shared_files maps {target!r} to {source!r}: use a path inside the repository and a gen-box/shared source")
+            problems.append(f"shared_files maps {target!r} to {source!r}: use a path inside the repository and a agent-core/shared source")
             continue
         if not path.is_file():
             problems.append(f"{target} is missing: {SYNC}")
             continue
         parsed = unvendor(read(path))
         if parsed is None or parsed[0] != source:
-            problems.append(f"{target} is not a vendored copy of gen-box/{source}: {SYNC}")
+            problems.append(f"{target} is not a vendored copy of agent-core/{source}: {SYNC}")
         elif digest(parsed[2]) != parsed[1]:
-            problems.append(f"{target} edited here: edit gen-box/{source} and {SYNC}")
+            problems.append(f"{target} edited here: edit agent-core/{source} and {SYNC}")
         elif parsed[2].startswith("#!") and not path.stat().st_mode & 0o111:
             problems.append(f"{target} must be executable: {SYNC}")
         elif master is not None and not (master / source).is_file():
-            problems.append(f"gen-box/{source} is missing from {master}: update that checkout or drop the mapping")
+            problems.append(f"agent-core/{source} is missing from {master}: update that checkout or drop the mapping")
         elif master is not None and read(master / source) != parsed[2]:
-            problems.append(f"{target} differs from gen-box/{source}: {SYNC}")
+            problems.append(f"{target} differs from agent-core/{source}: {SYNC}")
     missing = sorted(set(SOURCES) - set(shared.values()))
-    problems += [f"ai/repo-map.json shared_files lacks gen-box/{source}" for source in missing]
+    problems += [f"ai/repo-map.json shared_files lacks agent-core/{source}" for source in missing]
     # Where a copy lives matters: git runs .githooks/pre-commit, unittest discovers test_*.py, and the
     # health check imports the module beside it.
     targets = {source: {t for t, s in shared.items() if s == source} for source in SOURCES}
     if targets["shared/githooks/pre-commit"] and ".githooks/pre-commit" not in targets["shared/githooks/pre-commit"]:
-        problems.append("shared_files must map gen-box/shared/githooks/pre-commit to .githooks/pre-commit")
+        problems.append("shared_files must map agent-core/shared/githooks/pre-commit to .githooks/pre-commit")
     if targets["shared/test_workspace_contract.py"] and not any(
             Path(t).name.startswith("test_") for t in targets["shared/test_workspace_contract.py"]):
-        problems.append("shared_files must map gen-box/shared/test_workspace_contract.py to a test_*.py file")
+        problems.append("shared_files must map agent-core/shared/test_workspace_contract.py to a test_*.py file")
     own = Path(__file__).resolve()
     if own.is_relative_to(root.resolve()) and own.relative_to(root.resolve()).as_posix() not in targets[SOURCES[0]]:
-        problems.append(f"shared_files must map gen-box/{SOURCES[0]} to {own.relative_to(root.resolve()).as_posix()}, "
+        problems.append(f"shared_files must map agent-core/{SOURCES[0]} to {own.relative_to(root.resolve()).as_posix()}, "
                         "the copy the health check imports")
     return problems
 
 
 def problems(root: Path) -> list[str]:
     """Everything that breaks the workspace contract in the repository at root; empty when it holds."""
-    master = gen_box(root)
+    master = agent_core(root)
     repo_map = load_json(root / "ai/repo-map.json")
     found = contract_problems(root, master)
     pending = repo_map.get("pending_acceptance")
@@ -194,7 +194,7 @@ def problems(root: Path) -> list[str]:
         found.append(f"{local.group(1)} is declared in .githooks/pre-commit.conf but is not an executable file")
     shared = repo_map.get("shared_files")
     if not isinstance(shared, dict) or not shared:
-        found.append("ai/repo-map.json must map shared_files (vendored path -> gen-box source)")
+        found.append("ai/repo-map.json must map shared_files (vendored path -> agent-core source)")
     else:
         found += vendored_problems(root, shared, master)
     budget = repo_map.get("cold_start_token_budget")

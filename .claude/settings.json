@@ -42,7 +42,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "f=\"$CLAUDE_PROJECT_DIR/../gen-box/tools/secret_guard.py\"; [ ! -f \"$f\" ] || python3 \"$f\""
+            "command": "f=\"$CLAUDE_PROJECT_DIR/../agent-core/tools/secret_guard.py\"; [ ! -f \"$f\" ] || python3 \"$f\""
           }
         ]
       }
@@ -52,7 +52,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/../gen-box/tools/link_workspace.py\" \"$CLAUDE_PROJECT_DIR/..\" 2>/dev/null || true"
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/../agent-core/tools/link_workspace.py\" \"$CLAUDE_PROJECT_DIR/..\" 2>/dev/null || true"
           }
         ]
       }
