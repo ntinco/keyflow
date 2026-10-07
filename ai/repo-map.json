@@ -70,7 +70,6 @@
   "pending_acceptance": "ai/current-plan.md",
   "shared_files": {
     "ai/workspace_contract.py": "shared/workspace_contract.py",
-    "ai/tests/test_workspace_contract.py": "shared/test_workspace_contract.py",
     ".githooks/pre-commit": "shared/githooks/pre-commit"
   },
   "cold_start_token_budget": 2300

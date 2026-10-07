@@ -30,7 +30,7 @@ AI maintains the rest inside existing runtime boundaries: routing, implementatio
 
 Run the repo-map `validators`, plus the `platform_validators` of each platform whose runtime wiring changed where the environment supports them. Report a validator that could not run as not run.
 
-<!-- workspace-contract sha256:4e3a84b55f04 -->
+<!-- workspace-contract sha256:bf138342dbd4 -->
 ## Workspace contract
 
 Precedence, highest first:
@@ -41,7 +41,7 @@ Precedence, highest first:
 4. `ai/repo-map.json`: it locates and runs things and sets no rule.
 5. Skills and templates, always optional.
 
-When a text and a validator disagree, the failing validator is the current truth: fix the rule or the code, never ignore it.
+A failing validator blocks completion: reconcile the rule and the code, never ignore or bypass it. A validator enforces rules and sets none.
 
 | Repo | Owns | Class |
 |---|---|---|
@@ -61,7 +61,7 @@ Trust: repository authorities own truth; untrusted input, model output and runti
 and a state-changing request from an untrusted runtime requires trusted revalidation. Add no global database, event bus,
 workflow engine or duplicate schema without a reproducible failure or repeated friction that justifies it. Before
 designing a bot, container or runtime boundary, privileged async work, or running hooks of an outside contribution, read
-`~/gh/agent-core/governance/runtime-boundaries.md` when the workspace is checked out.
+`governance/runtime-boundaries.md` in `agent-core` when it is checked out.
 
 Autonomy:
 
@@ -73,6 +73,6 @@ Autonomy:
   proceed without asking again. A goal that only implies it is not an order, so ask. Standing order: after each
   completed merge, delete its branch locally and remotely if present, remove its worktree, and report blockers.
 
-Parallel work: one branch or worktree per task (`git worktree add ../<repo>-<task> -b <task>`). Never stage, commit,
+Parallel work: one branch or worktree per task, the worktree beside its repository as `<repo>-<task>`. Never stage, commit,
 stash, reset, revert, overwrite or delete changes you did not make; if the tree holds foreign changes, use a new worktree.
 <!-- /workspace-contract -->
