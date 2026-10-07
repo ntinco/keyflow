@@ -1,4 +1,4 @@
-# shared: agent-core/shared/test_workspace_contract.py sha256:08ef1809539f (edit it in agent-core, then run tools/contract_sync.py in agent-core)
+# shared: agent-core/shared/test_workspace_contract.py sha256:91a95060dd75 (edit it in agent-core, then run tools/contract_sync.py in agent-core)
 """Workspace contract check (agent-core/shared/workspace_contract.py) on this repository and on broken copies of it."""
 from __future__ import annotations
 
@@ -57,13 +57,13 @@ class WorkspaceContractTests(unittest.TestCase):
         self.assertEqual(MODULE.problems(self.root), [])
 
     def test_contract_edited_in_place_fails(self):
-        self.edit(self.root / "ai/governance.md", "Ask first", "Never ask")
+        self.edit(self.root / "ai/governance.md", "Without asking", "Never asking")
         self.assertEqual(MODULE.problems(self.root),
                          ["workspace contract edited here: edit it in agent-core and run tools/contract_sync.py in agent-core"])
 
     def test_contract_must_match_agent_core_master(self):
         master = self.make_agent_core() / "ai/governance.md"
-        self.edit(master, "Ask first", "Never ask")
+        self.edit(master, "Without asking", "Never asking")
         self.assertEqual(MODULE.problems(self.root),
                          ["workspace contract differs from the agent-core master: run tools/contract_sync.py in agent-core"])
         master.write_text("no contract here\n", encoding="utf-8")
