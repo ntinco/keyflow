@@ -20,6 +20,7 @@ sys.path.insert(0, str(AI_DIR))
 
 import health_check  # noqa: E402
 import hotkey_sync  # noqa: E402
+import run_smoke  # noqa: E402
 
 
 def _hotstring(trigger: str, options: str = "::", context: str = "") -> dict[str, object]:
@@ -312,6 +313,84 @@ class ControlPlaneTests(unittest.TestCase):
                                  for path in generated), source)
 
 
+class DisplayKeyTests(unittest.TestCase):
+    def test_hotstring_displays_trigger(self) -> None:
+        entry = {"type": "hotstring", "trigger": "hello"}
+        self.assertEqual(hotkey_sync._display_key(entry), "hello")
+
+    def test_hotstring_with_complex_trigger(self) -> None:
+        entry = {"type": "hotstring", "trigger": "bd,"}
+        self.assertEqual(hotkey_sync._display_key(entry), "bd,")
+
+    def test_modifiers_in_canonical_order(self) -> None:
+        entry = {"type": "hotkey", "key": "^!x"}
+        self.assertEqual(hotkey_sync._display_key(entry), "Ctrl+Alt+X")
+
+    def test_modifiers_processed_regardless_of_input_order(self) -> None:
+        entry = {"type": "hotkey", "key": "!^x"}
+        self.assertEqual(hotkey_sync._display_key(entry), "Alt+Ctrl+X")
+
+    def test_multiple_modifiers_all_displayed(self) -> None:
+        entry = {"type": "hotkey", "key": "#^!+a"}
+        self.assertEqual(hotkey_sync._display_key(entry), "Win+Ctrl+Alt+Shift+A")
+
+    def test_tilde_prefix_dropped(self) -> None:
+        entry = {"type": "hotkey", "key": "~^x"}
+        self.assertEqual(hotkey_sync._display_key(entry), "Ctrl+X")
+
+    def test_dollar_prefix_dropped(self) -> None:
+        entry = {"type": "hotkey", "key": "$^x"}
+        self.assertEqual(hotkey_sync._display_key(entry), "Ctrl+X")
+
+    def test_star_prefix_dropped(self) -> None:
+        entry = {"type": "hotkey", "key": "*^x"}
+        self.assertEqual(hotkey_sync._display_key(entry), "Ctrl+X")
+
+    def test_named_key_xbutton1(self) -> None:
+        entry = {"type": "hotkey", "key": "xbutton1"}
+        self.assertEqual(hotkey_sync._display_key(entry), "MouseBack")
+
+    def test_named_key_xbutton1_with_modifier(self) -> None:
+        entry = {"type": "hotkey", "key": "^xbutton1"}
+        self.assertEqual(hotkey_sync._display_key(entry), "Ctrl+MouseBack")
+
+    def test_named_key_pgdn(self) -> None:
+        entry = {"type": "hotkey", "key": "pgdn"}
+        self.assertEqual(hotkey_sync._display_key(entry), "PageDown")
+
+    def test_named_key_pgdn_case_insensitive(self) -> None:
+        entry = {"type": "hotkey", "key": "PGDN"}
+        self.assertEqual(hotkey_sync._display_key(entry), "PageDown")
+
+    def test_function_key(self) -> None:
+        entry = {"type": "hotkey", "key": "F9"}
+        self.assertEqual(hotkey_sync._display_key(entry), "F9")
+
+    def test_function_key_lowercase(self) -> None:
+        entry = {"type": "hotkey", "key": "f1"}
+        self.assertEqual(hotkey_sync._display_key(entry), "F1")
+
+    def test_function_key_with_modifier(self) -> None:
+        entry = {"type": "hotkey", "key": "^F12"}
+        self.assertEqual(hotkey_sync._display_key(entry), "Ctrl+F12")
+
+    def test_single_letter_uppercase(self) -> None:
+        entry = {"type": "hotkey", "key": "A"}
+        self.assertEqual(hotkey_sync._display_key(entry), "A")
+
+    def test_single_letter_lowercase_uppercased(self) -> None:
+        entry = {"type": "hotkey", "key": "z"}
+        self.assertEqual(hotkey_sync._display_key(entry), "Z")
+
+    def test_unknown_key_displayed_as_written(self) -> None:
+        entry = {"type": "hotkey", "key": "customkey"}
+        self.assertEqual(hotkey_sync._display_key(entry), "customkey")
+
+    def test_unknown_key_with_modifier(self) -> None:
+        entry = {"type": "hotkey", "key": "!customkey"}
+        self.assertEqual(hotkey_sync._display_key(entry), "Alt+customkey")
+
+
 class MacosLogicTests(unittest.TestCase):
     def test_lua_pure_logic(self) -> None:
         lua = shutil.which("lua")
@@ -320,6 +399,116 @@ class MacosLogicTests(unittest.TestCase):
         result = subprocess.run([lua, str(AI_DIR / "tests" / "macos_logic_test.lua")],
                                 cwd=REPO_ROOT, capture_output=True, text=True, check=False)
         self.assertEqual(result.returncode, 0, result.stderr)
+
+
+class RunSmokeSkipTests(unittest.TestCase):
+    def test_missing_ahk_executable_is_not_run(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            result = run_smoke.run_smoke(Path(tmp), 1)
+        self.assertEqual(result["outcome"], "not_run")
+        self.assertIn("AHK executable not found", str(result["notes"]))
+
+    def test_missing_entry_script_is_not_run(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            exe = root / "platforms/windows/tools/exe/AutoHotkey64.exe"
+            exe.parent.mkdir(parents=True)
+            exe.write_bytes(b"")
+            result = run_smoke.run_smoke(root, 1)
+        self.assertEqual(result["outcome"], "not_run")
+        self.assertIn("Entry point not found", str(result["notes"]))
+
+    def test_macos_missing_init_lua_is_not_run(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            result = run_smoke.run_smoke_macos(Path(tmp))
+        self.assertEqual(result["outcome"], "not_run")
+        self.assertIn("macOS entry point not found", str(result["notes"]))
+
+
+class StringEscapingTests(unittest.TestCase):
+    def test_ahk_str_escapes_backtick(self) -> None:
+        self.assertEqual(hotkey_sync._ahk_str("`"), "``")
+
+    def test_ahk_str_escapes_double_quote(self) -> None:
+        self.assertEqual(hotkey_sync._ahk_str('"'), '`"')
+
+    def test_ahk_str_escapes_both_backtick_and_double_quote(self) -> None:
+        self.assertEqual(hotkey_sync._ahk_str('"`"'), '`"```"')
+
+    def test_ahk_str_returns_unchanged_when_nothing_to_escape(self) -> None:
+        self.assertEqual(hotkey_sync._ahk_str("hello"), "hello")
+
+    def test_lua_str_escapes_backslash(self) -> None:
+        self.assertEqual(hotkey_sync._lua_str("\\"), "\\\\")
+
+    def test_lua_str_escapes_double_quote(self) -> None:
+        self.assertEqual(hotkey_sync._lua_str('"'), '\\"')
+
+    def test_lua_str_escapes_both_backslash_and_double_quote(self) -> None:
+        self.assertEqual(hotkey_sync._lua_str('\\"'), '\\\\\\"')
+
+    def test_lua_str_returns_unchanged_when_nothing_to_escape(self) -> None:
+        self.assertEqual(hotkey_sync._lua_str("hello"), "hello")
+
+
+class StaleGeneratedFilesTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory()
+        self.hotkeys_dir = Path(self.tmp.name)
+        self.original_hotkeys_dir = hotkey_sync.HOTKEYS_DIR
+        hotkey_sync.HOTKEYS_DIR = self.hotkeys_dir
+
+    def tearDown(self) -> None:
+        hotkey_sync.HOTKEYS_DIR = self.original_hotkeys_dir
+        self.tmp.cleanup()
+
+    def test_generated_file_not_in_expected_set_is_reported(self) -> None:
+        stale_file = self.hotkeys_dir / "stale.ahk"
+        stale_file.write_text(f"{hotkey_sync.GENERATED_MARKER}\nSome content\n")
+        stale = hotkey_sync.stale_generated_files(set())
+        self.assertEqual(len(stale), 1)
+        self.assertEqual(stale[0], stale_file)
+
+    def test_generated_file_in_expected_set_is_not_reported(self) -> None:
+        expected_file = self.hotkeys_dir / "expected.ahk"
+        expected_file.write_text(f"{hotkey_sync.GENERATED_MARKER}\nContent\n")
+        stale = hotkey_sync.stale_generated_files({expected_file})
+        self.assertEqual(stale, [])
+
+    def test_file_without_generated_marker_is_not_reported(self) -> None:
+        manual_file = self.hotkeys_dir / "manual.ahk"
+        manual_file.write_text("; This is a manual file\nSome content\n")
+        stale = hotkey_sync.stale_generated_files(set())
+        self.assertEqual(stale, [])
+
+    def test_empty_file_is_not_reported_and_does_not_raise(self) -> None:
+        empty_file = self.hotkeys_dir / "empty.ahk"
+        empty_file.write_text("")
+        stale = hotkey_sync.stale_generated_files(set())
+        self.assertEqual(stale, [])
+
+    def test_mixed_files_filters_correctly(self) -> None:
+        generated_stale = self.hotkeys_dir / "stale_generated.ahk"
+        generated_stale.write_text(f"{hotkey_sync.GENERATED_MARKER}\nContent\n")
+
+        generated_expected = self.hotkeys_dir / "expected_generated.ahk"
+        generated_expected.write_text(f"{hotkey_sync.GENERATED_MARKER}\nContent\n")
+
+        manual = self.hotkeys_dir / "manual.ahk"
+        manual.write_text("; Manual file\n")
+
+        stale = hotkey_sync.stale_generated_files({generated_expected})
+        self.assertEqual(len(stale), 1)
+        self.assertEqual(stale[0], generated_stale)
+
+    def test_nested_directories_are_checked(self) -> None:
+        subdir = self.hotkeys_dir / "subdir"
+        subdir.mkdir()
+        nested_stale = subdir / "nested.ahk"
+        nested_stale.write_text(f"{hotkey_sync.GENERATED_MARKER}\nContent\n")
+        stale = hotkey_sync.stale_generated_files(set())
+        self.assertEqual(len(stale), 1)
+        self.assertEqual(stale[0], nested_stale)
 
 
 if __name__ == "__main__":

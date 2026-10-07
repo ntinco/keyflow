@@ -83,7 +83,7 @@ def run_smoke_macos(repo_root: Path) -> dict[str, object]:
         "command": f"luac -p {' '.join(str(f.relative_to(repo_root)) for f in lua_files)}",
         "timestamp_utc": timestamp,
         "outcome": outcome,
-        "exit_code": exit_code if exit_code != 0 else 0,
+        "exit_code": exit_code,
         "stderr_lines": stderr_lines,
         "notes": notes,
     }
