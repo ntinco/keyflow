@@ -30,7 +30,7 @@ AI maintains the rest inside existing runtime boundaries: routing, implementatio
 
 Run the repo-map `validators`, plus the `platform_validators` of each platform whose runtime wiring changed where the environment supports them. Report a validator that could not run as not run.
 
-<!-- workspace-contract sha256:9bd4ddeb0233 -->
+<!-- workspace-contract sha256:0fa2a1492291 -->
 ## Workspace contract
 
 Precedence, highest first:
@@ -55,6 +55,7 @@ A failing validator blocks completion: reconcile the rule and the code, never ig
 | `keyflow` | hotkeys, hotstrings, daily desktop automation | public |
 | `reader` | NetNewsWire review, ranking, local enrichment and rollback | private-technical |
 | `workstation-ops` | installs, provisioning, machine maintenance and backups | private-technical |
+| `desk` | day-to-day entry point: the dispatch table and procedures that only chain owning repositories; never their state, data or tools | private-technical |
 
 Route work to the owning repository; never build a local substitute. Private-personal data stays in `life-os`, learning state in `knowflow`; client or employer confidential data belongs in none. Other content moves only to the same or a more private class.
 
