@@ -2,6 +2,7 @@ name: health-check
 
 on:
   push:
+    branches: [main]
   pull_request:
   schedule:
     - cron: "23 7 * * 1"
