@@ -1,10 +1,10 @@
-# shared: agent-core/shared/workspace_contract.py sha256:45ea50c45e4d (edit it in agent-core, then run tools/contract_sync.py in agent-core)
+# shared: agent-core/shared/workspace_contract.py sha256:d0f2a44a45d7 (edit it in agent-core, then run tools/contract_sync.py in agent-core)
 """Local workspace contract checks; the master copy is agent-core/shared/workspace_contract.py.
 
 problems(root) lists what breaks the workspace contract in the repository at root, reading nothing outside it: the
-contract block missing, duplicated or edited in place, the wiring the contract requires (pending_acceptance,
-CLAUDE.md, pre-commit hook settings, the secret deny rules and secret_guard hook in .claude/settings.json) and the
-cold-start token budget. Drift against agent-core (the contract master, the vendored files) is not checked here:
+contract block missing, duplicated or edited in place, the wiring the contract requires (a pending_acceptance
+reference that resolves, CLAUDE.md, pre-commit hook settings, the secret deny rules and secret_guard hook in
+.claude/settings.json) and the cold-start token budget. Drift against agent-core (the contract master, the vendored files) is not checked here:
 `tools/contract_sync.py ROOT --check` in agent-core owns it.
 Run directly to print the problems of this repository; exits 1 when there are any. Standard library only.
 """
@@ -14,7 +14,7 @@ import hashlib
 import json
 import re
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 BLOCK = re.compile(r"<!-- workspace-contract sha256:(\S+) -->\n(.*?)<!-- /workspace-contract -->", re.DOTALL)
 CHECK = re.compile(r"^check=(?:\"\s*[^\"\s][^\"]*\"|'\s*[^'\s][^']*'|[^\s\"'#]\S*)", re.MULTILINE)
@@ -31,6 +31,9 @@ SECRET_DENY = tuple(f"{tool}({pattern})" for pattern in (
 # PreToolUse hook that exits 2 blocks every Bash call.
 SECRET_GUARD = 'f="$CLAUDE_PROJECT_DIR/../agent-core/tools/secret_guard.py"; [ ! -f "$f" ] || python3 "$f"'
 SYNC = "run tools/contract_sync.py in agent-core"
+PENDING = "ai/repo-map.json pending_acceptance"
+HEADING = re.compile(r" {0,3}#{1,6}[ \t]+(.*?)(?:[ \t]+#+)?[ \t]*$")
+FENCE = re.compile(r" {0,3}(```|~~~)")
 
 
 def digest(text: str) -> str:
@@ -58,6 +61,48 @@ def load_json(path: Path) -> dict:
     except (OSError, json.JSONDecodeError):
         return {}
     return data if isinstance(data, dict) else {}
+
+
+def heading_anchor(heading: str) -> str:
+    """Anchor of a heading text: lowercase, punctuation dropped, each space a hyphen ("Open loops (2)" -> open-loops-2)."""
+    return re.sub(r"[^\w\- ]", "", heading.strip().lower()).replace(" ", "-")
+
+
+def anchors(text: str) -> set[str]:
+    """Anchors of the ATX headings (# to ######) of a Markdown text; a line inside a fenced code block is no heading."""
+    found, fence = set(), ""
+    for line in text.splitlines():
+        if mark := FENCE.match(line):
+            fence = "" if fence == mark.group(1) else fence or mark.group(1)
+        elif not fence and (heading := HEADING.match(line)):
+            found.add(heading_anchor(heading.group(1)))
+    return found
+
+
+def pending_problems(root: Path, pending: object) -> list[str]:
+    """pending_acceptance is `path` or `path#anchor`: a UTF-8 file of this repository and, if given, one of its headings."""
+    if not isinstance(pending, str) or not pending.strip():
+        return ["ai/repo-map.json must name one pending_acceptance path"]
+    rel, mark, anchor = pending.partition("#")
+    if pending != pending.strip() or not rel or (mark and not anchor) or "#" in anchor:
+        return [f"{PENDING} {pending!r} must be `path` or `path#anchor`, both parts non-empty"]
+    if (PurePosixPath(rel).is_absolute() or PureWindowsPath(rel).is_absolute() or PureWindowsPath(rel).drive
+            or ".." in PureWindowsPath(rel).parts):
+        return [f"{PENDING} {rel!r} must be a relative path inside the repository, without `..`"]
+    target = (root / rel).resolve()
+    if not target.is_relative_to(root.resolve()):
+        return [f"{PENDING} {rel!r} resolves outside the repository"]
+    if not target.is_file():
+        return [f"{PENDING} names {rel!r}, which is not an existing file"]
+    try:
+        text = target.read_bytes().decode("utf-8")
+    except UnicodeDecodeError:
+        return [f"{PENDING} names {rel!r}, which is not UTF-8 text"]
+    except OSError as exc:
+        return [f"{PENDING} names {rel!r}, which cannot be read: {exc}"]
+    if mark and anchor not in anchors(text):
+        return [f"{PENDING} names {rel!r}, which has no Markdown heading with the anchor #{anchor}"]
+    return []
 
 
 def contract_problems(root: Path) -> list[str]:
@@ -101,9 +146,7 @@ def problems(root: Path) -> list[str]:
     """Everything that breaks the workspace contract in the repository at root; empty when it holds."""
     repo_map = load_json(root / "ai/repo-map.json")
     found = contract_problems(root)
-    pending = repo_map.get("pending_acceptance")
-    if not isinstance(pending, str) or not pending.strip():
-        found.append("ai/repo-map.json must name one pending_acceptance path")
+    found += pending_problems(root, repo_map.get("pending_acceptance"))
     if read(root / "CLAUDE.md").strip() != "@AGENTS.md":
         found.append("CLAUDE.md must exist and contain only @AGENTS.md")
     found += settings_problems(root)
