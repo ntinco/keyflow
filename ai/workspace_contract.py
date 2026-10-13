@@ -1,4 +1,4 @@
-# shared: agent-core/shared/workspace_contract.py sha256:d0f2a44a45d7 (edit it in agent-core, then run tools/contract_sync.py in agent-core)
+# shared: agent-core/shared/workspace_contract.py sha256:bf199fc7c2f7 (edit it in agent-core, then run tools/contract_sync.py in agent-core)
 """Local workspace contract checks; the master copy is agent-core/shared/workspace_contract.py.
 
 problems(root) lists what breaks the workspace contract in the repository at root, reading nothing outside it: the
@@ -33,7 +33,9 @@ SECRET_GUARD = 'f="$CLAUDE_PROJECT_DIR/../agent-core/tools/secret_guard.py"; [ !
 SYNC = "run tools/contract_sync.py in agent-core"
 PENDING = "ai/repo-map.json pending_acceptance"
 HEADING = re.compile(r" {0,3}#{1,6}[ \t]+(.*?)(?:[ \t]+#+)?[ \t]*$")
-FENCE = re.compile(r" {0,3}(```|~~~)")
+FENCE = re.compile(r" {0,3}(`{3,}|~{3,})(.*)")
+COMMENT = re.compile(r"<!--.*?-->")
+UNRESOLVED = (OSError, RuntimeError, ValueError)  # unreadable or over-long, symlink loop, NUL or lone surrogate
 
 
 def digest(text: str) -> str:
@@ -69,12 +71,25 @@ def heading_anchor(heading: str) -> str:
 
 
 def anchors(text: str) -> set[str]:
-    """Anchors of the ATX headings (# to ######) of a Markdown text; a line inside a fenced code block is no heading."""
-    found, fence = set(), ""
-    for line in text.splitlines():
-        if mark := FENCE.match(line):
-            fence = "" if fence == mark.group(1) else fence or mark.group(1)
-        elif not fence and (heading := HEADING.match(line)):
+    """Anchors of the ATX headings (# to ######) of a Markdown text, and of nothing else.
+
+    No heading: a line inside a fenced code block, which only a run of its own character at least as long as the
+    opener and followed by nothing closes, or inside an HTML comment, which a line starting with `<!--` opens and the
+    first line holding `-->` (that same line included) closes. A comment within a heading line is not heading text.
+    Deliberately not a Markdown renderer: no Setext headings, no suffixes for repeated headings, no inline markup.
+    """
+    found, fence, comment = set(), "", False
+    for line in re.split(r"\r\n?|\n", text):
+        mark = FENCE.match(line)
+        if fence:
+            run, rest = mark.groups() if mark else ("", "")
+            if run[:1] == fence[0] and len(run) >= len(fence) and not rest.strip():
+                fence = ""
+        elif comment or re.match(r" {0,3}<!--", line):
+            comment = "-->" not in line
+        elif mark and not (mark.group(1)[0] == "`" and "`" in mark.group(2)):
+            fence = mark.group(1)
+        elif heading := HEADING.match(COMMENT.sub("", line)):
             found.add(heading_anchor(heading.group(1)))
     return found
 
@@ -89,19 +104,27 @@ def pending_problems(root: Path, pending: object) -> list[str]:
     if (PurePosixPath(rel).is_absolute() or PureWindowsPath(rel).is_absolute() or PureWindowsPath(rel).drive
             or ".." in PureWindowsPath(rel).parts):
         return [f"{PENDING} {rel!r} must be a relative path inside the repository, without `..`"]
-    target = (root / rel).resolve()
-    if not target.is_relative_to(root.resolve()):
+    base = root.resolve()
+    # The reference is untrusted text: what the filesystem refuses is a problem to report, never a traceback.
+    try:
+        target = (root / rel).resolve()
+        inside, exists = target.is_relative_to(base), target.is_file()
+    except UNRESOLVED:
+        return [f"{PENDING} {rel!r} is not a path the filesystem can resolve"]
+    if not inside:
         return [f"{PENDING} {rel!r} resolves outside the repository"]
-    if not target.is_file():
+    if not exists:
         return [f"{PENDING} names {rel!r}, which is not an existing file"]
     try:
-        text = target.read_bytes().decode("utf-8")
+        text = target.read_bytes().decode("utf-8-sig")
     except UnicodeDecodeError:
         return [f"{PENDING} names {rel!r}, which is not UTF-8 text"]
     except OSError as exc:
-        return [f"{PENDING} names {rel!r}, which cannot be read: {exc}"]
+        return [f"{PENDING} names {rel!r}, which cannot be read ({type(exc).__name__})"]
     if mark and anchor not in anchors(text):
-        return [f"{PENDING} names {rel!r}, which has no Markdown heading with the anchor #{anchor}"]
+        # A lone surrogate from a JSON escape cannot be printed: show it escaped.
+        shown = anchor.encode("utf-8", "backslashreplace").decode("utf-8")
+        return [f"{PENDING} names {rel!r}, which has no Markdown heading with the anchor #{shown}"]
     return []
 
 
