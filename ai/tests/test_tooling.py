@@ -204,6 +204,22 @@ class HealthCheckHelperTests(unittest.TestCase):
         self.assertEqual(sorted(str(issue["symbol"]) for issue in issues), ["caller", "unused"])
 
 
+class ParseClassMethodsTests(unittest.TestCase):
+    """Service contracts resolve methods through these classes; a parse slip hides or invents a method."""
+
+    def test_methods_and_parent_per_class(self) -> None:
+        text = ("class Base {\n  alpha() {\n  }\n  alpha() {\n  }\n}\n"
+                "class Child extends Base {\n  beta() {\n    if (ready) {\n    }\n  }\n  gamma() {\n  }\n}\n")
+        self.assertEqual(health_check.parse_class_methods(text), {
+            "Base": {"methods": ["alpha"], "parent": ""},
+            "Child": {"methods": ["beta", "gamma"], "parent": "Base"},
+        })
+
+    def test_functions_outside_a_class_are_not_methods(self) -> None:
+        text = "before() {\n}\nclass Example {\n  run() {\n  }\n}\nafter() {\n}\n"
+        self.assertEqual(health_check.parse_class_methods(text), {"Example": {"methods": ["run"], "parent": ""}})
+
+
 class AhkRiskLintTests(unittest.TestCase):
     def _types(self, text: str, path: str = "platforms/windows/library/automation/x.ahk") -> list[str]:
         return [str(issue["type"]) for issue in health_check.scan_ahk_risks({path: {"text": text}})]
