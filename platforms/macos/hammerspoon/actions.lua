@@ -12,6 +12,7 @@ local APP_BUNDLE_IDS = {
   githubCopilot = "com.github.githubapp",
   iina = "com.colliderli.iina",
   sap = "com.sap.platin",
+  siri = "com.apple.campo",
   snipaste = "com.Snipaste",
   spotlight = "com.apple.Spotlight",
   vscode = "com.microsoft.VSCode",
@@ -54,10 +55,15 @@ local function startTask(path, callback, args, configure)
   return task
 end
 
+-- Hosts of the Cmd+Space search UI: Siri AI from macOS 27, Spotlight before.
+local SEARCH_BUNDLE_IDS = {
+  [APP_BUNDLE_IDS.siri] = true,
+  [APP_BUNDLE_IDS.spotlight] = true,
+}
+
 local function isLauncherApp(app)
   local bundleID = app and app:bundleID()
-  return bundleID == APP_BUNDLE_IDS.finder
-    or bundleID == APP_BUNDLE_IDS.spotlight
+  return bundleID == APP_BUNDLE_IDS.finder or SEARCH_BUNDLE_IDS[bundleID] == true
 end
 
 function Actions.rememberLauncherTarget(app)
@@ -167,29 +173,37 @@ function Actions.shouldSubmitExistingSapCatalogTcode(profileID)
   return window and window:title():find("SAP Easy Access", 1, true) ~= nil
 end
 
-local function focusedApp()
-  local ok, app = pcall(function()
+-- The focused AX element, not frontmostApplication(): the macOS 27 search
+-- panel takes focus while the app behind it stays frontmost.
+local function focusedElementAndApp()
+  local ok, element, app = pcall(function()
     local element = hs.axuielement.systemWideElement()
       :attributeValue("AXFocusedUIElement")
-    return element
-      and hs.application.applicationForPID(element:pid())
-      or nil
+    return element, element and hs.application.applicationForPID(element:pid())
   end)
-  return ok and app or hs.application.frontmostApplication()
+  if ok and app then return element, app end
+  return nil, hs.application.frontmostApplication()
 end
 
-function Actions.launcherSourceBundleID()
-  local app = focusedApp()
+local function isSearchUI(element, app)
   local bundleID = app and app:bundleID()
-  if bundleID == APP_BUNDLE_IDS.finder
-      or bundleID == APP_BUNDLE_IDS.spotlight then
-    return bundleID
-  end
+  if bundleID == APP_BUNDLE_IDS.spotlight then return true end
+  -- Siri AI also hosts non-search windows; only its search field counts.
+  return bundleID == APP_BUNDLE_IDS.siri and element ~= nil
+    and element:attributeValue("AXRole") == "AXTextField"
+    and element:attributeValue("AXSubrole") == "AXSearchField"
+end
+
+-- "finder", "search" (Cmd+Space search UI) or nil.
+function Actions.launcherSource()
+  local element, app = focusedElementAndApp()
+  if isSearchUI(element, app) then return "search" end
+  if app and app:bundleID() == APP_BUNDLE_IDS.finder then return "finder" end
   return nil
 end
 
 function Actions.snipasteIsActive()
-  local app = focusedApp()
+  local _, app = focusedElementAndApp()
   return app and app:bundleID() == APP_BUNDLE_IDS.snipaste
 end
 
@@ -318,7 +332,7 @@ local function readFinderSelectionPaths()
   return paths
 end
 
-local function withFinderPaths(sourceBundleID, targetApp, clipboard, callback)
+local function withFinderPaths(source, targetApp, clipboard, callback)
   local readAttempts = 0
 
   local function readSelection()
@@ -336,7 +350,7 @@ local function withFinderPaths(sourceBundleID, targetApp, clipboard, callback)
   end
 
   hs.timer.doAfter(
-    sourceBundleID == APP_BUNDLE_IDS.spotlight and 0.3 or 0,
+    source == "search" and 0.3 or 0,
     readSelection
   )
 end
@@ -346,8 +360,10 @@ local function withSpotlightPaths(targetApp, clipboard, callback)
 
   local function copyFromFinder()
     finderAttempts = finderAttempts + 1
-    if isFrontApp(APP_BUNDLE_IDS.finder) then
-      withFinderPaths(APP_BUNDLE_IDS.spotlight, targetApp, clipboard, callback)
+    -- On macOS 27 Finder may already be frontmost behind the search panel;
+    -- the reveal is done only once the panel has lost focus.
+    if isFrontApp(APP_BUNDLE_IDS.finder) and Actions.launcherSource() ~= "search" then
+      withFinderPaths("search", targetApp, clipboard, callback)
     elseif finderAttempts < 20 then
       hs.timer.doAfter(0.1, copyFromFinder)
     else
@@ -362,12 +378,12 @@ local function withSpotlightPaths(targetApp, clipboard, callback)
 end
 
 local function withLauncherPaths(callback)
-  local sourceBundleID = Actions.launcherSourceBundleID()
+  local source = Actions.launcherSource()
   local targetApp = currentLauncherTarget()
   local clipboard = Clipboard.capture()
-  if sourceBundleID == APP_BUNDLE_IDS.finder then
-    withFinderPaths(sourceBundleID, targetApp, clipboard, callback)
-  elseif sourceBundleID == APP_BUNDLE_IDS.spotlight then
+  if source == "finder" then
+    withFinderPaths(source, targetApp, clipboard, callback)
+  elseif source == "search" then
     withSpotlightPaths(targetApp, clipboard, callback)
   end
 end
@@ -447,7 +463,7 @@ local spotlightCopyToken = 0
 -- scoped to the spotlight context, so the keystroke sent to Finder is never
 -- intercepted again.
 Actions.spotlight_cmd_alt_c = function()
-  if Actions.launcherSourceBundleID() ~= APP_BUNDLE_IDS.spotlight then return end
+  if Actions.launcherSource() ~= "search" then return end
   spotlightCopyToken = spotlightCopyToken + 1
   local token = spotlightCopyToken
   withSpotlightPaths(nil, Clipboard.capture(), function()

@@ -303,6 +303,7 @@ table.sort(mods)
 expectEqual(table.concat(mods, ",") .. "+" .. key, "alt,cmd+c", "!#c is Option+Cmd+C")
 
 local focusedBundleID, frontBundleID, selectedPath
+local focusedAttributes = {}
 local strokes, changeCount = {}, 0
 local function fakeApp(bundleID) return {bundleID = function() return bundleID end} end
 local finderApp = fakeApp("com.apple.finder")
@@ -311,7 +312,9 @@ local function element(attributes)
 end
 hs.pasteboard.changeCount = function() return changeCount end
 hs.axuielement = {
-  systemWideElement = function() return element({AXFocusedUIElement = element({})}) end,
+  systemWideElement = function()
+    return element({AXFocusedUIElement = element(focusedAttributes)})
+  end,
   applicationElement = function()
     local selected = selectedPath and {element({AXURL = {filePath = selectedPath}})} or {}
     return element({AXFocusedUIElement = element({AXSelectedChildren = selected})})
@@ -383,6 +386,57 @@ Actions.spotlight_cmd_alt_c()
 settle()
 expectEqual(#strokes, 2, "no file selection sends no Cmd+Option+C")
 expectEqual(pendingTimers(), 0, "empty selection leaves no timers behind")
+
+-- macOS 27: the Cmd+Space panel belongs to Siri AI (com.apple.campo) and
+-- takes focus while the app behind it stays frontmostApplication().
+local searchField = {AXRole = "AXTextField", AXSubrole = "AXSearchField"}
+focusedBundleID, focusedAttributes, frontBundleID = "com.apple.campo", searchField, "com.apple.finder"
+expectEqual(Actions.launcherSource(), "search",
+  "Siri AI search field is the search UI while Finder stays frontmost (not frontmost-only)")
+frontBundleID = "org.mozilla.firefox"
+expectEqual(Actions.launcherSource(), "search", "Siri AI search field over another app")
+focusedAttributes = {AXRole = "AXTextArea"}
+expectEqual(Actions.launcherSource(), nil, "other Siri AI elements are not the search UI")
+focusedBundleID, focusedAttributes, frontBundleID = "com.apple.Spotlight", {}, "com.apple.Spotlight"
+expectEqual(Actions.launcherSource(), "search", "legacy Spotlight is the search UI")
+focusedBundleID, frontBundleID = "com.apple.finder", "com.apple.finder"
+expectEqual(Actions.launcherSource(), "finder", "Finder is the launcher, not the search UI")
+focusedBundleID, frontBundleID = "com.apple.TextEdit", "com.apple.TextEdit"
+expectEqual(Actions.launcherSource(), nil, "a normal app is outside both contexts")
+focusedBundleID, focusedAttributes, frontBundleID = "com.apple.TextEdit", searchField, "com.apple.campo"
+expectEqual(Actions.launcherSource(), nil, "a search field in another app is not the search UI")
+
+strokes, selectedPath = {}, "/Users/me/old.txt"
+focusedBundleID, focusedAttributes, frontBundleID = "com.apple.campo", searchField, "com.apple.finder"
+Actions.spotlight_cmd_alt_c()
+expectEqual(strokes[1], "cmd+r", "Siri AI result is revealed in Finder")
+advance(0.1)
+advance(0.4)
+expectEqual(#strokes, 1, "Finder behind the open panel is not taken as the handoff")
+focusedBundleID, focusedAttributes, selectedPath = "com.apple.finder", {}, "/Users/me/new.txt"
+settle()
+expectEqual(strokes[2], "cmd+alt+c@finder", "Cmd+Option+C runs once the panel hands focus to Finder")
+expectEqual(pendingTimers(), 0, "Siri AI copy leaves no timers behind")
+
+strokes = {}
+for _ = 1, 3 do
+  focusedBundleID, focusedAttributes = "com.apple.campo", searchField
+  Actions.spotlight_cmd_alt_c()
+end
+focusedBundleID, focusedAttributes = "com.apple.finder", {}
+settle()
+copies = 0
+for _, stroke in ipairs(strokes) do
+  if stroke == "cmd+alt+c@finder" then copies = copies + 1 end
+end
+expectEqual(copies, 1, "repeated presses in Siri AI copy once")
+
+strokes = {}
+focusedBundleID, focusedAttributes, frontBundleID = "com.apple.campo", searchField, "com.apple.finder"
+Actions.spotlight_cmd_alt_c()
+settle()
+expectEqual(#strokes, 1, "panel never handing off sends no Cmd+Option+C")
+expectEqual(pendingTimers(), 0, "Siri AI handoff timeout leaves no timers behind")
 
 if failures > 0 then
   os.exit(1)

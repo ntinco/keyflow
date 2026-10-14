@@ -52,6 +52,13 @@ Spotlight `⌥⌘C` (2026-10-14, `spotlight_cmd_alt_c`, `macos-only`), pending r
 6. Spotlight with no result, or a non-file result (calculator, web): nothing is copied, the clipboard is unchanged, Console `spotlight Finder handoff timed out` within about 2 s.
 7. Three quick presses in Spotlight: a single `spotlight path copied`.
 
+macOS 27 search host (2026-10-14), pending runtime acceptance; nothing below has been observed. On macOS 27 the `⌘Space` panel belongs to Siri AI (`com.apple.campo`), never becomes `frontmostApplication()`, and is detected from the focused AX element (`AXTextField`/`AXSearchField`); `com.apple.Spotlight` stays for earlier macOS. Run the `⌥⌘C` checks above in the Siri AI panel, plus:
+
+1. With Finder behind the panel and a different file selected in Finder, `⌥⌘C` on a result: the clipboard holds the result's path, not Finder's previous selection.
+2. Move the highlight to another result with the arrow keys before `⌥⌘C` and before F12: still handled (focus must stay in the search field; if not, the Console shows no `keyflow:` line).
+3. F12 and `⌥P` on a Siri AI file result: same behavior as from Spotlight, and F12 pastes back into the app behind the panel.
+4. A Siri AI conversation window (not the search panel), `⌥⌘C`: not intercepted.
+
 ## Known parity gaps (deliberately deferred)
 
 - F12 on macOS lacks the Windows `YM` post-paste step (3 s wait + Ctrl+F3); pending implementation.

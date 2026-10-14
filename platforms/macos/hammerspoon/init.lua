@@ -20,6 +20,7 @@ local CONTEXT_APPS = {
   ["launcher"] = {
     {bundleID = "com.apple.finder", name = "Finder"},
     {bundleID = "com.apple.Spotlight", name = "Spotlight"},
+    {bundleID = "com.apple.campo", name = "Siri AI"},
   },
   ["netnewswire"] = {
     {bundleID = "com.ranchero.NetNewsWire-Evergreen", name = "NetNewsWire"},
@@ -33,9 +34,11 @@ local CONTEXT_APPS = {
   ["snipaste"] = {
     {bundleID = "com.Snipaste", name = "Snipaste"},
   },
-  -- Spotlight alone (not Finder), so Finder keeps its native Cmd+Option+C.
+  -- The Cmd+Space search UI alone (not Finder), so Finder keeps its native
+  -- Cmd+Option+C. Event contexts are resolved by Actions.launcherSource().
   ["spotlight"] = {
     {bundleID = "com.apple.Spotlight", name = "Spotlight"},
+    {bundleID = "com.apple.campo", name = "Siri AI"},
   },
 }
 
@@ -95,10 +98,10 @@ local function eventContextIsActive(contextLabel)
     return true
   end
   if contextLabel == "launcher" then
-    return Actions.launcherSourceBundleID() ~= nil
+    return Actions.launcherSource() ~= nil
   end
   if contextLabel == "spotlight" then
-    return Actions.launcherSourceBundleID() == "com.apple.Spotlight"
+    return Actions.launcherSource() == "search"
   end
   return contextLabel == "snipaste" and Actions.snipasteIsActive()
 end
