@@ -306,8 +306,21 @@ local focusedBundleID, frontBundleID, selectedPath
 local finderListView = false
 local focusedAttributes = {}
 local strokes, changeCount = {}, 0
-local function fakeApp(bundleID) return {bundleID = function() return bundleID end} end
+local activated = {}
+local function fakeApp(bundleID)
+  return {
+    bundleID = function() return bundleID end,
+    activate = function() activated[#activated + 1] = bundleID; return true end,
+  }
+end
 local finderApp = fakeApp("com.apple.finder")
+-- The reveal opens a Finder window; closed records what the copy closed.
+local finderWindows, closed = {}, {}
+local function fakeWindow(id)
+  return {id = function() return id end, close = function() closed[#closed + 1] = id end}
+end
+finderApp.allWindows = function() return finderWindows end
+finderApp.focusedWindow = function() return finderWindows[#finderWindows] end
 local function element(attributes)
   return {attributeValue = function(_, name) return attributes[name] end, pid = function() return 1 end}
 end
@@ -464,6 +477,29 @@ settle()
 expectEqual(strokes[2], "cmd+alt+c@finder", "a Finder list-view selection is read from its rows")
 expectEqual(pendingTimers(), 0, "list-view copy leaves no timers behind")
 finderListView = false
+
+-- The window the reveal opened closes after the copy; an existing one stays.
+strokes, closed, finderWindows = {}, {}, {fakeWindow(1)}
+focusedBundleID, focusedAttributes, frontBundleID = "com.apple.campo", searchField, "com.apple.finder"
+Actions.spotlight_cmd_alt_c()
+finderWindows[2] = fakeWindow(2)
+focusedBundleID, focusedAttributes, selectedPath = "com.apple.finder", {}, "/Users/me/close.txt"
+settle()
+expectEqual(table.concat(closed, ","), "2", "the revealed Finder window closes after the copy")
+closed = {}
+focusedBundleID, focusedAttributes = "com.apple.campo", searchField
+Actions.spotlight_cmd_alt_c()
+focusedBundleID, focusedAttributes = "com.apple.finder", {}
+settle()
+expectEqual(#closed, 0, "a reveal into a window that already existed leaves it open")
+activated = {}
+focusedBundleID, focusedAttributes, frontBundleID = "com.apple.campo", searchField, "org.mozilla.firefox"
+Actions.spotlight_cmd_alt_c()
+focusedBundleID, focusedAttributes, frontBundleID = "com.apple.finder", {}, "com.apple.finder"
+settle()
+expectEqual(activated[#activated], "org.mozilla.firefox",
+  "the app behind the Siri AI panel is brought back after the copy")
+finderWindows = {}
 
 if failures > 0 then
   os.exit(1)

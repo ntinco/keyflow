@@ -477,16 +477,33 @@ end
 
 local spotlightCopyToken = 0
 
+local function finderWindowIDs()
+  local ids = {}
+  local finder = hs.application.get(APP_BUNDLE_IDS.finder)
+  for _, window in ipairs(finder and finder:allWindows() or {}) do
+    ids[window:id()] = true
+  end
+  return ids
+end
+
 -- Spotlight has no Copy as Pathname: reveal the result through the F12 Finder
 -- handoff and let Finder's own Cmd+Option+C copy it. The handoff waits on
 -- verifiable state (Finder frontmost, then a readable selection) with bounded
 -- polling; Hammerspoon has no "Finder selection ready" event. Dispatch is
 -- scoped to the spotlight context, so the keystroke sent to Finder is never
--- intercepted again.
+-- intercepted again. Once copied, the window the reveal opened is closed (a
+-- Finder window that existed before the press is left alone) and the app
+-- behind the search panel is brought back.
 Actions.spotlight_cmd_alt_c = function()
   if Actions.launcherSource() ~= "search" then return end
   spotlightCopyToken = spotlightCopyToken + 1
   local token = spotlightCopyToken
+  local preexisting = finderWindowIDs()
+  -- macOS 27 keeps the app behind the panel frontmost; legacy Spotlight does not.
+  local previous = hs.application.frontmostApplication()
+  if previous and SEARCH_BUNDLE_IDS[previous:bundleID()] then
+    previous = currentLauncherTarget()
+  end
   withSpotlightPaths(nil, Clipboard.capture(), function()
     local finder = hs.application.get(APP_BUNDLE_IDS.finder)
     if token ~= spotlightCopyToken or not finder
@@ -500,6 +517,9 @@ Actions.spotlight_cmd_alt_c = function()
       attempts = attempts + 1
       if hs.pasteboard.changeCount() ~= changeCount then
         hs.printf("keyflow: spotlight path copied")
+        local window = finder:focusedWindow()
+        if window and not preexisting[window:id()] then window:close() end
+        if previous then previous:activate() end
       elseif attempts < 10 then
         hs.timer.doAfter(0.1, confirmCopy)
       else
