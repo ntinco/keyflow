@@ -1,4 +1,4 @@
-# shared: agent-core/shared/workspace_contract.py sha256:bf199fc7c2f7 (edit it in agent-core, then run tools/contract_sync.py in agent-core)
+# shared: agent-core/shared/workspace_contract.py sha256:0a708106fe53 (edit it in agent-core, then run tools/contract_sync.py in agent-core)
 """Local workspace contract checks; the master copy is agent-core/shared/workspace_contract.py.
 
 problems(root) lists what breaks the workspace contract in the repository at root, reading nothing outside it: the
@@ -20,6 +20,9 @@ BLOCK = re.compile(r"<!-- workspace-contract sha256:(\S+) -->\n(.*?)<!-- /worksp
 CHECK = re.compile(r"^check=(?:\"\s*[^\"\s][^\"]*\"|'\s*[^'\s][^']*'|[^\s\"'#]\S*)", re.MULTILINE)
 LOCAL = re.compile(r"^local=[\"']?([^\"'\s]+)", re.MULTILINE)
 BOOT_FILES = ("AGENTS.md", "CLAUDE.md", "ai/governance.md", "ai/repo-map.json")
+BUDGET_HINT = ("to fit: delete duplication, or move detail out of the boot files into a file the boot files say when "
+               "to open, or raise cold_start_token_budget in ai/repo-map.json with the reason in the commit; never "
+               "reword a rule to fit, and name any reworded rule in the commit message")
 SETTINGS = ".claude/settings.json"
 # The one provider-specific rule here: a clone without agent-core beside it (CI, a cloud session) must still fail
 # when its secret protection is removed, so the expected values cannot live only in agent-core's tooling.
@@ -184,7 +187,7 @@ def problems(root: Path) -> list[str]:
     if not isinstance(budget, int) or budget <= 0:
         found.append("ai/repo-map.json must set cold_start_token_budget")
     elif (tokens := boot_tokens(root)) > budget:
-        found.append(f"cold start reads ~{tokens} tokens, over the cold_start_token_budget of {budget}")
+        found.append(f"cold start reads ~{tokens} tokens, over the cold_start_token_budget of {budget}; {BUDGET_HINT}")
     return found
 
 
