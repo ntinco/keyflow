@@ -291,6 +291,99 @@ summarize()
 tasks[5].callback(0, "tercero", "")
 expectEqual(deleted, 1, "a window the user closed is not deleted again")
 
+-- Spotlight Cmd+Option+C ----------------------------------------------------
+local spotlightBinding
+for _, binding in ipairs(generated) do
+  if binding.id == "spotlight_cmd_alt_c" then spotlightBinding = binding end
+end
+expectEqual(spotlightBinding and spotlightBinding.contextLabel, "spotlight",
+  "Cmd+Option+C is scoped to Spotlight, not the Finder launcher context")
+mods, key = Dispatch.parseAhkKey(spotlightBinding["key"])
+table.sort(mods)
+expectEqual(table.concat(mods, ",") .. "+" .. key, "alt,cmd+c", "!#c is Option+Cmd+C")
+
+local focusedBundleID, frontBundleID, selectedPath
+local strokes, changeCount = {}, 0
+local function fakeApp(bundleID) return {bundleID = function() return bundleID end} end
+local finderApp = fakeApp("com.apple.finder")
+local function element(attributes)
+  return {attributeValue = function(_, name) return attributes[name] end, pid = function() return 1 end}
+end
+hs.pasteboard.changeCount = function() return changeCount end
+hs.axuielement = {
+  systemWideElement = function() return element({AXFocusedUIElement = element({})}) end,
+  applicationElement = function()
+    local selected = selectedPath and {element({AXURL = {filePath = selectedPath}})} or {}
+    return element({AXFocusedUIElement = element({AXSelectedChildren = selected})})
+  end,
+}
+hs.application = {
+  applicationForPID = function() return fakeApp(focusedBundleID) end,
+  frontmostApplication = function() return fakeApp(frontBundleID) end,
+  get = function() return finderApp end,
+}
+hs.eventtap = {keyStroke = function(keyMods, keyName, _, app)
+  strokes[#strokes + 1] = table.concat(keyMods, "+") .. "+" .. keyName
+    .. (app == finderApp and "@finder" or "")
+  -- Finder's Copy as Pathname.
+  if app == finderApp then changeCount = changeCount + 1 end
+end}
+local function settle()
+  for _ = 1, 60 do advance(0.1) end
+end
+local function pendingTimers()
+  local count = 0
+  for _, timer in ipairs(timers) do
+    if not timer.fired and not timer.stopped then count = count + 1 end
+  end
+  return count
+end
+
+focusedBundleID, frontBundleID = "com.apple.finder", "com.apple.finder"
+Actions.spotlight_cmd_alt_c()
+expectEqual(#strokes, 0, "outside Spotlight the action sends nothing")
+
+focusedBundleID, frontBundleID, selectedPath = "com.apple.Spotlight", "com.apple.Spotlight", nil
+Actions.spotlight_cmd_alt_c()
+expectEqual(strokes[1], "cmd+r", "Spotlight result is revealed in Finder")
+frontBundleID, focusedBundleID, selectedPath = "com.apple.finder", "com.apple.finder", "/Users/me/a b.txt"
+advance(0.1)
+advance(0.3)
+advance(0.2)
+expectEqual(strokes[2], "cmd+alt+c@finder", "Finder's Cmd+Option+C is sent to Finder")
+expectEqual(changeCount, 1, "Copy as Pathname ran once")
+settle()
+expectEqual(pendingTimers(), 0, "no timer survives a completed copy")
+
+strokes = {}
+for _ = 1, 3 do
+  focusedBundleID, frontBundleID = "com.apple.Spotlight", "com.apple.Spotlight"
+  Actions.spotlight_cmd_alt_c()
+end
+frontBundleID, focusedBundleID = "com.apple.finder", "com.apple.finder"
+settle()
+local copies = 0
+for _, stroke in ipairs(strokes) do
+  if stroke == "cmd+alt+c@finder" then copies = copies + 1 end
+end
+expectEqual(copies, 1, "repeated presses copy once, for the latest press")
+expectEqual(pendingTimers(), 0, "repeated presses leave no timers behind")
+
+strokes, selectedPath = {}, nil
+focusedBundleID, frontBundleID = "com.apple.Spotlight", "com.apple.Spotlight"
+Actions.spotlight_cmd_alt_c()
+settle()
+expectEqual(#strokes, 1, "Finder never activating sends no Cmd+Option+C")
+expectEqual(pendingTimers(), 0, "handoff timeout leaves no timers behind")
+frontBundleID, focusedBundleID = "com.apple.finder", "com.apple.finder"
+Actions.spotlight_cmd_alt_c()
+expectEqual(#strokes, 1, "focus in Finder bypasses the action")
+focusedBundleID = "com.apple.Spotlight"
+Actions.spotlight_cmd_alt_c()
+settle()
+expectEqual(#strokes, 2, "no file selection sends no Cmd+Option+C")
+expectEqual(pendingTimers(), 0, "empty selection leaves no timers behind")
+
 if failures > 0 then
   os.exit(1)
 end

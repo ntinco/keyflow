@@ -33,6 +33,10 @@ local CONTEXT_APPS = {
   ["snipaste"] = {
     {bundleID = "com.Snipaste", name = "Snipaste"},
   },
+  -- Spotlight alone (not Finder), so Finder keeps its native Cmd+Option+C.
+  ["spotlight"] = {
+    {bundleID = "com.apple.Spotlight", name = "Spotlight"},
+  },
 }
 
 for contextLabel in pairs(CONTEXT_APPS) do
@@ -58,7 +62,8 @@ for _, binding in ipairs(bindings) do
       local mods, key = Dispatch.parseAhkKey(binding.key)
       if binding.contextLabel == "global"
           or binding.contextLabel == "launcher"
-          or binding.contextLabel == "snipaste" then
+          or binding.contextLabel == "snipaste"
+          or binding.contextLabel == "spotlight" then
         eventBindings[#eventBindings + 1] = {
           action = action,
           contextLabel = binding.contextLabel,
@@ -91,6 +96,9 @@ local function eventContextIsActive(contextLabel)
   end
   if contextLabel == "launcher" then
     return Actions.launcherSourceBundleID() ~= nil
+  end
+  if contextLabel == "spotlight" then
+    return Actions.launcherSourceBundleID() == "com.apple.Spotlight"
   end
   return contextLabel == "snipaste" and Actions.snipasteIsActive()
 end

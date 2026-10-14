@@ -438,6 +438,41 @@ Actions.launcher_alt_p = function()
   end)
 end
 
+local spotlightCopyToken = 0
+
+-- Spotlight has no Copy as Pathname: reveal the result through the F12 Finder
+-- handoff and let Finder's own Cmd+Option+C copy it. The handoff waits on
+-- verifiable state (Finder frontmost, then a readable selection) with bounded
+-- polling; Hammerspoon has no "Finder selection ready" event. Dispatch is
+-- scoped to the spotlight context, so the keystroke sent to Finder is never
+-- intercepted again.
+Actions.spotlight_cmd_alt_c = function()
+  if Actions.launcherSourceBundleID() ~= APP_BUNDLE_IDS.spotlight then return end
+  spotlightCopyToken = spotlightCopyToken + 1
+  local token = spotlightCopyToken
+  withSpotlightPaths(nil, Clipboard.capture(), function()
+    local finder = hs.application.get(APP_BUNDLE_IDS.finder)
+    if token ~= spotlightCopyToken or not finder
+        or not isFrontApp(APP_BUNDLE_IDS.finder) then
+      return
+    end
+    local changeCount = hs.pasteboard.changeCount()
+    hs.eventtap.keyStroke({"cmd", "alt"}, "c", KEYSTROKE_DELAY, finder)
+    local attempts = 0
+    local function confirmCopy()
+      attempts = attempts + 1
+      if hs.pasteboard.changeCount() ~= changeCount then
+        hs.printf("keyflow: spotlight path copied")
+      elseif attempts < 10 then
+        hs.timer.doAfter(0.1, confirmCopy)
+      else
+        hs.printf("keyflow: spotlight path copy timed out")
+      end
+    end
+    hs.timer.doAfter(0.1, confirmCopy)
+  end)
+end
+
 local snipasteRunToken = 0
 
 local function magickPath()

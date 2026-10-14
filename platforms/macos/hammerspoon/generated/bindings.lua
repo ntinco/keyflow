@@ -30,4 +30,5 @@ return {
   {id = "sap_gui_alt_8", type = "hotkey", key = "!8", contextLabel = "sap-gui-session", tcode = "SE38", label = "SE38 ABAP editor"},
   {id = "sap_gui_alt_9", type = "hotkey", key = "!9", contextLabel = "sap-gui-session", tcode = "SE09", label = "SE09 transport organizer"},
   {id = "snipaste_enter", type = "hotkey", key = "~enter", contextLabel = "snipaste", tcode = "", label = "Copy + paste to targets"},
+  {id = "spotlight_cmd_alt_c", type = "hotkey", key = "!#c", contextLabel = "spotlight", tcode = "", label = "Copy Spotlight result pathname"},
 }

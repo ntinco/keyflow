@@ -42,6 +42,16 @@ NetNewsWire summary hotkey (2026-10-05), pending runtime acceptance; nothing bel
 9. A second summary replaces the previous window.
 10. No article selected: an alert with the reason and no window. Override pointing to a missing file: `No se encontró nnw_summary.py.` and nothing runs.
 
+Spotlight `⌥⌘C` (2026-10-14, `spotlight_cmd_alt_c`, `macos-only`), pending runtime acceptance; nothing below has been observed. Spotlight-only context: reveals the result with the F12 handoff (`⌘R`, not `⌘↩`), waits for Finder frontmost and a readable selection, then sends Finder's own `⌥⌘C`.
+
+1. Reload Hammerspoon; the Console shows no errors and one more contextual binding.
+2. Finder with a file selected, `⌥⌘C`: native Copy as Pathname, no `keyflow: spotlight` line in the Console.
+3. Spotlight with a file result selected, `⌥⌘C`: Finder reveals it, the clipboard holds its absolute path, Console `spotlight path copied`.
+4. Same with Finder as the app behind Spotlight: the path is the Spotlight result's, not Finder's previous selection (the shared handoff reads the selection 0.3 s after Finder is frontmost).
+5. Another app (TextEdit, a browser), `⌥⌘C`: that app's own behavior.
+6. Spotlight with no result, or a non-file result (calculator, web): nothing is copied, the clipboard is unchanged, Console `spotlight Finder handoff timed out` within about 2 s.
+7. Three quick presses in Spotlight: a single `spotlight path copied`.
+
 ## Known parity gaps (deliberately deferred)
 
 - F12 on macOS lacks the Windows `YM` post-paste step (3 s wait + Ctrl+F3); pending implementation.
