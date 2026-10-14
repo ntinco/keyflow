@@ -185,13 +185,30 @@ local function focusedElementAndApp()
   return nil, hs.application.frontmostApplication()
 end
 
+-- Arrow keys move focus from the search field to the result list; the list
+-- counts only when its panel (list → scroll area → host) holds the field.
+local function isSiriSearchResults(element)
+  if element:attributeValue("AXSubrole") ~= "AXCollectionList" then return false end
+  local scrollArea = element:attributeValue("AXParent")
+  local host = scrollArea and scrollArea:attributeValue("AXParent")
+  for _, area in ipairs(host and host:attributeValue("AXChildren") or {}) do
+    for _, child in ipairs(area:attributeValue("AXChildren") or {}) do
+      if child:attributeValue("AXIdentifier") == "SpotlightSearchField" then
+        return true
+      end
+    end
+  end
+  return false
+end
+
 local function isSearchUI(element, app)
   local bundleID = app and app:bundleID()
   if bundleID == APP_BUNDLE_IDS.spotlight then return true end
-  -- Siri AI also hosts non-search windows; only its search field counts.
-  return bundleID == APP_BUNDLE_IDS.siri and element ~= nil
-    and element:attributeValue("AXRole") == "AXTextField"
-    and element:attributeValue("AXSubrole") == "AXSearchField"
+  -- Siri AI also hosts non-search windows; only its search panel counts.
+  if bundleID ~= APP_BUNDLE_IDS.siri or element == nil then return false end
+  return (element:attributeValue("AXRole") == "AXTextField"
+      and element:attributeValue("AXSubrole") == "AXSearchField")
+    or isSiriSearchResults(element)
 end
 
 -- "finder", "search" (Cmd+Space search UI) or nil.
@@ -322,9 +339,13 @@ local function readFinderSelectionPaths()
     local finder = hs.application.get(APP_BUNDLE_IDS.finder)
     local app = finder and hs.axuielement.applicationElement(finder)
     local focused = app and app:attributeValue("AXFocusedUIElement")
-    for _, selected in ipairs(
-      focused and focused:attributeValue("AXSelectedChildren") or {}
-    ) do
+    -- Icon view selects children; list view (an AXOutline, as Finder opens
+    -- a search result revealed with Cmd+R) selects rows.
+    local selection = focused and (
+      focused:attributeValue("AXSelectedChildren")
+      or focused:attributeValue("AXSelectedRows")
+    )
+    for _, selected in ipairs(selection or {}) do
       collect(selected)
     end
   end)

@@ -303,6 +303,7 @@ table.sort(mods)
 expectEqual(table.concat(mods, ",") .. "+" .. key, "alt,cmd+c", "!#c is Option+Cmd+C")
 
 local focusedBundleID, frontBundleID, selectedPath
+local finderListView = false
 local focusedAttributes = {}
 local strokes, changeCount = {}, 0
 local function fakeApp(bundleID) return {bundleID = function() return bundleID end} end
@@ -317,6 +318,11 @@ hs.axuielement = {
   end,
   applicationElement = function()
     local selected = selectedPath and {element({AXURL = {filePath = selectedPath}})} or {}
+    if finderListView then
+      -- List view: an AXOutline whose selected rows hold the URL in a cell.
+      local rows = selectedPath and {element({AXChildren = selected})} or {}
+      return element({AXFocusedUIElement = element({AXSelectedRows = rows})})
+    end
     return element({AXFocusedUIElement = element({AXSelectedChildren = selected})})
   end,
 }
@@ -397,6 +403,17 @@ frontBundleID = "org.mozilla.firefox"
 expectEqual(Actions.launcherSource(), "search", "Siri AI search field over another app")
 focusedAttributes = {AXRole = "AXTextArea"}
 expectEqual(Actions.launcherSource(), nil, "other Siri AI elements are not the search UI")
+-- Arrow keys move focus to the result list (list -> scroll area -> host).
+local function resultList(fieldIdentifier)
+  local fieldArea = element({AXChildren = {element({AXIdentifier = fieldIdentifier})}})
+  local host = element({AXChildren = {fieldArea, element({})}})
+  return {AXRole = "AXList", AXSubrole = "AXCollectionList",
+    AXParent = element({AXParent = host})}
+end
+focusedAttributes = resultList("SpotlightSearchField")
+expectEqual(Actions.launcherSource(), "search", "Siri AI result list next to the search field")
+focusedAttributes = resultList(nil)
+expectEqual(Actions.launcherSource(), nil, "a Siri AI list outside the search panel")
 focusedBundleID, focusedAttributes, frontBundleID = "com.apple.Spotlight", {}, "com.apple.Spotlight"
 expectEqual(Actions.launcherSource(), "search", "legacy Spotlight is the search UI")
 focusedBundleID, frontBundleID = "com.apple.finder", "com.apple.finder"
@@ -437,6 +454,16 @@ Actions.spotlight_cmd_alt_c()
 settle()
 expectEqual(#strokes, 1, "panel never handing off sends no Cmd+Option+C")
 expectEqual(pendingTimers(), 0, "Siri AI handoff timeout leaves no timers behind")
+
+-- Finder reveals a search result in list view, where the selection is rows.
+strokes, finderListView = {}, true
+focusedBundleID, focusedAttributes, frontBundleID = "com.apple.campo", searchField, "com.apple.finder"
+Actions.spotlight_cmd_alt_c()
+focusedBundleID, focusedAttributes, selectedPath = "com.apple.finder", {}, "/Users/me/list.txt"
+settle()
+expectEqual(strokes[2], "cmd+alt+c@finder", "a Finder list-view selection is read from its rows")
+expectEqual(pendingTimers(), 0, "list-view copy leaves no timers behind")
+finderListView = false
 
 if failures > 0 then
   os.exit(1)

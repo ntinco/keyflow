@@ -52,11 +52,19 @@ Spotlight `⌥⌘C` (2026-10-14, `spotlight_cmd_alt_c`, `macos-only`), pending r
 6. Spotlight with no result, or a non-file result (calculator, web): nothing is copied, the clipboard is unchanged, Console `spotlight Finder handoff timed out` within about 2 s.
 7. Three quick presses in Spotlight: a single `spotlight path copied`.
 
-macOS 27 search host (2026-10-14), pending runtime acceptance; nothing below has been observed. On macOS 27 the `⌘Space` panel belongs to Siri AI (`com.apple.campo`), never becomes `frontmostApplication()`, and is detected from the focused AX element (`AXTextField`/`AXSearchField`); `com.apple.Spotlight` stays for earlier macOS. Run the `⌥⌘C` checks above in the Siri AI panel, plus:
+macOS 27 search host (2026-10-14), partly observed. On macOS 27 the `⌘Space` panel belongs to Siri AI (`com.apple.campo`), never becomes `frontmostApplication()`, and is detected from the focused AX element: the search field (`AXSearchField`, id `SpotlightSearchField`) or, after arrow keys, the result list (`AXCollectionList`) beside it; `com.apple.Spotlight` stays for earlier macOS. Result rows expose only name and parent folder, never a path, so `⌘R` stays the handoff; Finder reveals the result in list view (`AXOutline`), whose selection is `AXSelectedRows`.
 
-1. With Finder behind the panel and a different file selected in Finder, `⌥⌘C` on a result: the clipboard holds the result's path, not Finder's previous selection.
-2. Move the highlight to another result with the arrow keys before `⌥⌘C` and before F12: still handled (focus must stay in the search field; if not, the Console shows no `keyflow:` line).
-3. F12 and `⌥P` on a Siri AI file result: same behavior as from Spotlight, and F12 pastes back into the app behind the panel.
+Observed on macOS 27.0.1 (26A434), events synthesized through Hammerspoon:
+
+- `⌥⌘C` on a file result, with the field focused and after `↓`: Finder reveals it, the clipboard holds the result's path, Console `spotlight path copied`.
+- F12 on a `.md` result with TextEdit behind the panel: TextEdit is restored and receives the file content.
+- `⌥⌘C` on a browser-history result (`com.apple.bookmarks`): `⌘R` opens it in the browser, nothing is copied, `spotlight Finder handoff timed out`.
+
+Still pending:
+
+1. The same checks with physical keys (modifiers held by hand).
+2. With Finder frontmost behind the panel and a different file selected, `⌥⌘C` on a result: the result's path, not Finder's previous selection.
+3. `⌥P` on a Siri AI media result opens it in IINA.
 4. A Siri AI conversation window (not the search panel), `⌥⌘C`: not intercepted.
 
 ## Known parity gaps (deliberately deferred)
