@@ -73,7 +73,7 @@
     },
     {
       "trigger": "dp",
-      "value": "directo and push",
+      "value": "directo and push al main",
       "immediate": true
     }
   ]
