@@ -1,8 +1,9 @@
-# shared: agent-core/shared/workspace_contract.py sha256:0a708106fe53 (edit it in agent-core, then run tools/contract_sync.py in agent-core)
+# shared: agent-core/shared/workspace_contract.py sha256:974e17fd445b (edit it in agent-core, then run tools/contract_sync.py in agent-core)
 """Local workspace contract checks; the master copy is agent-core/shared/workspace_contract.py.
 
-problems(root) lists what breaks the workspace contract in the repository at root, reading nothing outside it: the
-contract block missing, duplicated or edited in place, the wiring the contract requires (a pending_acceptance
+problems(root) lists what breaks the workspace contract in the repository at root, reading nothing outside it: a
+contract block that is missing, duplicated or edited in place where ai/repo-map.json declares `workspace_contract_block`
+(agent-core, the master, and a repository whose tooling consumes the contract), or present where it does not, the wiring the contract requires (a pending_acceptance
 reference that resolves, CLAUDE.md, pre-commit hook settings, the secret deny rules and secret_guard hook in
 .claude/settings.json) and the cold-start token budget. Drift against agent-core (the contract master, the vendored files) is not checked here:
 `tools/contract_sync.py ROOT --check` in agent-core owns it.
@@ -131,8 +132,11 @@ def pending_problems(root: Path, pending: object) -> list[str]:
     return []
 
 
-def contract_problems(root: Path) -> list[str]:
+def contract_problems(root: Path, declared: object) -> list[str]:
     blocks = BLOCK.findall(read(root / "ai/governance.md"))
+    if declared is not True:
+        return [f"ai/governance.md holds a workspace contract copy that ai/repo-map.json does not declare "
+                f"(workspace_contract_block); the master lives in agent-core: {SYNC} to remove it"] if blocks else []
     if len(blocks) != 1:
         return [f"ai/governance.md needs one workspace contract block, found {len(blocks)}"]
     if digest(blocks[0][1]) != blocks[0][0]:
@@ -171,7 +175,7 @@ def settings_problems(root: Path) -> list[str]:
 def problems(root: Path) -> list[str]:
     """Everything that breaks the workspace contract in the repository at root; empty when it holds."""
     repo_map = load_json(root / "ai/repo-map.json")
-    found = contract_problems(root)
+    found = contract_problems(root, repo_map.get("workspace_contract_block"))
     found += pending_problems(root, repo_map.get("pending_acceptance"))
     if read(root / "CLAUDE.md").strip() != "@AGENTS.md":
         found.append("CLAUDE.md must exist and contain only @AGENTS.md")
